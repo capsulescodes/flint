@@ -1,0 +1,46 @@
+#!/bin/bash
+
+if [ -n "$FLINT_FIX_TEMP_COMMIT" ]
+
+then
+    exit 0
+fi
+
+
+staged=$( git diff --cached --name-only --diff-filter=ACMR )
+
+if [ -n "$staged" ]
+
+then
+    npx eslint --fix --config .flint/configs/remote.js $staged
+
+    modified=$( git diff --name-only --diff-filter=M )
+
+    files=()
+
+    for file in $staged
+
+    do
+        if echo "$modified" | grep -Fqx "$file"
+
+        then
+            files+=( "$file" )
+        fi
+    done
+
+    if [ ${#files[@]} -gt 0 ]
+
+    then
+        git add "${files[@]}"
+
+        manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
+
+        if [ -n "$manual" ]
+
+        then
+            git reset --soft "$manual"
+        fi
+    fi
+fi
+
+exit 0

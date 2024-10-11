@@ -1,0 +1,53 @@
+{
+	"name" : "flint-js",
+	"description" : "Auto-format utility for local and remote ease of development",
+	"version" : "0.1.0",
+	"keywords" : [
+        "format",
+        "lint",
+        "fix",
+        "local",
+        "remote",
+        "git",
+        "hooks",
+        "post-pull",
+        "pre-commit",
+        "post-commit",
+        "pre-push",
+        "post-push"
+    ],
+    "homepage" : "https://github.com/capsulescodes/flint",
+	"repository" : {
+        "type" : "git",
+        "url" : "git+https://github.com/capsulescodes/flint.git"
+	},
+	"license" : "MIT",
+    "author" : {
+        "name" : "Yannick Decat",
+        "email" : "yannick@capsules.codes",
+        "url" : "https://capsules.codes/"
+    },
+    "files" : [
+        "!*",
+        ".flint",
+        "dist"
+    ],
+    "scripts" : {
+        "build" : "vite build",
+        "test" : "vitest run",
+        "postinstall" : "node dist/installer.js"
+    },
+    "dependencies" : {
+        "vite" : "^5.4.8"
+    },
+    "devDependencies" : {
+        "@stylistic/eslint-plugin" : "^2.8.0",
+        "@types/node" : "^22.7.4",
+        "eslint" : "^9.11.1",
+        "tsx" : "^4.19.1",
+        "typescript" : "^5.6.2",
+        "typescript-eslint" : "^8.8.0",
+        "vitest" : "^2.1.2"
+    },
+    "type" : "module"
+}

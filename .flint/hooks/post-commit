@@ -1,0 +1,45 @@
+#!/bin/bash
+
+if [ -n "$FLINT_FIX_TEMP_COMMIT" ]
+
+then
+    exit 0
+fi
+
+
+committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
+
+if [ -n "$committed" ]
+
+then
+
+    npx eslint --fix --config .flint/configs/local.js $committed
+
+    modified=$( git diff --name-only --diff-filter=M )
+
+    files=()
+
+    for file in $committed
+
+    do
+        if echo "$modified" | grep -Fqx "$file"
+
+        then
+            files+=( "$file" )
+        fi
+    done
+
+    if [ ${#files[@]} -gt 0 ]
+
+    then
+        git add "${files[@]}"
+
+        export FLINT_FIX_TEMP_COMMIT=1
+
+        git commit -m "FLINT-FIX-TEMP-COMMIT"
+
+        unset FLINT_FIX_TEMP_COMMIT
+    fi
+fi
+
+exit 0

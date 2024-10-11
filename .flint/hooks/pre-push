@@ -1,0 +1,11 @@
+#!/bin/bash
+
+manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
+
+if [ -n "$manual" ]
+
+then
+    git reset --soft "$manual"
+fi
+
+exit 0
