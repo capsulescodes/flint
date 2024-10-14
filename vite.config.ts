@@ -10,6 +10,9 @@ export default defineConfig( {
             formats : [ 'es' ]
         },
         outDir : '',
+        rollupOptions : {
+            external : [ 'fs' ]
+        },
         target : 'esnext'
     }
 } );
