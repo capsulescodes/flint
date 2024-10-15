@@ -12,8 +12,10 @@ committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
 if [ -n "$committed" ]
 
 then
+    source ../functions.sh
 
-    npx eslint --fix --config .flint/configs/local.js $committed
+    format_for_local "$FLINT_CONFIG" "$committed"
+
 
     modified=$( git diff --name-only --diff-filter=M )
 

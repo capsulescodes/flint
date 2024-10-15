@@ -1,14 +1,15 @@
 #!/bin/bash
 
-cmd="$1"
+config="flint.config.json"
+hooks=".flint/hooks"
 
-hooks_path=hooks
 
-flint_hooks=( "post-pull" "pre-commit" "post-commit" "pre-push" "post-push" )
 
-is_flint_hook()
+function is_flint_hook
 {
-    for hook in "${new_hooks[@]}"
+    flint_hooks=( "post-pull" "pre-commit" "post-commit" "pre-push" "post-push" )
+
+    for hook in "${flint_hooks[@]}"
 
     do
         if [[ "$hook" == "$1" ]]
@@ -21,17 +22,46 @@ is_flint_hook()
     return 1
 }
 
-if is_flint_hook "pre-$cmd" && [[ -n "$hooks_path" && -f "$hooks_path/pre-$cmd" ]]; then
-    "$hooks_path/pre-$cmd"
+
+
+if is_flint_hook "pre-$1" && [ ! -f "$PWD/$config" ]
+
+then
+    printf "\n\033[1;33mWarning : The \"$config\" file does not exist in the root directory ( $PWD ). Running default git.\033[0m\n\n"
 fi
+
+
+
+
+if is_flint_hook "pre-$1" && [ -f "$PWD/$config" ] && [[ -f "$PWD/$hooks/pre-$1" ]]
+
+then
+    export FLINT_CONFIG="$PWD/$config"
+
+    "$PWD/$hooks/pre-$1"
+
+    unset FLINT_CONFIG
+fi
+
+
+
 
 command git "$@"
 
-return_val="$?"
+return="$?"
 
-if is_flint_hook "post-$cmd" && [[ -n "$hooks_path" && -f "$hooks_path/post-$cmd" ]]; then
-    "$hooks_path/post-$cmd"
+
+
+
+if is_flint_hook "post-$1" && [ -f "$PWD/$config" ] && [[ -f "$PWD/$hooks/post-$1" ]]
+
+then
+    export FLINT_CONFIG="$PWD/$config"
+
+    "$PWD/$hooks/post-$1"
+
+    unset FLINT_CONFIG
 fi
 
 
-return "$return_val"
+return "$return"

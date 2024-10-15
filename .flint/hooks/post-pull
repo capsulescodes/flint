@@ -5,7 +5,10 @@ pulled=$( git diff --name-only --diff-filter=ACMRT @{1} HEAD )
 if [ -n "$pulled" ]
 
 then
-    npx eslint --fix --config .flint/configs/local.js $pulled
+    source ../functions.sh
+
+    format_for_local "$FLINT_CONFIG" "$pulled"
+
 
     modified=$( git diff --name-only --diff-filter=M )
 

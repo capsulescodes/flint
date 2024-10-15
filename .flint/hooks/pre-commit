@@ -6,13 +6,15 @@ then
     exit 0
 fi
 
-
 staged=$( git diff --cached --name-only --diff-filter=ACMR )
 
 if [ -n "$staged" ]
 
 then
-    npx eslint --fix --config .flint/configs/remote.js $staged
+    source ../functions.sh
+
+    format_for_remote "$FLINT_CONFIG" "$staged"
+
 
     modified=$( git diff --name-only --diff-filter=M )
 
