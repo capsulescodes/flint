@@ -1,0 +1,14 @@
+{
+    "linters" : [
+        {
+            "extensions" : [ "js" ],
+            "local" : "echo local_js_lint",
+            "remote" : "echo remote_js_lint"
+        },
+        {
+            "extensions" : [ "php" ],
+            "local" : "echo local_php_lint",
+            "remote" : "echo remote_php_lint"
+        }
+    ]
+}

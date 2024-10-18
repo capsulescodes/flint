@@ -11,8 +11,6 @@ staged=$( git diff --cached --name-only --diff-filter=ACMR )
 if [ -n "$staged" ]
 
 then
-    source ../functions.sh
-
     format_for_remote "$FLINT_CONFIG" "$staged"
 
 

@@ -1,0 +1,8 @@
+{
+    "linters" : [
+        {
+            "extensions" : [ "js" ],
+            "local" : "echo local_js_lint"
+        }
+    ]
+}

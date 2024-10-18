@@ -1,10 +1,10 @@
 function format_for_local
 {
-    local config="$1"
+    local config="$( cat $1 )"
 
     local files="$2"
 
-    if ! command -v jq &> /dev/null
+    if ! command -v jq &> /dev/null || [ "$( type -t jq )" != "file" ]
 
     then
         printf "\n\033[0;31mError: jq is not installed. Please install it to use this function.\033[0m\n"
@@ -15,7 +15,7 @@ function format_for_local
     for (( index=0; index < "$( echo "$config" | jq '.linters | length' )"; index++ ))
 
     do
-        local command=$( echo "$config" | jq -r ".linters[$index].local" )
+        local command=$( echo "$config" | jq -r ".linters[$index].local // empty" )
 
         if [[ -z "$command" ]]
 
@@ -27,7 +27,7 @@ function format_for_local
 
         local extensions=$( echo "$config" | jq -r ".linters[$index].extensions | join(\"|\")" )
 
-        local filtered=$( [ -n "$extensions" ] && echo "$files" | grep -E "\.($extensions)$" || echo "$files" )
+        local filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
 
         if [[ -n "$filtered" ]]
 
@@ -40,11 +40,11 @@ function format_for_local
 
 function format_for_remote
 {
-    local config="$1"
+    local config="$( cat $1 )"
 
     local files="$2"
 
-    if ! command -v jq &> /dev/null
+    if ! command -v jq &> /dev/null || [ "$( type -t jq )" != "file" ]
 
     then
         printf "\n\033[0;31mError: jq is not installed. Please install it to use this function.\033[0m\n"
@@ -55,7 +55,7 @@ function format_for_remote
     for (( index=0; index < "$( echo "$config" | jq '.linters | length' )"; index++ ))
 
     do
-        local command=$( echo "$config" | jq -r ".linters[$index].remote" )
+        local command=$( echo "$config" | jq -r ".linters[$index].remote // empty" )
 
         if [[ -z "$command" ]]
 
@@ -67,7 +67,7 @@ function format_for_remote
 
         local extensions=$( echo "$config" | jq -r ".linters[$index].extensions | join(\"|\")" )
 
-        local filtered=$( [ -n "$extensions" ] && echo "$files" | grep -E "\.($extensions)$" || echo "$files" )
+        local filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
 
         if [[ -n "$filtered" ]]
 

@@ -1,27 +1,17 @@
 #!/bin/bash
 
-if [ -n "$FLINT_FIX_TEMP_COMMIT" ]
+pulled=$( git diff --name-only --diff-filter=ACMRT @{1} HEAD )
+
+if [ -n "$pulled" ]
 
 then
-    exit 0
-fi
-
-
-committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
-
-if [ -n "$committed" ]
-
-then
-    source ../functions.sh
-
-    format_for_local "$FLINT_CONFIG" "$committed"
-
+    format_for_local "$FLINT_CONFIG" "$pulled"
 
     modified=$( git diff --name-only --diff-filter=M )
 
     files=()
 
-    for file in $committed
+    for file in $pulled
 
     do
         if echo "$modified" | grep -Fqx "$file"

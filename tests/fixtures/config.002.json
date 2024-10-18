@@ -1,0 +1,7 @@
+{
+    "linters" : [
+        {
+            "extensions" : [ "js" ]
+        }
+    ]
+}
