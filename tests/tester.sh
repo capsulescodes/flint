@@ -3,7 +3,7 @@ source "$PWD/tests/helpers.sh"
 
 
 
-for file in tests/**/*.test.sh
+for file in tests/**/**/*.test.sh
 
 do
     source "$file"

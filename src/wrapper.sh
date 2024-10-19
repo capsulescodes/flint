@@ -29,9 +29,12 @@ else
 fi
 
 
+is_flint_hook "pre-$1" && echo "YES" || echo "NO"
+[ -f "$config" ] && echo "YES" || echo "NO"
+[[ -f "$PWD/$hooks/pre-$1" ]] && echo "YES" || echo "NO"
+echo "$PWD/$hooks/pre-$1"
 
-
-if is_flint_hook "pre-$1" && [ -f "$config" ] && [[ -f "$hooks/pre-$1" ]]
+if is_flint_hook "pre-$1" && [ -f "$config" ] && [[ -f "$PWD/$hooks/pre-$1" ]]
 
 then
     export FLINT_CONFIG="$config"
@@ -55,7 +58,7 @@ return="$?"
 
 
 
-if is_flint_hook "post-$1" && [ -f "$config" ] && [[ -f "$hooks/post-$1" ]]
+if is_flint_hook "post-$1" && [ -f "$config" ] && [[ -f "$PWD/$hooks/post-$1" ]]
 
 then
     export FLINT_CONFIG="$config"

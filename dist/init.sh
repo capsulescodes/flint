@@ -1,26 +1,21 @@
 #!/bin/bash
 
-if [[ "$INIT_CWD" == "$PWD" ]]
-
-then
-    exit 0
-fi
+source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/helpers.sh"
 
 
-destination="$INIT_CWD/.flint"
+[[ "$INIT_CWD" == "$PWD" ]] && exit 0
 
 
-if [[ -d "$destination" ]]
-
-then
-    rm -rf "$destination"
-fi
-
-mkdir  "$destination"
 
 
+destination="${INIT_CWD:+$INIT_CWD/}"
+
+rm -rf "$destination/.flint" && mkdir -p "$destination/.flint"
 
 source="$( cd "$(dirname "$0" )/.." && pwd )"
+
+
+
 
 if [[ ! -f "$source/src/wrapper.sh" && ! -d "$source/hooks" ]]
 
@@ -30,22 +25,23 @@ then
     exit 1
 fi
 
-path=$source
+
+path="$source"
 
 if [[ "$1" == "--with-hooks" ]]
 
 then
-    cp -r "$source/hooks" "$destination/hooks"
+    cp -r "$source/hooks" "$destination/.flint/hooks"
 
-    path=$destination
+    path="$destination"
 fi
 
 
 printf "#!/bin/bash
 
 config=\"flint.config.json\"
-hooks=\"$path/hooks\"
+hooks=\"$( get_relative_path "$destination" "$path/.flint/hooks" )\"
 
-source \"$source/src/wrapper.sh\" \"\$@\"" > "$destination/git.sh"
+source \"$( get_relative_path "$destination/.flint" "$source/src/wrapper.sh" )\" \"\$@\"" > "$destination/.flint/git.sh"
 
-chmod +x "$destination/git.sh"
+chmod +x "$destination/.flint/git.sh"

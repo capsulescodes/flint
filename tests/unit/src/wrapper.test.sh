@@ -36,13 +36,13 @@ it_checks_if_flint_hook()
 
 it_checks_if_config_file_exists()
 {
-    mv flint.config.json test.config.json
+    mv flint.config.json flint.config.json.bak
 
     output=$( bash .flint/git.sh commit 2>&1 )
     echo "$output" | grep -q "Warning : The \"flint.config.json\" file does not exist"
     assert "Should warn when flint.config.json is missing"
 
-    mv test.config.json flint.config.json
+    mv flint.config.json.bak flint.config.json
 }
 
 
