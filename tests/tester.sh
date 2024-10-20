@@ -2,6 +2,9 @@ source "$PWD/tests/helpers.sh"
 
 
 
+total=0
+
+passed=0
 
 for file in tests/**/**/*.test.sh
 
@@ -12,6 +15,7 @@ do
 
 
     tests=()
+
     results=0
 
 
@@ -21,6 +25,8 @@ do
         if [[ "$function" == it_* ]] || [[ "$function" == test_* ]]
 
         then
+            total=$(( total + 1 ))
+
             tests+=( "$function" )
         fi
     done
@@ -52,6 +58,12 @@ do
             test $test
 
             results+=$?
+
+            if [ $? -eq 0 ]
+
+            then
+                passed=$(( passed + 1 ))
+            fi
         fi
 
         if declare -f afterEach > /dev/null
@@ -72,7 +84,6 @@ do
 
 
 
-
     run "$results" "$file"
 
 
@@ -82,3 +93,5 @@ do
         unset -f $function
     done
 done
+
+summary $total $passed

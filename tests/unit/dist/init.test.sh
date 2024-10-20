@@ -19,7 +19,7 @@ afterAll()
 
 it_prevents_double_initialization()
 {
-    INIT_CWD="$path" output=$( sh "$path/dist/init.sh" 2>&1 )
+    INIT_CWD="$TEST" output=$( sh "$path/dist/init.sh" 2>&1 )
     [ "$?" -eq 0 ]
     assert "Should exit cleanly when INIT_CWD equals PWD"
 }
@@ -27,7 +27,6 @@ it_prevents_double_initialization()
 
 it_creates_flint_directory()
 {
-
     INIT_CWD="$TEST" PWD="$path" sh "$path/dist/init.sh"
     [ -d "$TEST/.flint" ]
     assert "Should create .flint directory"
@@ -67,7 +66,7 @@ it_handles_missing_source_files()
     cp "$path/dist/init.sh" "$TEST/dist/init.sh"
     cp "$path/src/helpers.sh" "$TEST/src/helpers.sh"
 
-    output=$( sh "$TEST/dist/init.sh" 2>&1 )
+    output=$( INIT_CWD="$TEST" PWD="$path" sh "$TEST/dist/init.sh" 2>&1 )
     echo "$output" | grep -q "Error: Required files not found"
     assert "Should error when required files are missing"
 
@@ -79,10 +78,10 @@ it_handles_missing_source_files()
 it_creates_valid_wrapper_script()
 {
     INIT_CWD="$TEST" PWD="$path" sh "$path/dist/init.sh"
-#
+
     grep -q "config=\"flint.config.json\"" "$TEST/.flint/git.sh"
     assert "Generated git.sh should contain config variable"
-#
+
     grep -q "source" "$TEST/.flint/git.sh"
     assert "Generated git.sh should source wrapper script"
 }

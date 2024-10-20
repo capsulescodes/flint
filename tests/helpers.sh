@@ -44,3 +44,17 @@ run()
         return 1
     fi
 }
+
+
+summary()
+{
+    if (( $2 - $1 == 0 ))
+
+    then
+        result="\033[0;32m $1 passed"
+    else
+        result="\033[0;31m $(( $2 - $1 )) failed"
+    fi
+
+    echo "Tests: $result\n"
+}

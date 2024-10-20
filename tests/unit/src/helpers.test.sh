@@ -1,6 +1,8 @@
 beforeAll()
 {
-    source "$PWD/src/helpers.sh"
+    DIR="$PWD"
+
+    source "$DIR/src/helpers.sh"
 
     TEST=$( mktemp -d )
 
@@ -15,7 +17,7 @@ beforeAll()
 
 afterAll()
 {
-    cd - > /dev/null || exit 1
+    cd "$DIR" > /dev/null || exit 1
 
     rm -rf "$TEST"
 }
@@ -23,10 +25,93 @@ afterAll()
 
 
 
+it_handles_file_paths()
+{
+    touch "$TEST/file.txt"
+
+    result=$( get_absolute_path "$TEST/file.txt" )
+    [ "$result" = "$TEST/file.txt" ]
+    assert "Should return absolute path for a file"
+}
+
+
+it_handles_directory_paths()
+{
+    mkdir -p "$TEST/foo"
+
+    result=$( get_absolute_path "$TEST/foo" )
+    [ "$result" = "$TEST/foo" ]
+    assert "Should return absolute path for a directory"
+}
+
+
+it_handles_nested_paths()
+{
+    mkdir -p "$TEST/foo/bar"
+    touch "$TEST/foo/bar/file.txt"
+
+    result=$( get_absolute_path "$TEST/foo/bar/file.txt" )
+    [ "$result" = "$TEST/foo/bar/file.txt" ]
+    assert "Should return absolute path for nested file"
+}
+
+
+it_handles_relative_paths()
+{
+    result=$( get_absolute_path "./foo" )
+    [ "$result" = "$TEST/foo" ]
+    assert "Should convert relative path to absolute path"
+}
+
+
+it_handles_parent_directory_paths()
+{
+    cd "$TEST/foo/bar"
+
+    result=$( get_absolute_path "../" )
+    [ "$result" = "$TEST/foo" ]
+    assert "Should handle parent directory references"
+}
+
+it_handles_non_existent_paths()
+{
+    result=$( get_absolute_path "$TEST/none" )
+    [ "$result" = "$TEST/none" ]
+    assert "Should return original path for non-existent paths"
+}
+
+
+it_handles_empty_path()
+{
+    result=$( get_absolute_path "" )
+    [ "$result" = "$( pwd )" ]
+    assert "Should return current directory for empty path"
+}
+
+
+it_handles_current_directory()
+{
+    result=$( get_absolute_path "." )
+    current_dir=
+    [ "$result" = "$( pwd )" ]
+    assert "Should handle current directory path"
+}
+
+
+it_preserves_trailing_slashes()
+{
+    mkdir -p "$TEST/foo"
+
+    result=$( get_absolute_path "$TEST/foo/" )
+    [ "$result" = "$TEST/foo" ]
+    assert "Should handle paths with trailing slashes"
+}
+
+
 it_handles_same_directory()
 {
     result=$( get_relative_path "$TEST/foo" "$TEST/foo" )
-    [ "$result" = "." ]
+    [ "$result" = "" ]
     assert "Relative path between same directories should be empty"
 }
 

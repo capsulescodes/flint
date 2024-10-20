@@ -33,7 +33,7 @@ get_relative_path()
     if [ "$source" = "$target" ]
 
     then
-        echo "."
+        echo ""
 
         return
     fi
