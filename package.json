@@ -29,9 +29,13 @@
     },
     "files" : [
         "!*",
+        "bin",
         "dist",
         "hooks",
-        "src"
+        "src",
+        "LICENSE.md",
+        "README.md",
+        "template.config.json"
     ],
     "scripts" : {
         "test" : "sh tests/tester.sh"
