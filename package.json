@@ -1,5 +1,5 @@
 {
-	"name" : "flint-js",
+	"name" : "@capsulescodes/flint",
 	"description" : "Auto-format utility for local and remote ease of development",
 	"version" : "0.1.0",
 	"keywords" : [
@@ -29,12 +29,15 @@
     },
     "files" : [
         "!*",
-        ".flint",
-        "dist"
+        "dist",
+        "hooks",
+        "src"
     ],
     "scripts" : {
-        "test" : "sh tests/tester.sh",
-        "postinstall" : "sh dist/init.sh"
+        "test" : "sh tests/tester.sh"
+    },
+    "bin" : {
+        "flint" : "bin/flint"
     },
     "type" : "module"
 }

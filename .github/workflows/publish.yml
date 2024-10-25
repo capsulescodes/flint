@@ -1,0 +1,23 @@
+name : Publish Package
+on :
+  release :
+    types : [ published ]
+jobs :
+  build :
+    runs-on : ubuntu-latest
+    steps :
+      - uses : actions/checkout@v4
+      -  run : bash tests/tester.sh
+      - uses : actions/setup-node@v4
+        with :
+          node-version : '22.x'
+          # registry-url : 'https://registry.npmjs.org'
+      - run : npm run test
+      # - run : npm publish
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM }}
+      - uses : shivammathur/setup-php@v2
+        with :
+          php-version : '8.3'
+          tools : composer:v2
+      - run : composer test

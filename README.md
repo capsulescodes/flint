@@ -1,287 +1,145 @@
 
-<p align="center"><img src="https://raw.githubusercontent.com/capsulescodes/articles/main/art/capsules-articles-image.svg" width="300px" height="200px" /></p>
+<p align="center"><img src="art/capsules-flint-image.png" height="265px" alt="Flint Image" /></p>
 
-Seamlessly craft dynamic and reusable email templates using Inertia.
+Write code in your own style while maintaining team consistency.
 
-Inertia Mailable empowers you to build beautiful, component-driven emails in Laravel, utilizing the power of InertiaJS. Create interactive and responsive email designs effortlessly by composing Vue components and embedding them into your mailables.
-
-<br>
-
- [This article](https://capsules.codes/en/blog/fyi/en-fyi-craft-emails-with-vue-and-tailwind-using-inertia-mailable) provides an in-depth exploration of the package.
+Flint empowers developers to code using their personal style and formatting preferences locally, while ensuring that the codebase remains consistent with the team's standards. By wrapping Git commands with its own wrapper and custom hooks, Flint automatically formats code during pull and push operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
 
 <br>
 
 > [!NOTE]
-> This package is currently designed for Laravel and Vue users and is still in development.
+> This package is currently in development. Contributions are warmly welcomed.
 
 <br>
 
 ## Installation
 
-**1. Install package and publish expected inertia mailable file**
+**1. Install package with your project's package manager**
 
 ```bash
-composer require capsulescodes/inertia-mailable
+# NPM
+npm install --save-dev capsulescodes/flint
 
-php artisan vendor:publish --tag=inertia-mailable-vue-js
+# Composer
+composer require-dev capsulescodes/flint
 ```
 
 <br>
 
-It publishes two files :
 
- - `resources/js/mail.js` : base Inertia file
- - `resources/js/mails/Welcome.vue` : example Vue Component.
-
-<br>
-
-**2. Add filename into vite config's SSR array**
-
-```javascript
-plugins : [
-    laravel( {
-        ssr : [ ..., 'resources/js/mail.js' ],
-    } )
-```
-
-<br>
-
-**3. Add SSR to `build` script and build files**
-
-`package.json`
-```json
-"scripts" : {
-    "build" : "vite build && vite build --ssr"
-},
-```
+**2. Run Flint binary**
 
 ```bash
-npm run build
+# NPM
+node_modules/.bin/flint
+
+# Composer
+vendor/bin/flint
 ```
+
+<br>
+
+It will do multiple things :
+
+- Create the .flint directory on your project's root if not present
+- Create the flint.config.json on your project's root
+- Write the Flint git wrapper in your shell's RC file if not present
 
 <br>
 
 ## Usage
 
-```bash
-php artisan make:mail InertiaMailableInstalled.php
-```
+Once installed and initialized, Flint seamlessly integrates with your Git workflow.
+
+- **Local Development** : Write and format your code according to your personal preferences.
+- **Pulling Code** : When you pull code from the repository, Flint formats it to match your local style, making it easier for you to read and work with.
+- **Committing and Pushing** : Before code is committed and pushed to the repository, Flint reformats it to adhere to the team's style guidelines based on remote config, ensuring consistency across the codebase.
 
 <br>
 
-`App\Mails\InertiaMailableInstalled.php`
+This process helps in :
 
-```diff
-<?php
+- **Maintaining Code Consistency** : The remote repository always reflects the team's agreed-upon code style.
+- **Improving Readability** : Developers can work in an environment tailored to their preferences without affecting others.
+- **Cleaner Commits** : By separating formatting changes from actual code changes, commits become more meaningful and easier to review.
 
-namespace App\Mail;
+<br>
 
-- use Illuminate\Mail\Mailable;
-+ use CapsulesCodes\InertiaMailable\Mail\Mailable;
-use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Mail\Mailables\Address;
-- use Illuminate\Mail\Mailables\Content;
-+ use CapsulesCodes\InertiaMailable\Mail\Mailables\Content;
+## Configuration
 
+Flint uses the `flint.config.json` file for configuration. You can specify your local and team formatting rules here.
 
-class InertiaMailableInstalled extends Mailable
+<br>
+
+Here is a basic config file formatting Javascript and Typescript files with ESLint with `remote.config.js` file remotely and `local.config.js` locally.
+
+<br>
+
+```json
 {
-    private string $name;
-
-
-    public function __construct( string $name )
-    {
-        $this->name = $name;
-    }
-
-
-    public function envelope() : Envelope
-    {
-        return new Envelope( from : new Address( 'example@example.com', 'Mailable World' ), subject : 'Hello Inertia Mailable World!' );
-    }
-
-    public function content() : Content
-    {
--       return new Content( view: 'view.name' );
-+       return new Content( view : 'Welcome', props : [ 'name' => $this->name ] );
-    }
-
-    public function attachments() : array
-    {
-        return [];
-    }
+    "linters" :
+    [
+        {
+            "extensions" : [ "js", "ts" ],
+            "remote" : "node_modules/.bin/eslint --fix --config remote.config.js",
+            "local" : "node_modules/.bin/eslint --fix --config local.config.js"
+        }
+    ]
 }
 ```
 
 <br>
 
-`routes/web.php`
+## Supported Package Managers
 
-```php
-<?php
-
-use Illuminate\Support\Facades\Route;
-use App\Mail\InertiaMailableInstalled;
-
-
-Route::get( '/render', fn() => ( new InertiaMailableInstalled( "Mailable World" ) )->render() );
-```
-
-<br>
-
-```bash
-php artisan serve
-
-
-INFO  Server running on [http://127.0.0.1:8000].
-```
-
-<br>
-
-`> http://127.0.0.1:8000/render`
-
-<p align="center"><img src="art/capsules-inertia-mailable-screenshot.png" alt="Inertia Mailable Screenshot" /></p>
-
-<br>
-
-You are now ready to send.
-
-<br>
-
-`routes/web.php`
-
-```php
-<?php
-
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\InertiaMailableInstalled;
-
-
-Route::get( '/send', function(){ Mail::to( 'example@example.com' )->send( new InertiaMailableInstalled( "Mailable World" ) ); } );
-```
-- replace 'example@example.com' with the desired email address in `routes/web.php`and `App\Mail\InertiaMailableInstalled.php`.
-
-<br>
-<br>
-
-## Supported Frameworks
-
-- [x] Inertia mailable supports Laravel.
-
-<br>
-
-- [x] Inertia Mailable supports Vue.
-- [x] Inertia Mailable supports Vue with Typescript.
-- [x] Inertia Mailable supports Vue with Tailwindcss.
+- [x] Flint is available on NPM.
+- [x] Flint is available on Composer.
 
 <br>
 
 ## Options
 
-**- Add a custom css file**
+**- Init flint hooks in your project**
 
-If you want to modify the current css file, publish the template and modify the path in the `inertia-mailable` config file.
+If you want to modify the flint hooks, you can run the command with the `--with-hooks` flag.
+
+<br>
 
 ```bash
-php artisan vendor:publish --tag=inertia-mailable-css
+# NPM
+node_modules/.bin/flint --with-hooks
+
+# Composer
+vendor/bin/flint --with-hooks
 ```
 
-<br>
-
-`config.inertia-mailable.php`
-```php
-
-return [
-
-    'css' => 'resources/css/custom-css.css'
-
-];
-```
-
-<br>
-<br>
-
-**- Add a custom Tailwind config file**
-
-If you want to use a custom tailwind config, modify the path in the `inertia-mailable` config file.
-
-<br>
-
-`config.inertia-mailable.php`
-```php
-
-return [
-
-    'tailwind' => 'custom.tailwind.config.js'
-
-];
-```
-
-<br>
-<br>
-
-**- Add a custom root blade view**
-
-If you want to modify the current blade file, publish the template and modify the path in the `inertia-mailable` config file.
-
-```bash
-php artisan vendor:publish --tag=inertia-mailable-blade
-```
-
-<br>
-
-`App\Mails\InertiaMailableInstalled.php`
-
-```php
-...
-
-public function content() : Content
-{
-    return new Content( root : 'custom-blade-view', view : 'Welcome', props : [ 'name' => $this->name ] );
-}
-
-...
-```
-
-<br>
-<br>
-
-**- Specify the actual path to node**
-
-If you encounter the following error : `Error: proc_open(): posix_spawn() failed: No such file or directory`, you will need to specify the actual path to Node.js. There is a dedicated environment variable for this.
-
-<br>
-
-`.env`
-
-```
-NODE_PATH=path/to/node
-```
-
-<br>
 <br>
 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
 Please make sure to update tests as appropriate.
-In order to run MySQL tests, credentials have to be configured in the intended TestCases.
 
 <br>
 
 ## Testing
 
-```
+```bash
+# NPM
+npm run test
+
+# Composer
 composer test
+
+# Bash
+sh tests/tester.sh
 ```
 
 <br>
 
 ## Credits
 
-- [Capsules Codes](https://github.com/capsulescodes)
+[Capsules Codes](https://github.com/capsulescodes)
 
 ## License
 

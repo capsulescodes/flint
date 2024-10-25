@@ -1,0 +1,32 @@
+{
+    "name" : "capsulescodes/flint",
+    "description" : "Auto-format utility for local and remote ease of development",
+    "type" : "library",
+    "license" : "MIT",
+    "keywords" : [
+        "format",
+        "lint",
+        "fix",
+        "local",
+        "remote",
+        "git",
+        "hooks",
+        "post-pull",
+        "pre-commit",
+        "post-commit",
+        "pre-push",
+        "post-push"
+    ],
+    "minimum-stability": "dev",
+    "authors" : [
+        {
+            "name" : "Yannick Decat",
+            "email" : "yannick@capsules.codes",
+            "homepage" : "https://capsules.codes"
+        }
+    ],
+    "scripts" : {
+        "test" : [ "sh ./tests/tester.sh" ]
+    },
+    "bin" : [ "bin/flint" ]
+}

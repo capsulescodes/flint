@@ -2,16 +2,18 @@ source "$PWD/tests/helpers.sh"
 
 
 
+
 total=0
 
 passed=0
+
 
 for file in tests/**/**/*.test.sh
 
 do
     source "$file"
 
-    functions=( $( grep -Eo '^[[:space:]]*[^#[:space:]]+[[:space:]]*\(\)' "$file" | awk '{print $1}' | sed 's/()//' ) )
+    functions=( $( awk '/^[[:space:]]*[^#[:space:]]+[[:space:]]*\(\)/ && !/=/ {print $1}' "$file" | sed 's/()//' ) )
 
 
     tests=()
@@ -25,9 +27,9 @@ do
         if [[ "$function" == it_* ]] || [[ "$function" == test_* ]]
 
         then
-            total=$(( total + 1 ))
-
             tests+=( "$function" )
+
+            total=$(( total + 1 ))
         fi
     done
 

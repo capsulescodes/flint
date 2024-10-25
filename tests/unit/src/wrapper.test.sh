@@ -2,7 +2,7 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    INIT_CWD="$TEST" sh "$PWD/dist/init.sh" --with-hooks
+    INIT_CWD="$TEST" sh "$PWD/dist/init.sh" --with-hooks > /dev/null
 
     cd "$TEST" > /dev/null || exit 1
 
@@ -23,13 +23,13 @@ afterAll()
 
 it_checks_if_flint_hook()
 {
-    is_flint_hook "pre-commit"
+    [[ -f "$PWD/$hooks/pre-commit" ]]
     assert "pre-commit should be recognized as a Flint hook"
 
-    is_flint_hook "post-pull"
+    [[ -f "$PWD/$hooks/post-pull" ]]
     assert "post-pull should be recognized as a Flint hook"
 
-    ! is_flint_hook "random-hook"
+    ! [[ -f "$PWD/$hooks/random-hook" ]]
     assert "random-hook should not be recognized as a Flint hook"
 }
 

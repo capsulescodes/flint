@@ -1,0 +1,9 @@
+{
+    "linters" :
+    [
+        {
+            "extensions" : [ "js", "ts" ],
+            "remote" : "node_modules/.bin/eslint --fix --config eslint.config.js"
+        }
+    ]
+}

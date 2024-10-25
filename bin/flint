@@ -1,0 +1,3 @@
+# #!/bin/bash
+
+sh "$( dirname "$( realpath "$0" )" )/../dist/init.sh"

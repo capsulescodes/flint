@@ -51,10 +51,12 @@ summary()
     if (( $2 - $1 == 0 ))
 
     then
-        result="\033[0;32m $1 passed"
-    else
-        result="\033[0;31m $(( $2 - $1 )) failed"
-    fi
+        echo "Tests: \033[0;32m $1 passed\n"
 
-    echo "Tests: $result\n"
+        return=0
+    else
+        echo "Tests: \033[0;31m $(( $2 - $1 )) failed\n"
+
+        return=1
+    fi
 }
