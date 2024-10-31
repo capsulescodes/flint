@@ -64,7 +64,7 @@ then
 
 
 
-        config="$INIT_CWD/flint.config.json"
+        config="./flint.config.json"
 
         if [ ! -f "$config" ]
 
@@ -132,5 +132,5 @@ then
 
 
 else
-    echo "\033[1;33m[ Flint ] The 'init' argument is mandatory to run Flint init command. Skipping.\033[0m\n"
+    echo "\n\033[1;33m[ Flint ] The 'init' argument is mandatory to run Flint init command. Skipping.\033[0m\n"
 fi
