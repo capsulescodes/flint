@@ -41,9 +41,9 @@ then
         then
             cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" "$config"
 
-            echo "n\033[1;32m[ Flint ] Base config file 'flint.config.json' added to project root.\033[0m"
+            echo "\n\033[1;32m[ Flint ] Base config file 'flint.config.json' added to project root.\033[0m"
         else
-            echo "n\033[1;36m[ Flint ] Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m"
+            echo "\n\033[1;36m[ Flint ] Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m"
         fi
 
 
