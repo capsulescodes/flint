@@ -12,6 +12,8 @@ committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
 if [ -n "$committed" ]
 
 then
+    source "$( cd "$( dirname "${BASH_SOURCE:-$0}" )" && pwd )/functions.sh"
+
     format_for_local "$FLINT_CONFIG" "$committed"
 
 
