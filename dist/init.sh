@@ -34,6 +34,21 @@ then
 
 
 
+        config="${INIT_CWD:-.}/flint.config.json"
+
+        if [ ! -f "$config" ]
+
+        then
+            cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" "$config"
+
+            echo "n\033[1;32m[ Flint ] Base config file 'flint.config.json' added to project root.\033[0m"
+        else
+            echo "n\033[1;36m[ Flint ] Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m"
+        fi
+
+
+
+
         hooks="$( get_relative_path "$destination" "$source" )/hooks"
 
         if [[ "$2" == "--with-hooks" ]]
@@ -44,9 +59,9 @@ then
             then
                 cp -r "$source/hooks" "$destination/hooks"
 
-                echo "\n\033[1;32m[ Flint ] Hooks directory 'hooks' added to \"/.flint\" directory.\033[0m"
+                echo "\033[1;32m[ Flint ] Hooks directory 'hooks' added to \"/.flint\" directory.\033[0m"
             else
-                echo "\n\033[1;36m[ Flint ] Hooks directory 'hooks' already exists in \"/.flint\" directory. Skipping.\033[0m"
+                echo "\033[1;36m[ Flint ] Hooks directory 'hooks' already exists in \"/.flint\" directory. Skipping.\033[0m"
             fi
 
             hooks=".flint/hooks"
@@ -62,17 +77,6 @@ then
 
 
 
-        config="${INIT_CWD:-.}/flint.config.json"
-
-        if [ ! -f "$config" ]
-
-        then
-            cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" "$config"
-
-            echo "\033[1;32m[ Flint ] Base config file 'flint.config.json' added to project root.\033[0m"
-        else
-            echo "\033[1;36m[ Flint ] Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m"
-        fi
 
         echo "\033[1;32m[ Flint ] \"/.flint\" directory added to project root.\033[0m"
     else
