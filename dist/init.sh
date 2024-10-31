@@ -49,7 +49,7 @@ then
 
 
 
-        hooks="$( get_relative_path "$destination" "$source" )/hooks"
+        hooks="$( get_relative_path "$INIT_CWD" "$source" )/hooks"
 
         if [[ "$2" == "--with-hooks" ]]
 
