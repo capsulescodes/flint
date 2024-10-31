@@ -92,13 +92,12 @@ it_handles_empty_path()
 it_handles_current_directory()
 {
     result=$( get_absolute_path "." )
-    current_dir=
     [ "$result" = "$( pwd )" ]
     assert "Should handle current directory path"
 }
 
 
-it_preserves_trailing_slashes()
+it_preserves_trailing_slashes_in_absolute_path()
 {
     mkdir -p "$TEST/foo"
 
@@ -182,11 +181,19 @@ it_handles_non_existent_paths()
 }
 
 
-it_preserves_trailing_slashes()
+it_preserves_trailing_slashes_in_relative_path()
 {
     mkdir -p "$TEST/corge/"
 
     result=$( get_relative_path "$TEST/foo" "$TEST/corge/" )
     [ "$result" = "../corge" ]
     assert "Should handle trailing slashes correctly"
+}
+
+
+it_handles_no_common_path()
+{
+    result=$( get_relative_path "/usr/local/bin" "$TEST/foo/bar" )
+    [ "$result" = "$TEST/foo/bar" ]
+    assert "Should return the target's absolute path when no common parts exist"
 }

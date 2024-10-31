@@ -39,8 +39,8 @@ get_relative_path()
         return
     fi
 
-    IFS='/' read -ra source_parts <<< "$source"
-    IFS='/' read -ra target_parts <<< "$target"
+    IFS='/' read -ra source_parts <<< "${source#/}"
+    IFS='/' read -ra target_parts <<< "${target#/}"
 
     local common_length=0
 
@@ -55,6 +55,15 @@ get_relative_path()
             break
         fi
     done
+
+   if [ $common_length -eq 0 ]
+
+   then
+        echo "$target"
+
+        return
+    fi
+
 
     local result=""
 

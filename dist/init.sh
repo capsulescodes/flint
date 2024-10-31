@@ -49,22 +49,20 @@ then
                 echo "\n\033[1;36m[ Flint ] Hooks directory 'hooks' already exists in \"/.flint\" directory. Skipping.\033[0m"
             fi
 
-            hooks="$( get_relative_path "$destination" "$destination" ).flint/hooks"
+            hooks=".flint/hooks"
         fi
 
-        wrapper="$( get_relative_path "$destination" "$source/src/wrapper.sh" )"
 
+        wrapper="$( get_relative_path "$INIT_CWD" "$source/src/wrapper.sh" )"
 
-
-
-        printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\n\nsource \"$wrapper\" \"\$@\"" > "$destination/git.sh"
+        printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\n\nsource \"$( [[ "$wrapper" == /* ]] && echo "$wrapper" || echo "\$PWD/$wrapper" )\" \"\$@\"" > "$destination/git.sh"
 
         chmod +x "$destination/git.sh"
 
 
 
 
-        config="./flint.config.json"
+        config="$INIT_CWD/flint.config.json"
 
         if [ ! -f "$config" ]
 
