@@ -5,13 +5,14 @@ get_absolute_path()
     if [ -f "$path" ]
 
     then
-        local dir=$( cd "$(dirname "$path")" && pwd )
+        local dir="$( cd "$( dirname "$path" )" && pwd )"
 
-        echo "${dir}/$(basename "$path")"
+        echo "${dir}/$( basename "$path" )"
     else
         ( cd "$path" 2>/dev/null && pwd ) || echo "$path"
     fi
 }
+
 
 get_relative_path()
 {
@@ -57,25 +58,22 @@ get_relative_path()
 
     local result=""
 
-    for (( i=common_length; i < ${#source_parts[@]}; i++))
+    for (( i=common_length; i < ${#source_parts[@]}; i++ ))
     do
-        result="../$result"
+        result+="../"
     done
 
-    for (( i=common_length; i < ${#target_parts[@]}; i++))
-    do
-        if [ -n "${target_parts[i]}" ]
-        then
-            result="${result}${target_parts[i]}"
+    for (( i=common_length; i < ${#target_parts[@]}; i++ ))
 
-            if [ $i -lt $((${#target_parts[@]} - 1)) ]
-            then
-                result="${result}/"
-            fi
+    do
+        result+="${target_parts[i]}"
+
+        if [ $i -lt $(( ${#target_parts[@]} - 1 )) ]
+
+        then
+            result+="/"
         fi
     done
-
-    result="${result%/}"
 
     echo "$result"
 }

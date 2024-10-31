@@ -59,9 +59,11 @@ do
         then
             test $test
 
-            results+=$?
+            result=$?
 
-            if [ $? -eq 0 ]
+            results=$(( results + $result ))
+
+            if [ $result -eq 0 ]
 
             then
                 passed=$(( passed + 1 ))

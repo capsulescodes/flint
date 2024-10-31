@@ -3,7 +3,8 @@
     [
         {
             "extensions" : [ "js", "ts" ],
-            "remote" : "node_modules/.bin/eslint --fix --config eslint.config.js"
+            "local" : "node_modules/.bin/eslint --fix --config eslint.local.config.js",
+            "remote" : "node_modules/.bin/eslint --fix --config eslint.remote.config..js"
         }
     ]
 }

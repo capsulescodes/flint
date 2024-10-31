@@ -18,7 +18,7 @@ Flint empowers developers to code using their personal style and formatting pref
 
 ```bash
 # NPM
-npm install --save-dev capsulescodes/flint
+npm install --save-dev @capsulescodes/flint
 
 # Composer
 composer require-dev capsulescodes/flint

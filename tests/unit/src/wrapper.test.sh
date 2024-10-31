@@ -2,11 +2,9 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    INIT_CWD="$TEST" sh "$PWD/dist/init.sh" --with-hooks > /dev/null
+    INIT_CWD="$TEST" sh "$PWD/dist/init.sh" init --with-hooks > /dev/null
 
     cd "$TEST" > /dev/null || exit 1
-
-    echo '{}' > flint.config.json
 
     source .flint/git.sh > /dev/null
 }
@@ -36,13 +34,13 @@ it_checks_if_flint_hook()
 
 it_checks_if_config_file_exists()
 {
-    mv flint.config.json flint.config.json.bak
+    mv "$TEST/flint.config.json" "$TEST/flint.config.json.bak"
 
     output=$( bash .flint/git.sh commit 2>&1 )
     echo "$output" | grep -q "Warning : The \"flint.config.json\" file does not exist"
     assert "Should warn when flint.config.json is missing"
 
-    mv flint.config.json.bak flint.config.json
+    mv "$TEST/flint.config.json.bak" "$TEST/flint.config.json"
 }
 
 

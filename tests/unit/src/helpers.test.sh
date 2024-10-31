@@ -1,8 +1,8 @@
 beforeAll()
 {
-    DIR="$PWD"
+    path="$PWD"
 
-    source "$DIR/src/helpers.sh"
+    source "$path/src/helpers.sh"
 
     TEST=$( mktemp -d )
 
@@ -17,7 +17,7 @@ beforeAll()
 
 afterAll()
 {
-    cd "$DIR" > /dev/null || exit 1
+    cd "$path" > /dev/null || exit 1
 
     rm -rf "$TEST"
 }
@@ -127,7 +127,7 @@ it_handles_parent_to_child()
 it_handles_child_to_parent()
 {
     result=$( get_relative_path "$TEST/foo/bar" "$TEST" )
-    [ "$result" = "../.." ]
+    [ "$result" = "../../" ]
     assert "Should handle path from child to parent directory"
 }
 
