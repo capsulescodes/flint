@@ -62,7 +62,7 @@ then
 
 
 
-        config="$INIT_CWD/flint.config.json"
+        config="${INIT_CWD:-.}/flint.config.json"
 
         if [ ! -f "$config" ]
 
