@@ -4,11 +4,9 @@ function format_for_local
 
     local files="$2"
 
-    local raw=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' )
+    local linters=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
 
-    IFS='{}' read -ra linters <<< "$raw"
-
-    for linter in "${linters[@]}"
+    echo "$linters" | while IFS= read -r linter
 
     do
         if [[ -z "$linter" ]]
@@ -47,11 +45,9 @@ function format_for_remote
 
     local files="$2"
 
-    local raw=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' )
+    local linters=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
 
-    IFS='{}' read -ra linters <<< "$raw"
-
-    for linter in "${linters[@]}"
+    echo "$linters" | while IFS= read -r linter
 
     do
         if [[ -z "$linter" ]]
