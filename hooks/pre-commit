@@ -11,10 +11,7 @@ staged=$( git diff --cached --name-only --diff-filter=ACMR )
 if [ -n "$staged" ]
 
 then
-    source "$( cd "$( dirname "${BASH_SOURCE:-$0}" )" && pwd )/functions.sh"
-
     format_for_remote "$FLINT_CONFIG" "$staged"
-
 
     modified=$( git diff --name-only --diff-filter=M )
 
