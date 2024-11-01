@@ -1,5 +1,3 @@
-#!/bin/bash
-
 staged=$( git diff --cached --name-only )
 
 if [ -n "$staged" ]
@@ -11,5 +9,3 @@ then
 
     unset FLINT_FIX_TEMP_COMMIT
 fi
-
-exit 0

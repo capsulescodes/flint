@@ -19,15 +19,11 @@ then
 
     export FLINT_HOOKS="$hooks"
 
-    export -f format_for_remote
-
-    "$PWD/$hooks/pre-$1"
+    source "$PWD/$hooks/pre-$1"
 
     unset FLINT_CONFIG
 
     unset FLINT_HOOKS
-
-    unset -f format_for_remote
 fi
 
 
@@ -47,15 +43,11 @@ then
 
     export FLINT_HOOKS="$hooks"
 
-    export -f format_for_local
-
-    "$PWD/$hooks/post-$1"
+    source "$PWD/$hooks/post-$1"
 
     unset FLINT_CONFIG
 
     unset FLINT_HOOKS
-
-    unset -f format_for_local
 fi
 
 

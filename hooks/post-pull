@@ -1,5 +1,3 @@
-#!/bin/bash
-
 pulled=$( git diff --name-only --diff-filter=ACMRT @{1} HEAD )
 
 if [ -n "$pulled" ]
@@ -33,5 +31,3 @@ then
         unset FLINT_FIX_TEMP_COMMIT
     fi
 fi
-
-exit 0

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 if [ -n "$FLINT_FIX_TEMP_COMMIT" ]
 
 then
@@ -41,5 +39,3 @@ then
         fi
     fi
 fi
-
-exit 0
