@@ -23,7 +23,7 @@ test()
 
         return 0
     else
-        echo "\033[1;31m\xE2\x9C\x96 $1\033[0m"
+        echo "\033[1;31m\xE2\x9C\x96 \033[1;30m$1\033[0m"
 
         return 1
     fi

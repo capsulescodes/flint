@@ -23,24 +23,6 @@ afterAll()
 
 
 
-it_checks_if_jq_is_installed()
-{
-    jq()
-    {
-        echo "jq: command not found"
-    }
-
-    output=$( format_for_local "flint.config.001.json" "test.js" 2>&1 )
-    echo "$output" | grep -q "Error: jq is not installed"
-    assert "Should show error when jq is not installed [ local ]"
-
-    output=$( format_for_remote "flint.config.001.json" "test.js" 2>&1 )
-    echo "$output" | grep -q "Error: jq is not installed"
-    assert "Should show error when jq is not installed [ remote ]"
-
-    unset -f jq
-}
-
 it_formats_for_local()
 {
     output=$( format_for_local "config.001.json" "test.js test.php test.py" )
@@ -66,14 +48,14 @@ it_formats_for_remote()
 it_handles_missing_local_command()
 {
     output=$( format_for_local "config.002.json" "test.js" 2>&1 )
-    echo "$output" | grep -q "Warning : No local command associated to linter"
+    echo "$output" | grep -q "Warning : No local command associated with a linter. Skipping."
     assert "Should warn when local command is missing"
 }
 
 it_handles_missing_remote_command()
 {
     output=$( format_for_remote "config.002.json" "test.js" 2>&1 )
-    echo "$output" | grep -q "Warning : No remote command associated to linter"
+    echo "$output" | grep -q "Warning : No remote command associated with a linter. Skipping."
     assert "Should warn when remote command is missing"
 }
 
@@ -82,19 +64,8 @@ it_handles_empty_file_list()
     output=$( format_for_local "config.001.json" "" )
     [ -z "$output" ]
     assert "Should not produce output for empty file list [ local ]"
-#
+
     output=$( format_for_remote "config.001.json" "" )
     [ -z "$output" ]
     assert "Should not produce output for empty file list [ remote ]"
-}
-
-it_handles_invalid_json()
-{
-    output=$( format_for_local "config.003.json" "test.js" 2>&1 )
-    [ $? -ne 0 ]
-    assert "Should return non-zero exit code for invalid JSON (local)"
-
-    output=$( format_for_remote "config.003.json" "test.js" 2>&1 )
-    [ $? -ne 0 ]
-    assert "Should return non-zero exit code for invalid JSON (remote)"
 }

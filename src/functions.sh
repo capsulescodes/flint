@@ -1,33 +1,35 @@
 function format_for_local
 {
-    local config="$( cat $1 )"
+    local config="$1"
 
     local files="$2"
 
-    if ! command -v jq &> /dev/null || [ "$( type -t jq )" != "file" ]
+    local raw=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' )
 
-    then
-        printf "\n\033[0;31mError: jq is not installed. Please install it to use this function.\033[0m\n"
+    IFS='{}' read -ra linters <<< "$raw"
 
-        return 1
-    fi
-
-    for (( index=0; index < "$( echo "$config" | jq '.linters | length' )"; index++ ))
+    for linter in "${linters[@]}"
 
     do
-        local command=$( echo "$config" | jq -r ".linters[$index].local // empty" )
+        if [[ -z "$linter" ]]
+
+        then
+            continue
+        fi
+
+        command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"local"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
         if [[ -z "$command" ]]
 
         then
-            printf "\n\033[1;33mWarning : No local command associated to linter $d. Skipping.\033[0m\n" "$index"
+            echo "\n\033[1;33mWarning : No local command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
 
-        local extensions=$( echo "$config" | jq -r ".linters[$index].extensions | join(\"|\")" )
+        extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        local filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
+        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
 
         if [[ -n "$filtered" ]]
 
@@ -38,36 +40,39 @@ function format_for_local
 }
 
 
+
 function format_for_remote
 {
-    local config="$( cat $1 )"
+    local config="$1"
 
     local files="$2"
 
-    if ! command -v jq &> /dev/null || [ "$( type -t jq )" != "file" ]
+    local raw=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' )
 
-    then
-        printf "\n\033[0;31mError: jq is not installed. Please install it to use this function.\033[0m\n"
+    IFS='{}' read -ra linters <<< "$raw"
 
-        return 1
-    fi
-
-    for (( index=0; index < "$( echo "$config" | jq '.linters | length' )"; index++ ))
+    for linter in "${linters[@]}"
 
     do
-        local command=$( echo "$config" | jq -r ".linters[$index].remote // empty" )
+        if [[ -z "$linter" ]]
+
+        then
+            continue
+        fi
+
+        command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"remote"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
         if [[ -z "$command" ]]
 
         then
-            printf "\n\033[1;33mWarning : No remote command associated to linter $d. Skipping.\033[0m\n" "$index"
+            echo "\n\033[1;33mWarning : No remote command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
 
-        local extensions=$( echo "$config" | jq -r ".linters[$index].extensions | join(\"|\")" )
+        extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        local filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
+        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
 
         if [[ -n "$filtered" ]]
 
