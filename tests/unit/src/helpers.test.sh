@@ -160,10 +160,7 @@ it_handles_deep_paths()
 
 it_handles_absolute_paths()
 {
-    one=$( realpath "$TEST/foo" )
-    two=$( realpath "$TEST/baz" )
-
-    result=$( get_relative_path "$one" "$two" )
+    result=$( get_relative_path "$TEST/foo" "$TEST/baz" )
     [ "$result" = "../baz" ]
     assert "Should handle absolute paths correctly"
 }
