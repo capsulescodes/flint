@@ -19,19 +19,29 @@ afterAll()
 
 mock()
 {
+    DIFF=($1)
+    COMMIT="$2"
+    COMMANDS="$3"
+
     git()
     {
-        if [[ "$1" == "diff" && "$2" =~ "--cached" && "$3" =~ "--name-only" ]]
+        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "--diff-filter=ACMR" ]]
 
         then
-            echo "file.001.js"
-            echo "file.002.js"
+            printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "commit" && "$2" == "-m" && "$3" == "FLINT-FIX-TEMP-COMMIT" ]]
+        if [[ "$1" == "commit" ]] && [[ "$2" == "-m" ]]
 
         then
-            echo "Mock : git commit -m FLINT-FIX-TEMP-COMMIT"
+            echo "Mock : git commit -m $COMMIT"
+        fi
+
+
+        if [[ -f "$COMMANDS" ]]
+
+        then
+            echo "$@" >> "$COMMANDS"
         fi
     }
 }
@@ -46,25 +56,19 @@ unmock()
 
 it_handles_staged_files()
 {
-    mock
+    mock "file.001.js file.002.js" "FOO"
 
     output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
-    echo "$output" | grep -q "Mock : git commit -m FLINT-FIX-TEMP-COMMIT"
+    echo "$output" | grep -q "Mock : git commit -m FOO"
     assert "Should create temporary commit for staged files"
 
     unmock
 }
 
+
 it_handles_no_staged_files()
 {
-    git()
-    {
-        if [[ "$1" == "diff" && "$2" =~ "--cached" && "$3" =~ "--name-only" ]]
-
-        then
-            echo ""
-        fi
-    }
+    mock
 
     output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
     [ -z "$output" ]
@@ -73,9 +77,10 @@ it_handles_no_staged_files()
     unmock
 }
 
+
 it_sets_and_unsets_environment_variable()
 {
-    mock
+    mock "file.001.js file.002.js" "BAR"
 
     [ -z "$FLINT_FIX_TEMP_COMMIT" ]
     assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
@@ -88,60 +93,52 @@ it_sets_and_unsets_environment_variable()
     unmock
 }
 
+
 it_creates_commit_with_correct_message()
 {
     commands=$( mktemp )
 
-    git()
-    {
-       echo "$@" >> "$commands"
-
-        if [[ "$1" == "diff" && "$2" =~ "--cached" && "$3" =~ "--name-only" ]]
-
-        then
-            echo "file.001.js"
-        fi
-
-        if [[ "$1" == "commit" ]]
-
-        then
-            echo "Mock : git commit $2 $3"
-        fi
-    }
+    mock "file.001.js" "baz" "$commands"
 
     output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
 
-    echo "$output" | grep -q "Mock : git commit -m FLINT-FIX-TEMP-COMMIT"
+    echo "$output" | grep -q "Mock : git commit -m baz"
     assert "Should create commit with correct temporary commit message"
 
-    [[ "$( cat "$commands" )" =~ "commit -m FLINT-FIX-TEMP-COMMIT" ]]
+    [[ "$( cat "$commands" )" =~ "commit -m" ]]
     assert "Should use correct commit command format"
+
+    unmock
+
+    rm "$commands"
+}
+
+
+it_processes_multiple_staged_files()
+{
+    mock "file.001.js file.002.js file.003.php" "QUX"
+
+    output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
+    echo "$output" | grep -q "Mock : git commit -m QUX"
+    assert "Should handle multiple staged files correctly"
 
     unmock
 }
 
-it_processes_multiple_staged_files()
+
+it_uses_correct_git_commands()
 {
-    git()
-    {
-        if [[ "$1" == "diff" && "$2" =~ "--cached" && "$3" =~ "--name-only" ]]
+    commands=$( mktemp )
 
-        then
-            echo "file.001.js"
-            echo "file.002.js"
-            echo "file.003.php"
-        fi
+    mock "file.001.js file.002.js file.003.php" "QUX" "$commands"
 
-        if [[ "$1" == "commit" ]]
-
-        then
-            echo "Mock : git commit -m FLINT-FIX-TEMP-COMMIT"
-        fi
-    }
-
-    output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
-    echo "$output" | grep -q "Mock : git commit -m FLINT-FIX-TEMP-COMMIT"
-    assert "Should handle multiple staged files correctly"
+    ( source "$TEST/.flint/hooks/post-push" > /dev/null 2>&1 )
+    [[ "$( cat "$commands" )" =~ "diff --cached --name-only" ]]
+    assert "Should use correct diff-tree command format"
+    [[ "$( cat "$commands" )" =~ "commit -m" ]]
+    assert "Should use correct add command format"
 
     unmock
+
+    rm "$commands"
 }

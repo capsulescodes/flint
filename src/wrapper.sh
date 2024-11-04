@@ -4,7 +4,7 @@
 if [ ! -f "$config" ]
 
 then
-    printf "\n\033[1;33mWarning : The \"$config\" file does not exist in the root directory. Running default git.\033[0m\n\n"
+    echo "\n\033[1;33mWarning : The \"$config\" file does not exist in the root directory. Running default git.\033[0m\n\n"
 else
     source "$( cd "$( dirname "${BASH_SOURCE:-$0}" )" && pwd )/functions.sh"
 fi

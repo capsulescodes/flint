@@ -1,4 +1,4 @@
-staged=$( git diff --cached --name-only )
+staged=$( git diff --cached --name-only --diff-filter=ACMR )
 
 if [ -n "$staged" ]
 

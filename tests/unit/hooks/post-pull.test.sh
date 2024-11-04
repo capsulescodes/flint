@@ -31,31 +31,42 @@ afterAll()
 
 mock()
 {
+    DIFF=($1)
+    FILTER=($2)
+    COMMIT="$3"
+    COMMANDS="$4"
+
     git()
     {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=ACMRT" ]]
+        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=ACMRT" ]] && [[ "$4" == "@{1}" ]] && [[ "$5" == "HEAD" ]]
 
         then
-            echo "file.001.js"
-            echo "file.002.js"
+            printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=M" ]]
+        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=M" ]]
 
         then
-            echo "file.001.js"
+            printf "%s\n" "${FILTER[@]}"
         fi
 
         if [[ "$1" == "add" ]]
 
         then
-            echo "Mock : git add $2"
+            echo "Mock : git add ${@:2}"
         fi
 
-        if [[ "$1" == "commit" ]]
+        if [[ "$1" == "commit" ]] && [[ "$2" == "-m" ]]
 
         then
-            echo "Mock : git commit $2 $3"
+            echo "Mock : git commit -m $COMMIT"
+        fi
+
+
+        if [[ -f "$COMMANDS" ]]
+
+        then
+            echo "$@" >> "$COMMANDS"
         fi
     }
 }
@@ -70,7 +81,7 @@ unmock()
 
 it_formats_pulled_files()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
@@ -82,7 +93,7 @@ it_formats_pulled_files()
 
 it_adds_modified_files()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "Mock : git add file.001.js"
@@ -94,10 +105,10 @@ it_adds_modified_files()
 
 it_creates_temp_commit()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js" "foo"
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git commit -m FLINT-FIX-TEMP-COMMIT"
+    echo "$output" | grep -q "Mock : git commit -m foo"
     assert "Should create a temporary commit"
 
     unmock
@@ -106,14 +117,7 @@ it_creates_temp_commit()
 
 it_handles_no_pulled_files()
 {
-    git()
-    {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=ACMRT" ]]
-
-        then
-            echo ""
-        fi
-    }
+    mock
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     [ -z "$output" ]
@@ -125,20 +129,7 @@ it_handles_no_pulled_files()
 
 it_handles_no_modified_files_after_formatting()
 {
-    git()
-    {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=ACMRT" ]]
-
-        then
-            echo "file.001.js"
-        fi
-
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=M" ]]
-
-        then
-            echo ""
-        fi
-    }
+    mock "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "local_js_lint file.001.js"
@@ -154,7 +145,7 @@ it_handles_no_modified_files_after_formatting()
 
 it_sets_and_unsets_environment_variable()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js"
 
     [ -z "$FLINT_FIX_TEMP_COMMIT" ]
     assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
@@ -165,4 +156,26 @@ it_sets_and_unsets_environment_variable()
     assert "FLINT_FIX_TEMP_COMMIT should be unset after running the hook"
 
     unmock
+}
+
+
+it_uses_correct_git_commands()
+{
+    commands=$( mktemp )
+
+    mock "file.001.js file.002.js" "file.001.js" "bar" "$commands"
+
+    ( source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
+    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=ACMRT @{1} HEAD" ]]
+    assert "Should use correct diff-filter command format"
+    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=M" ]]
+    assert "Should use correct diff command format"
+    [[ "$( cat "$commands" )" =~ "add" ]]
+    assert "Should use correct add command format"
+    [[ "$( cat "$commands" )" =~ "commit -m" ]]
+    assert "Should use correct add command format"
+#
+    unmock
+
+    rm "$commands"
 }

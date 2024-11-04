@@ -1,6 +1,8 @@
 
 <p align="center"><img src="art/capsules-flint-image.png" height="265px" alt="Flint Image" /></p>
 
+<br>
+
 Write code in your own style while maintaining team consistency.
 
 <br>
@@ -10,7 +12,7 @@ Flint empowers developers to code using their personal style and formatting pref
 <br>
 
 > [!NOTE]
-> This package is currently in development. Contributions are warmly welcomed.
+> This package is currently under development. Contributions are warmly welcomed.
 
 <br>
 

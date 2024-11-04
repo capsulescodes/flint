@@ -4,4 +4,14 @@ if [ -n "$manual" ]
 
 then
     git reset --soft "$manual"
+
+    staged=$( git diff --cached --name-only --diff-filter=ACMR )
+
+    if [ -n "$staged" ]
+
+    then
+        format_for_remote "$FLINT_CONFIG" "$staged"
+
+        git add "$staged"
+    fi
 fi

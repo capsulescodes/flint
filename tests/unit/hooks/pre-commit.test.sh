@@ -31,37 +31,48 @@ afterAll()
 
 mock()
 {
+    DIFF=($1)
+    FILTER=($2)
+    HEAD="$3"
+    COMMANDS="$4"
+
     git()
     {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]]
+        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "--diff-filter=ACMR" ]]
 
         then
-            echo "file.001.js"
-            echo "file.002.js"
+            printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=M" ]]
+        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=M" ]]
 
         then
-            echo "file.001.js"
+            printf "%s\n" "${FILTER[@]}"
         fi
 
         if [[ "$1" == "add" ]]
 
         then
-            echo "Mock : git add $2"
+            echo "Mock : git add ${@:2}"
         fi
 
-        if [[ "$1" == "rev-list" ]]
+        if [[ "$1" == "rev-list" ]] && [[ "$2" == "HEAD" ]] && [[ "$3" == "--invert-grep" ]]
 
         then
-            echo "foobar"
+            echo "$HEAD"
         fi
 
-        if [[ "$1" == "reset" ]]
+        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]]
 
         then
-            echo "Mock : git reset $2 $3"
+            echo "Mock : git reset --soft $3"
+        fi
+
+
+        if [[ -f "$COMMANDS" ]]
+
+        then
+            echo "$@" >> "$COMMANDS"
         fi
     }
 }
@@ -88,7 +99,7 @@ it_skips_when_temp_commit()
 
 it_formats_staged_files()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
     echo "$output" | grep -q "remote_js_lint file.001.js file.002.js"
@@ -100,7 +111,7 @@ it_formats_staged_files()
 
 it_adds_modified_files()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
     echo "$output" | grep -q "Mock : git add file.001.js"
@@ -112,9 +123,10 @@ it_adds_modified_files()
 
 it_resets_to_manual_commit()
 {
-    mock
+    mock "file.001.js file.002.js" "file.001.js" "foo"
+
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft foobar"
+    echo "$output" | grep -q "Mock : git reset --soft foo"
     assert "Should reset to last manual commit"
 
     unmock
@@ -123,14 +135,7 @@ it_resets_to_manual_commit()
 
 it_handles_no_staged_files()
 {
-    git()
-    {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]]
-
-        then
-            echo ""
-        fi
-    }
+    mock
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
     [ -z "$output" ]
@@ -142,20 +147,7 @@ it_handles_no_staged_files()
 
 it_handles_no_modified_files_after_formatting()
 {
-    git()
-    {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]]
-
-        then
-            echo "file.001.js"
-        fi
-
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=M" ]]
-
-        then
-            echo ""
-        fi
-    }
+    mock "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
     echo "$output" | grep -q "remote_js_lint file.001.js"
@@ -171,32 +163,7 @@ it_handles_no_modified_files_after_formatting()
 
 it_handles_no_manual_commits()
 {
-    git()
-    {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]]
-
-        then
-            echo "file.001.js"
-        fi
-
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" && "$3" == "--diff-filter=M" ]]
-
-        then
-            echo "file.001.js"
-        fi
-
-        if [[ "$1" == "add" ]]
-
-        then
-            echo "Mock : git add $2"
-        fi
-
-        if [[ "$1" == "rev-list" ]]
-
-        then
-            echo ""
-        fi
-    }
+    mock "file.001.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
     echo "$output" | grep -q "Mock : git add file.001.js"
@@ -205,4 +172,28 @@ it_handles_no_manual_commits()
     assert "Should not attempt to reset when no manual commit is found"
 
     unmock
+}
+
+
+it_uses_correct_git_commands()
+{
+    commands=$( mktemp )
+
+    mock "file.001.js file.002.js" "file.001.js" "bar" "$commands"
+
+    ( source "$TEST/.flint/hooks/pre-commit" > /dev/null 2>&1 )
+    [[ "$( cat "$commands" )" =~ "diff --cached --name-only --diff-filter=ACMR" ]]
+    assert "Should use correct diff-filter command format"
+    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=M" ]]
+    assert "Should use correct diff command format"
+    [[ "$( cat "$commands" )" =~ "add file.001.js" ]]
+    assert "Should use correct add command format"
+    [[ "$( cat "$commands" )" =~ "rev-list HEAD --invert-grep" ]]
+    assert "Should use correct add command format"
+    [[ "$( cat "$commands" )" =~ "reset --soft bar" ]]
+    assert "Should use correct add command format"
+
+    unmock
+
+    rm "$commands"
 }
