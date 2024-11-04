@@ -10,6 +10,7 @@
         "remote",
         "git",
         "hooks",
+        "pre-pull",
         "post-pull",
         "pre-commit",
         "post-commit",
