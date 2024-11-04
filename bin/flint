@@ -1,3 +1,15 @@
-# #!/bin/bash
+#!/bin/bash
 
-sh "$( cd "$( dirname "$0" )" && pwd )/../dist/init.sh" "$@"
+TARGET_FILE="$0"
+
+while [ -h "$TARGET_FILE" ]
+
+do
+    DIR="$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )"
+
+    TARGET_FILE="$( readlink "$TARGET_FILE" )"
+
+    [[ "$TARGET_FILE" != /* ]] && TARGET_FILE="$DIR/$TARGET_FILE"
+done
+
+sh "$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )/../dist/init.sh" "$@"
