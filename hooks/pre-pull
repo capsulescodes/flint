@@ -3,7 +3,7 @@ manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-c
 if [ -n "$manual" ]
 
 then
-    git reset --soft "$manual"
+    git reset --soft "$manual" --quiet
 
     staged=$( git diff --cached --name-only --diff-filter=ACMR )
 
@@ -12,6 +12,6 @@ then
     then
         format_for_remote "$FLINT_CONFIG" "$staged"
 
-        git add "$staged"
+        git add "$staged" --quiet
     fi
 fi

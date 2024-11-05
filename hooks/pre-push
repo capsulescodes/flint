@@ -3,5 +3,5 @@ manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-c
 if [ -n "$manual" ]
 
 then
-    git reset --soft "$manual"
+    git reset --soft "$manual" --quiet
 fi

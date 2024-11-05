@@ -5,7 +5,7 @@ if [ -n "$staged" ]
 then
     export FLINT_FIX_TEMP_COMMIT=1
 
-    git commit -m "FLINT-FIX-TEMP-COMMIT"
+    git commit -m "FLINT-FIX-TEMP-COMMIT" --quiet
 
     unset FLINT_FIX_TEMP_COMMIT
 fi

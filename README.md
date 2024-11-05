@@ -69,6 +69,28 @@ This process helps in :
 
 <br>
 
+## Caveats
+
+Flint creates a hidden temporary commit between certain `git` commands, which may sometimes cause the following message to appear when running `git status` :
+
+```diff
+On branch main
++ Your branch is ahead of 'origin/main' by 1 commit.
++     (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+```
+
+<br>
+
+This message indicates that your local branch is configured to track the remote branch, and Flint's hidden temporary commit makes your local branch appear ahead by one commit. To ignore this message, you can unset the upstream tracking for your branch by running :
+
+```git
+git branch --unset-upstream <branch-name>
+```
+
+<br>
+
 ## Configuration
 
 Flint uses the `flint.config.json` file for configuration. You can specify your local and team formatting rules here.

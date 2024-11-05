@@ -25,11 +25,11 @@ then
         if [ ${#files[@]} -gt 0 ]
 
         then
-            git add "${files[@]}"
+            git add "${files[@]}" --quiet
 
             export FLINT_FIX_TEMP_COMMIT=1
 
-            git commit -m "FLINT-FIX-TEMP-COMMIT"
+            git commit -m "FLINT-FIX-TEMP-COMMIT" --quiet
 
             unset FLINT_FIX_TEMP_COMMIT
         fi
