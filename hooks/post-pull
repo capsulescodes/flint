@@ -22,7 +22,7 @@ then
     if [ ${#files[@]} -gt 0 ]
 
     then
-        git add "${files[@]}" --quiet
+        git add "${files[@]}"
 
         export FLINT_FIX_TEMP_COMMIT=1
 

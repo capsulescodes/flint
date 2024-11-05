@@ -25,7 +25,7 @@ then
         if [ ${#files[@]} -gt 0 ]
 
         then
-            git add "${files[@]}" --quiet
+            git add "${files[@]}"
 
             manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
 

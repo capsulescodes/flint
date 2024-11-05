@@ -12,6 +12,6 @@ then
     then
         format_for_remote "$FLINT_CONFIG" "$staged"
 
-        git add "$staged" --quiet
+        git add "$staged"
     fi
 fi
