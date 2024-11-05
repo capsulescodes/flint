@@ -32,7 +32,7 @@ function format_for_local
         if [[ -n "$filtered" ]]
 
         then
-            eval "$command" $filtered
+            eval "$command" "$filtered"
         fi
     done
 }
@@ -73,7 +73,7 @@ function format_for_remote
         if [[ -n "$filtered" ]]
 
         then
-            eval "$command" $filtered
+            eval "$command" "$filtered"
         fi
     done
 }
