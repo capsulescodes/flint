@@ -12,7 +12,7 @@ then
 
         files=()
 
-        for file in $committed
+        while IFS= read -r file
 
         do
             if echo "$modified" | grep -Fqx "$file"
@@ -20,7 +20,8 @@ then
             then
                 files+=( "$file" )
             fi
-        done
+        done <<< "$committed"
+
 
         if [ ${#files[@]} -gt 0 ]
 

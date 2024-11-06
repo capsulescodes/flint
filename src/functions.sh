@@ -27,7 +27,7 @@ function format_for_local
 
         extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
+        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' )
 
         if [[ -n "$filtered" ]]
 
@@ -68,7 +68,7 @@ function format_for_remote
 
         extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" )
+        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' )
 
         if [[ -n "$filtered" ]]
 

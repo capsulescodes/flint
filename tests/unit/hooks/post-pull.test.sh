@@ -79,6 +79,18 @@ unmock()
 
 
 
+it_handles_no_pulled_files()
+{
+    mock
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    [ -z "$output" ]
+    assert "Should not perform any actions when no files are pulled"
+
+    unmock
+}
+
+
 it_formats_pulled_files()
 {
     mock "file.001.js file.002.js" "file.001.js"
@@ -86,6 +98,34 @@ it_formats_pulled_files()
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
     assert "Should run local lint command for pulled files"
+
+    unmock
+}
+
+
+it_handles_no_modified_files()
+{
+    mock "file.001.js"
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    echo "$output" | grep -q "local_js_lint file.001.js"
+    assert "Should run formatter even if no files are modified afterwards"
+    echo "$output" | grep -qv "git add"
+    assert "Should not add files if none were modified after formatting"
+    echo "$output" | grep -qv "git commit"
+    assert "Should not create a commit if no files were modified after formatting"
+
+    unmock
+}
+
+
+it_identifies_modified_files()
+{
+    mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    echo "$output" | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
+    assert "Should add only modified files from committed files list"
 
     unmock
 }
@@ -110,34 +150,6 @@ it_creates_temp_commit()
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "Mock : git commit -m foo"
     assert "Should create a temporary commit"
-
-    unmock
-}
-
-
-it_handles_no_pulled_files()
-{
-    mock
-
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
-    [ -z "$output" ]
-    assert "Should not perform any actions when no files are pulled"
-
-    unmock
-}
-
-
-it_handles_no_modified_files_after_formatting()
-{
-    mock "file.001.js"
-
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
-    echo "$output" | grep -q "local_js_lint file.001.js"
-    assert "Should run formatter even if no files are modified afterwards"
-    echo "$output" | grep -qv "git add"
-    assert "Should not add files if none were modified after formatting"
-    echo "$output" | grep -qv "git commit"
-    assert "Should not create a commit if no files were modified after formatting"
 
     unmock
 }

@@ -4,14 +4,33 @@ if [ -n "$manual" ]
 
 then
     git reset --soft "$manual" --quiet
+fi
 
-    staged=$( git diff --cached --name-only --diff-filter=ACMR )
+staged=$( git diff --cached --name-only --diff-filter=ACMR )
 
-    if [ -n "$staged" ]
+if [ -n "$staged" ]
+
+then
+    format_for_remote "$FLINT_CONFIG" "$staged"
+
+    modified=$( git diff --name-only --diff-filter=M )
+
+    files=()
+
+    while IFS= read -r file
+
+    do
+        if echo "$modified" | grep -Fqx "$file"
+
+        then
+            files+=( "$file" )
+        fi
+    done <<< "$staged"
+
+
+    if [ ${#files[@]} -gt 0 ]
 
     then
-        format_for_remote "$FLINT_CONFIG" "$staged"
-
-        git add "$staged"
+        git add "${files[@]}"
     fi
 fi

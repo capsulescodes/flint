@@ -9,7 +9,7 @@ then
 
     files=()
 
-    for file in $pulled
+    while IFS= read -r file
 
     do
         if echo "$modified" | grep -Fqx "$file"
@@ -17,7 +17,8 @@ then
         then
             files+=( "$file" )
         fi
-    done
+    done <<< "$pulled"
+
 
     if [ ${#files[@]} -gt 0 ]
 

@@ -54,18 +54,6 @@ unmock()
 
 
 
-it_handles_staged_files()
-{
-    mock "file.001.js file.002.js" "FOO"
-
-    output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
-    echo "$output" | grep -q "Mock : git commit -m FOO"
-    assert "Should create temporary commit for staged files"
-
-    unmock
-}
-
-
 it_handles_no_staged_files()
 {
     mock
@@ -73,6 +61,18 @@ it_handles_no_staged_files()
     output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
     [ -z "$output" ]
     assert "Should do nothing when no files are staged"
+
+    unmock
+}
+
+
+it_handles_staged_files()
+{
+    mock "file.001.js file.002.js" "FOO"
+
+    output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
+    echo "$output" | grep -q "Mock : git commit -m FOO"
+    assert "Should create temporary commit for staged files"
 
     unmock
 }
@@ -96,30 +96,22 @@ it_sets_and_unsets_environment_variable()
 
 it_creates_commit_with_correct_message()
 {
-    commands=$( mktemp )
-
-    mock "file.001.js" "baz" "$commands"
+    mock "file.001.js" "baz"
 
     output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
-
     echo "$output" | grep -q "Mock : git commit -m baz"
     assert "Should create commit with correct temporary commit message"
 
-    [[ "$( cat "$commands" )" =~ "commit -m" ]]
-    assert "Should use correct commit command format"
-
     unmock
-
-    rm "$commands"
 }
 
 
 it_processes_multiple_staged_files()
 {
-    mock "file.001.js file.002.js file.003.php" "QUX"
+    mock "file.001.js file.002.js file.003.php" "qux"
 
     output=$( source "$TEST/.flint/hooks/post-push" 2>&1 )
-    echo "$output" | grep -q "Mock : git commit -m QUX"
+    echo "$output" | grep -q "Mock : git commit -m qux"
     assert "Should handle multiple staged files correctly"
 
     unmock

@@ -30,10 +30,10 @@ mock()
             printf "%s\n" "${LIST[@]}"
         fi
 
-        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]]
+        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]] && [[ "$4" == "--quiet" ]]
 
         then
-            echo "Mock : git reset --soft $3"
+            echo "Mock : git reset $2 $3 $4"
         fi
 
 
@@ -53,18 +53,6 @@ unmock()
 
 
 
-it_resets_to_last_manual_commit()
-{
-    mock "foo"
-
-    output=$( source "$TEST/.flint/hooks/pre-push" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft foo"
-    assert "Should reset to the last non-temporary commit"
-
-    unmock
-}
-
-
 it_handles_no_manual_commits()
 {
     mock
@@ -77,13 +65,25 @@ it_handles_no_manual_commits()
 }
 
 
-it_correctly_identifies_temp_commits()
+it_resets_to_last_manual_commit()
+{
+    mock "foo"
+
+    output=$( source "$TEST/.flint/hooks/pre-push" 2>&1 )
+    echo "$output" | grep -q "Mock : git reset --soft foo"
+    assert "Should reset to the last non-temporary commit"
+
+    unmock
+}
+
+
+it_resets_silently()
 {
     mock "bar"
 
     output=$( source "$TEST/.flint/hooks/pre-push" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft bar"
-    assert "Should correctly identify and reset to last manual commit"
+    echo "$output" | grep -q "Mock : git reset --soft bar --quiet"
+    assert "Should reset to the last non-temporary commit"
 
     unmock
 }

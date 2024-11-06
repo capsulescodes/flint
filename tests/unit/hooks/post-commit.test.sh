@@ -155,6 +155,32 @@ it_handles_no_modified_files_after_formatting()
 }
 
 
+it_identifies_modified_files()
+{
+    mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
+
+    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    echo "$output" | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
+    assert "Should add only modified files from committed files list"
+
+    unmock
+}
+
+
+it_processes_multiple_files()
+{
+    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js"
+
+    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
+    assert "Should process all committed files"
+    echo "$output" | grep -q "Mock : git add file.001.js file.002.js"
+    assert "Should add all modified files"
+
+    unmock
+}
+
+
 it_sets_and_unsets_environment_variable()
 {
     mock "file.001.js file.002.js" "file.001.js"
@@ -166,20 +192,6 @@ it_sets_and_unsets_environment_variable()
 
     [ -z "$FLINT_FIX_TEMP_COMMIT" ]
     assert "FLINT_FIX_TEMP_COMMIT should be unset after running the hook"
-
-    unmock
-}
-
-
-it_processes_multiple_files_correctly()
-{
-    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js"
-
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
-    assert "Should process all committed files"
-    echo "$output" | grep -q "Mock : git add file.001.js file.002.js"
-    assert "Should add all modified files"
 
     unmock
 }

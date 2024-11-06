@@ -31,9 +31,10 @@ afterAll()
 
 mock()
 {
-    HEAD="$1"
-    DIFF=($2)
-    COMMANDS="$3"
+    DIFF=($1)
+    FILTER=($2)
+    HEAD="$3"
+    COMMANDS="$4"
 
     git()
     {
@@ -43,16 +44,28 @@ mock()
             echo "$HEAD"
         fi
 
-        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]]
+        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]] && [[ "$4" == "--quiet" ]]
 
         then
-            echo "Mock : git reset --soft $3"
+            echo "Mock : git reset $2 $3 $4"
         fi
 
         if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "--diff-filter=ACMR" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
+        fi
+
+        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=M" ]]
+
+        then
+            printf "%s\n" "${FILTER[@]}"
+        fi
+
+        if [[ "$1" == "add" ]]
+
+        then
+            echo "Mock : git add ${@:2}"
         fi
 
 
@@ -72,51 +85,105 @@ unmock()
 
 
 
-it_resets_to_last_manual_commit()
+it_handles_no_manual_commits()
 {
-    mock "foo"
+    mock "file.001.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft foo"
-    assert "Should reset to last manual commit when it exists"
+    echo "$output" | grep -q "Mock : git add file.001.js"
+    assert "Should add modified files even when no manual commit is found"
+    echo "$output" | grep -qv "git reset"
+    assert "Should not attempt to reset when no manual commit is found"
 
     unmock
 }
 
 
-it_handles_no_manual_commit()
+it_resets_to_manual_commit()
+{
+    mock "file.001.js file.002.js" "file.001.js" "foo"
+
+    output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
+    echo "$output" | grep -q "Mock : git reset --soft foo"
+    assert "Should reset to last manual commit"
+
+    unmock
+}
+
+
+it_resets_silently()
+{
+    mock "file.001.js file.002.js" "file.001.js" "bar"
+
+    output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
+    echo "$output" | grep -q "Mock : git reset --soft bar --quiet"
+    assert "Should reset to the last non-temporary commit"
+
+    unmock
+}
+
+
+it_handles_no_staged_files()
 {
     mock
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -qv "git reset"
-    assert "Should not reset when no manual commit exists"
+    [ -z "$output" ]
+    assert "Should not perform any actions when no files are staged"
 
     unmock
 }
 
 
-it_runs_formatter_when_staged_files_exist()
+it_formats_staged_files()
 {
-    mock "bar" "file.001.js file.002.js"
+    mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft bar"
     echo "$output" | grep -q "remote_js_lint file.001.js file.002.js"
-    assert "Should run formatter for staged files"
+    assert "Should run remote lint command for staged files"
 
     unmock
 }
 
 
-it_handles_manual_commit_but_no_staged_files()
+it_handles_no_modified_files()
 {
-    mock "baz"
+    mock "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft baz"
-    echo "$output" | grep -qv "remote_js_lint"
-    assert "Should reset but not run formatter when no staged files exist"
+    echo "$output" | grep -q "remote_js_lint file.001.js"
+    assert "Should run formatter even if no files are modified afterwards"
+    echo "$output" | grep -qv "git add"
+    assert "Should not add files if none were modified after formatting"
+    echo "$output" | grep -qv "git reset"
+    assert "Should not reset if no files were modified after formatting"
+
+    unmock
+}
+
+
+it_identifies_modified_files()
+{
+    mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
+
+    output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
+    echo "$output" | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
+    assert "Should add only modified files from committed files list"
+
+    unmock
+}
+
+
+it_processes_multiple_files()
+{
+    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js"
+
+    output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
+    echo "$output" | grep -q "remote_js_lint file.001.js file.002.js"
+    assert "Should run formatter even if no files are modified afterwards"
+    echo "$output" | grep -q "Mock : git add file.001.js file.002.js"
+    assert "Should add modified files"
 
     unmock
 }
@@ -126,14 +193,19 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "qux" "file.001.js file.002.js" "$commands"
+    mock "file.001.js file.002.js" "file.001.js" "bar" "$commands"
 
     ( source "$TEST/.flint/hooks/pre-pull" > /dev/null 2>&1 )
-    [[ "$( cat "$commands" )" =~ "rev-list HEAD --invert-grep" ]]
-    assert "Should use correct rev-list command format"
     [[ "$( cat "$commands" )" =~ "diff --cached --name-only --diff-filter=ACMR" ]]
-
-    assert "Should use correct reset command format"
+    assert "Should use correct diff-filter command format"
+    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=M" ]]
+    assert "Should use correct diff command format"
+    [[ "$( cat "$commands" )" =~ "add file.001.js" ]]
+    assert "Should use correct add command format"
+    [[ "$( cat "$commands" )" =~ "rev-list HEAD --invert-grep" ]]
+    assert "Should use correct add command format"
+    [[ "$( cat "$commands" )" =~ "reset --soft bar" ]]
+    assert "Should use correct add command format"
 
     unmock
 
