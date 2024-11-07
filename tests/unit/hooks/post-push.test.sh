@@ -126,9 +126,9 @@ it_uses_correct_git_commands()
 
     ( source "$TEST/.flint/hooks/post-push" > /dev/null 2>&1 )
     [[ "$( cat "$commands" )" =~ "diff --cached --name-only" ]]
-    assert "Should use correct diff-tree command format"
+    assert "Should use correct diff command format"
     [[ "$( cat "$commands" )" =~ "commit -m" ]]
-    assert "Should use correct add command format"
+    assert "Should use correct commit command format"
 
     unmock
 

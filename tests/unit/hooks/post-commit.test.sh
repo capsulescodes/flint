@@ -8,6 +8,8 @@ beforeAll()
 
     cp "$PWD/tests/fixtures/config.004.json" "$TEST/flint.config.json"
 
+    cp "$PWD/tests/fixtures/echo" "$TEST/echo"
+
     source "$PWD/src/functions.sh"
 
     cd "$TEST" > /dev/null || exit 1
@@ -82,11 +84,11 @@ unmock()
 it_skips_when_temp_commit()
 {
     export FLINT_FIX_TEMP_COMMIT=1
-
+#
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
     [ -z "$output" ]
     assert "Should skip execution when FLINT_FIX_TEMP_COMMIT is set"
-
+#
     unset FLINT_FIX_TEMP_COMMIT
 }
 
@@ -211,7 +213,7 @@ it_uses_correct_git_commands()
     [[ "$( cat "$commands" )" =~ "add file.001.js file.002.js" ]]
     assert "Should use correct add command format"
     [[ "$( cat "$commands" )" =~ "commit -m" ]]
-    assert "Should use correct add command format"
+    assert "Should use correct commit command format"
 
     unmock
 

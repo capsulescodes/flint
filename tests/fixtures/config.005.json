@@ -2,7 +2,10 @@
     "linters" : [
         {
             "extensions" : [ "js" ],
-            "remote" : "echo remote_js_lint"
+            "binary" : "echo",
+            "commands" : {
+                "remote" : "remote_js_lint"
+            }
         }
     ]
 }

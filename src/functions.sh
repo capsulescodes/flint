@@ -15,24 +15,32 @@ function format_for_local
             continue
         fi
 
+        binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
+
         command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"local"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
-        if [[ -z "$command" ]]
+        if [[ -z "$binary" ]] || [[ -z "$command" ]]
 
         then
-            echo "\n\033[1;33mWarning : No local command associated with a linter. Skipping.\033[0m\n"
+            echo "\n\033[1;33mWarning : No binary or local command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
 
         extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' )
+        filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
 
         if [[ -n "$filtered" ]]
 
         then
-            eval "$command" "$filtered"
+            if [[ -x "$binary" ]]
+
+            then
+                eval "$binary" "$command" "$filtered"
+            else
+                echo "\n\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+            fi
         fi
     done
 }
@@ -56,24 +64,32 @@ function format_for_remote
             continue
         fi
 
+        binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
+
         command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"remote"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
-        if [[ -z "$command" ]]
+        if [[ -z "$binary" ]] || [[ -z "$command" ]]
 
         then
-            echo "\n\033[1;33mWarning : No remote command associated with a linter. Skipping.\033[0m\n"
+            echo "\n\033[1;33mWarning : No binary or remote command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
 
         extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        filtered=$( printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' )
+        filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
 
         if [[ -n "$filtered" ]]
 
         then
-            eval "$command" "$filtered"
+            if [[ -x "$binary" ]]
+
+            then
+                eval "$binary" "$command" "$filtered"
+            else
+                echo "\n\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+            fi
         fi
     done
 }

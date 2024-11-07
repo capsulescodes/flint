@@ -2,9 +2,12 @@
     "linters" :
     [
         {
-            "extensions" : [ "js", "ts" ],
-            "local" : "node_modules/.bin/eslint --fix --config eslint.local.config.js",
-            "remote" : "node_modules/.bin/eslint --fix --config eslint.remote.config..js"
+            "extensions" : [ "js" ],
+            "binary" : "node_modules/.bin/eslint",
+            "commands" : {
+                "local" : "--fix --config eslint.local.config.js",
+                "remote" : "--fix --config eslint.remote.config.js"
+            }
         }
     ]
 }

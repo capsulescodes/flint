@@ -8,6 +8,8 @@ beforeAll()
 
     cp "$PWD/tests/fixtures/config.004.json" "$TEST/flint.config.json"
 
+    cp "$PWD/tests/fixtures/echo" "$TEST/echo"
+
     source "$PWD/src/functions.sh"
 
     cd "$TEST" > /dev/null || exit 1
@@ -185,7 +187,7 @@ it_uses_correct_git_commands()
     [[ "$( cat "$commands" )" =~ "add" ]]
     assert "Should use correct add command format"
     [[ "$( cat "$commands" )" =~ "commit -m" ]]
-    assert "Should use correct add command format"
+    assert "Should use correct commit command format"
 #
     unmock
 

@@ -12,4 +12,10 @@ do
     [[ "$TARGET_FILE" != /* ]] && TARGET_FILE="$DIR/$TARGET_FILE"
 done
 
-sh "$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )/../dist/init.sh" "$@"
+if [[ "$1" == 'init' ]]
+
+then
+    sh "$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )/../dist/init.sh" "$@"
+else
+    sh "$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )/../dist/run.sh"
+fi

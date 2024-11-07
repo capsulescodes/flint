@@ -19,7 +19,7 @@ afterEach()
 
 it_prevents_double_initialization()
 {
-    INIT_CWD="$TEST" output=$( sh "$path/dist/init.sh" init 2>&1 ) > /dev/null
+    INIT_CWD="$TEST" sh "$path/dist/init.sh" init > /dev/null
     [ "$?" -eq 0 ]
     assert "Should exit cleanly when INIT_CWD equals PWD"
 }

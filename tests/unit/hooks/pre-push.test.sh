@@ -33,7 +33,7 @@ mock()
         if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]] && [[ "$4" == "--quiet" ]]
 
         then
-            echo "Mock : git reset $2 $3 $4"
+            echo "Mock : git reset --soft $3 --quiet"
         fi
 
 

@@ -8,6 +8,8 @@ beforeAll()
 
     cp "$PWD/tests/fixtures/config.005.json" "$TEST/flint.config.json"
 
+    cp "$PWD/tests/fixtures/echo" "$TEST/echo"
+
     source "$PWD/src/functions.sh"
 
     cd "$TEST" > /dev/null || exit 1
@@ -47,7 +49,7 @@ mock()
         if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]] && [[ "$4" == "--quiet" ]]
 
         then
-            echo "Mock : git reset $2 $3 $4"
+            echo "Mock : git reset --soft $3 --quiet"
         fi
 
         if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "--diff-filter=ACMR" ]]
@@ -215,9 +217,9 @@ it_uses_correct_git_commands()
     [[ "$( cat "$commands" )" =~ "add file.001.js" ]]
     assert "Should use correct add command format"
     [[ "$( cat "$commands" )" =~ "rev-list HEAD --invert-grep" ]]
-    assert "Should use correct add command format"
+    assert "Should use correct rev-list command format"
     [[ "$( cat "$commands" )" =~ "reset --soft bar" ]]
-    assert "Should use correct add command format"
+    assert "Should use correct reset command format"
 
     unmock
 

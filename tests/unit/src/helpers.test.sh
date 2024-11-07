@@ -73,6 +73,7 @@ it_handles_parent_directory_paths()
     assert "Should handle parent directory references"
 }
 
+
 it_handles_non_existent_paths()
 {
     result=$( get_absolute_path "$TEST/none" )
