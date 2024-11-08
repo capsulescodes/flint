@@ -1,13 +1,13 @@
 get_absolute_path()
 {
-    local path="$1"
+    local path=$1
 
     if [ -f "$path" ]
 
     then
-        local dir="$( cd "$( dirname "$path" )" && pwd )"
+        local dir="$( cd "$( dirname $path )" && pwd )"
 
-        echo "${dir}/$( basename "$path" )"
+        echo "${dir}/$( basename $path )"
     else
         ( cd "$path" 2>/dev/null && pwd ) || echo "$path"
     fi
@@ -16,22 +16,22 @@ get_absolute_path()
 
 get_relative_path()
 {
-    local source="$1"
-    local target="$2"
+    local source=$1
+    local target=$2
 
-    source="$( get_absolute_path "$source" )"
-    target="$( get_absolute_path "$target" )"
+    source="$( get_absolute_path $source )"
+    target="$( get_absolute_path $target )"
 
     if [ -f "$source" ]
 
     then
-        source=$( dirname "$source" )
+        source=$( dirname $source )
     fi
 
     source="${source%/}"
     target="${target%/}"
 
-    if [ "$source" = "$target" ]
+    if [ $source = $target ]
 
     then
         echo ""

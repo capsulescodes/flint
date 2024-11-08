@@ -1,4 +1,4 @@
-if [ -z "$FLINT_FIX_TEMP_COMMIT" ]
+if [ -z $FLINT_FIX_TEMP_COMMIT ]
 
 then
     committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
@@ -6,7 +6,7 @@ then
     if [ -n "$committed" ]
 
     then
-        format_for_local "$FLINT_CONFIG" "$committed"
+        format_for_local $FLINT_CONFIG "$committed"
 
         modified=$( git diff --name-only )
 
@@ -15,10 +15,10 @@ then
         while IFS= read -r file
 
         do
-            if echo "$modified" | grep -Fqx "$file"
+            if echo "$modified" | grep -Fqx $file
 
             then
-                files+=( "$file" )
+                files+=( $file )
             fi
         done <<< "$committed"
 

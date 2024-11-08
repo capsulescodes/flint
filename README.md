@@ -31,14 +31,14 @@ composer require-dev capsulescodes/flint
 <br>
 
 
-**2. Run Flint binary**
+**2. Initialize Flint**
 
 ```bash
 # NPM
-node_modules/.bin/flint
+node_modules/.bin/flint init
 
 # Composer
-vendor/bin/flint
+vendor/bin/flint init
 ```
 
 <br>
@@ -46,7 +46,7 @@ vendor/bin/flint
 It will do multiple things :
 
 - Create the .flint directory on your project's root if not present
-- Create the flint.config.json on your project's root
+- Create the flint.config.json on your project's root if not present
 - Write the Flint git wrapper in your shell's RC file if not present
 
 <br>
@@ -116,7 +116,7 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
 
 <br>
 
-## Supported Package Managers
+## Supported Package Managers [ WIP ]
 
 - [x] Flint is available on NPM.
 - [x] Flint is available on Composer.
@@ -133,10 +133,24 @@ If you want to modify the flint hooks, you can run the command with the `--with-
 
 ```bash
 # NPM
-node_modules/.bin/flint --with-hooks
+node_modules/.bin/flint init --with-hooks
 
 # Composer
-vendor/bin/flint --with-hooks
+vendor/bin/flint init --with-hooks
+```
+
+**- Run Flint manually**
+
+If you want to run your Flint configuration manually, you can run the `run` command.
+
+<br>
+
+```bash
+# NPM
+node_modules/.bin/flint run
+
+# Composer
+vendor/bin/flint run
 ```
 
 <br>

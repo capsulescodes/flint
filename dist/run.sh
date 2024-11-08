@@ -1,13 +1,13 @@
 #!/bin/bash
 
-[[ "$INIT_CWD" == "$PWD" ]] && exit 0
+[[ $INIT_CWD == $PWD ]] && exit 0
 
 
 
 
 destination="${INIT_CWD:+$INIT_CWD/}.flint"
 
-if [[ ! -d "$destination" ]] || [[ ! -f "$destination/git.sh" ]]
+if [[ ! -d "$destination" || ! -f "$destination/git.sh" ]]
 
 then
     printf "\n\033[1;33m[ Flint ] Flint must be configured first. Run 'flint init' to proceed.\033[0m\n"
@@ -33,10 +33,10 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/functions.sh"
 
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
 
-if [ -n "$manual" ]
+if [ -n $manual ]
 
 then
-    git reset --soft "$manual" --quiet
+    git reset --soft $manual --quiet
 fi
 
 
@@ -46,7 +46,7 @@ staged=$( git diff --staged --name-only )
 
 unstaged=$( git diff --name-only )
 
-format_for_local "$config"
+format_for_local $config
 
 modified=$( git diff --name-only )
 
@@ -57,18 +57,16 @@ after=()
 while IFS= read -r file
 
 do
-    if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
+    if ( ! echo "$staged" | grep -Fqx $file ) && ( ! echo "$unstaged" | grep -Fqx $file )
 
     then
-        before+=( "$file" )
+        before+=( $file )
     fi
 
-    if echo "$staged" | grep -Fqx "$file"
+    if echo "$staged" | grep -Fqx $file
 
     then
-        after+=( "$file" )
-
-        continue
+        after+=( $file )
     fi
 done <<< "$modified"
 

@@ -1,10 +1,10 @@
 function format_for_local
 {
-    local config="$1"
+    local config=$1
 
-    local files="$2"
+    local files=$2
 
-    local linters=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
+    local linters=$( echo "$( tr -d '\n' < $config )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
 
     while IFS= read -r linter
 
@@ -37,9 +37,9 @@ function format_for_local
             if [[ -x "$binary" ]]
 
             then
-                eval "$binary" "$command" "$filtered"
+                eval $binary $command "$filtered"
             else
-                printf "\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+                printf "\033[1;33mWarning : Binary \"$binary\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
             fi
         fi
     done <<< "$linters"
@@ -49,11 +49,11 @@ function format_for_local
 
 function format_for_remote
 {
-    local config="$1"
+    local config=$1
 
-    local files="$2"
+    local files=$2
 
-    local linters=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
+    local linters=$( echo "$( tr -d '\n' < $config )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
 
     while IFS= read -r linter
 
@@ -86,9 +86,9 @@ function format_for_remote
             if [[ -x "$binary" ]]
 
             then
-                eval "$binary" "$command" "$filtered"
+                eval $binary $command "$filtered"
             else
-                printf "\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+                printf "\033[1;33mWarning : Binary \"$binary\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
             fi
         fi
     done <<< "$linters"

@@ -3,10 +3,10 @@
 TARGET="$0"
 
 
-while [ -h "$TARGET_FILE" ]
+while [ -h "$TARGET" ]
 
 do
-    DIR="$( cd -P "$( dirname "$TARGET" )" && pwd )"
+    DIR="$( cd -P "$( dirname $TARGET )" && pwd )"
 
     TARGET="$( readlink "$TARGET" )"
 
@@ -16,26 +16,26 @@ done
 
 
 
-if [[ "$1" == 'init' ]]
+if [[ $1 == 'init' ]]
 
 then
-    sh "$( cd -P "$( dirname "$TARGET" )" && pwd )/../dist/init.sh" "$@"
+    sh "$( cd -P "$( dirname $TARGET )" && pwd )/../dist/init.sh" $@
 
     exit 0
 fi
 
-if [[ "$1" == 'run' ]] || [[ -z "$1" ]]
+if [[ $1 == 'run' ]] || [[ -z $1 ]]
 
 then
-    sh "$( cd -P "$( dirname "$TARGET" )" && pwd )/../dist/run.sh"
+    sh "$( cd -P "$( dirname $TARGET )" && pwd )/../dist/run.sh"
 
     exit 0
 fi
 
-if [[ "$1" == '-h' ]] || [[ "$1" == '--help' ]]
+if [[ $1 == '-h' ]] || [[ $1 == '--help' ]]
 
 then
-    sh "$( cd -P "$( dirname "$TARGET" )" && pwd )/../dist/help.sh"
+    sh "$( cd -P "$( dirname $TARGET )" && pwd )/../dist/help.sh"
 
     exit 0
 fi

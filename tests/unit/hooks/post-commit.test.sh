@@ -12,7 +12,7 @@ beforeAll()
 
     source "$PWD/src/functions.sh"
 
-    cd "$TEST" > /dev/null || exit 1
+    cd $TEST > /dev/null || exit 1
 
     export FLINT_CONFIG="$TEST/flint.config.json"
 
@@ -23,7 +23,7 @@ afterAll()
 {
     cd - > /dev/null || exit 1
 
-    rm -rf "$TEST"
+    rm -rf $TEST
 
     unset FLINT_CONFIG
 
@@ -35,30 +35,30 @@ mock()
 {
     DIFF=($1)
     FILTER=($2)
-    COMMIT="$3"
-    COMMANDS="$4"
+    COMMIT=$3
+    COMMANDS=$4
 
     git()
     {
-        if [[ "$1" == "diff-tree" && "$2" == "--no-commit-id" && "$3" == "--name-only" && "$4" == "-r" && "$5" == "HEAD" ]]
+        if [[ $1 == "diff-tree" && $2 == "--no-commit-id" && $3 == "--name-only" && $4 == "-r" && $5 == "HEAD" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" && "$2" == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
             printf "%s\n" "${FILTER[@]}"
         fi
 
-        if [[ "$1" == "add" ]]
+        if [[ $1 == "add" ]]
 
         then
             echo "Mock : git add ${@:2}"
         fi
 
-        if [[ "$1" == "commit" && "$2" == "-m" ]]
+        if [[ $1 == "commit" && $2 == "-m" ]]
 
         then
             echo "Mock : git commit -m $COMMIT"
@@ -68,7 +68,7 @@ mock()
         if [[ -f "$COMMANDS" ]]
 
         then
-            echo "$@" >> "$COMMANDS"
+            echo $@ >> $COMMANDS
         fi
     }
 }
@@ -86,7 +86,7 @@ it_skips_when_temp_commit()
     export FLINT_FIX_TEMP_COMMIT=1
 #
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    [ -z "$output" ]
+    [ -z $output ]
     assert "Should skip execution when FLINT_FIX_TEMP_COMMIT is set"
 #
     unset FLINT_FIX_TEMP_COMMIT
@@ -98,7 +98,7 @@ it_formats_committed_files()
     mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
+    echo $output | grep -q "local_js_lint file.001.js file.002.js"
     assert "Should run local lint command for committed files"
 
     unmock
@@ -110,7 +110,7 @@ it_adds_modified_files()
     mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "Mock : git add file.001.js"
+    echo $output | grep -q "Mock : git add file.001.js"
     assert "Should add modified files"
 
     unmock
@@ -122,7 +122,7 @@ it_creates_temp_commit()
     mock "file.001.js file.002.js" "file.001.js" "foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "Mock : git commit -m foo"
+    echo $output | grep -q "Mock : git commit -m foo"
     assert "Should create a temporary commit"
 
     unmock
@@ -134,7 +134,7 @@ it_handles_no_committed_files()
     mock
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    [ -z "$output" ]
+    [ -z $output ]
     assert "Should not perform any actions when no files are committed"
 
     unmock
@@ -146,11 +146,11 @@ it_handles_no_modified_files_after_formatting()
     mock "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "local_js_lint file.001.js"
+    echo $output | grep -q "local_js_lint file.001.js"
     assert "Should run formatter even if no files are modified afterwards"
-    echo "$output" | grep -qv "git add"
+    echo $output | grep -qv "git add"
     assert "Should not add files if none were modified after formatting"
-    echo "$output" | grep -qv "git commit"
+    echo $output | grep -qv "git commit"
     assert "Should not create commit if no files were modified after formatting"
 
     unmock
@@ -162,7 +162,7 @@ it_identifies_modified_files()
     mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
+    echo $output | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
     assert "Should add only modified files from committed files list"
 
     unmock
@@ -174,9 +174,9 @@ it_processes_multiple_files()
     mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
+    echo $output | grep -q "local_js_lint file.001.js file.002.js"
     assert "Should process all committed files"
-    echo "$output" | grep -q "Mock : git add file.001.js file.002.js"
+    echo $output | grep -q "Mock : git add file.001.js file.002.js"
     assert "Should add all modified files"
 
     unmock
@@ -187,12 +187,12 @@ it_sets_and_unsets_environment_variable()
 {
     mock "file.001.js file.002.js" "file.001.js"
 
-    [ -z "$FLINT_FIX_TEMP_COMMIT" ]
+    [ -z $FLINT_FIX_TEMP_COMMIT ]
     assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
 
     ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
 
-    [ -z "$FLINT_FIX_TEMP_COMMIT" ]
+    [ -z $FLINT_FIX_TEMP_COMMIT ]
     assert "FLINT_FIX_TEMP_COMMIT should be unset after running the hook"
 
     unmock
@@ -203,19 +203,19 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js" "bar" "$commands"
+    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js" "bar" $commands
 
     ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
-    [[ "$( cat "$commands" )" =~ "diff-tree --no-commit-id --name-only -r HEAD" ]]
+    [[ "$( cat $commands )" =~ "diff-tree --no-commit-id --name-only -r HEAD" ]]
     assert "Should use correct diff-tree command format"
-    [[ "$( cat "$commands" )" =~ "diff --name-only" ]]
+    [[ "$( cat $commands )" =~ "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( cat "$commands" )" =~ "add file.001.js file.002.js" ]]
+    [[ "$( cat $commands )" =~ "add file.001.js file.002.js" ]]
     assert "Should use correct add command format"
-    [[ "$( cat "$commands" )" =~ "commit -m" ]]
+    [[ "$( cat $commands )" =~ "commit -m" ]]
     assert "Should use correct commit command format"
 
     unmock
 
-    rm "$commands"
+    rm $commands
 }

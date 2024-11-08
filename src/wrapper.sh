@@ -12,9 +12,9 @@ fi
 if [ -f "$config" ] && [[ -f "$PWD/$hooks/pre-$1" ]]
 
 then
-    export FLINT_CONFIG="$config"
+    export FLINT_CONFIG=$config
 
-    export FLINT_HOOKS="$hooks"
+    export FLINT_HOOKS=$hooks
 
     source "$PWD/$hooks/pre-$1"
 
@@ -26,9 +26,9 @@ fi
 
 
 
-command git "$@"
+command git $@
 
-return="$?"
+return=$?
 
 
 
@@ -36,9 +36,9 @@ return="$?"
 if [ -f "$config" ] && [[ -f "$PWD/$hooks/post-$1" ]]
 
 then
-    export FLINT_CONFIG="$config"
+    export FLINT_CONFIG=$config
 
-    export FLINT_HOOKS="$hooks"
+    export FLINT_HOOKS=$hooks
 
     source "$PWD/$hooks/post-$1"
 
@@ -50,4 +50,4 @@ fi
 
 
 
-return "$return"
+return $return

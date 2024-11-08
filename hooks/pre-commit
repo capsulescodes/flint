@@ -1,4 +1,4 @@
-if [ -z "$FLINT_FIX_TEMP_COMMIT" ]
+if [ -z $FLINT_FIX_TEMP_COMMIT ]
 
 then
     manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
@@ -6,7 +6,7 @@ then
     if [ -n "$manual" ]
 
     then
-        git reset --soft "$manual" --quiet
+        git reset --soft $manual --quiet
     fi
 
     staged=$( git diff --staged --name-only --diff-filter=d )
@@ -14,7 +14,7 @@ then
     if [ -n "$staged" ]
 
     then
-        format_for_remote "$FLINT_CONFIG" "$staged"
+        format_for_remote $FLINT_CONFIG "$staged"
 
         modified=$( git diff --name-only )
 
@@ -23,10 +23,10 @@ then
         while IFS= read -r file
 
         do
-            if echo "$modified" | grep -Fqx "$file"
+            if echo "$modified" | grep -Fqx $file
 
             then
-                files+=( "$file" )
+                files+=( $file )
             fi
         done <<< "$staged"
 

@@ -24,10 +24,10 @@ do
     for function in "${functions[@]}"
 
     do
-        if [[ "$function" == it_* ]] || [[ "$function" == test_* ]]
+        if [[ $function == it_* ]] || [[ $function == test_* ]]
 
         then
-            tests+=( "$function" )
+            tests+=( $function )
 
             total=$(( total + 1 ))
         fi

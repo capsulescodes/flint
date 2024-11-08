@@ -12,7 +12,7 @@ beforeAll()
 
     source "$PWD/src/functions.sh"
 
-    cd "$TEST" > /dev/null || exit 1
+    cd $TEST > /dev/null || exit 1
 
     export FLINT_CONFIG="$TEST/flint.config.json"
 
@@ -23,7 +23,7 @@ afterAll()
 {
     cd - > /dev/null || exit 1
 
-    rm -rf "$TEST"
+    rm -rf $TEST
 
     unset FLINT_CONFIG
 
@@ -35,36 +35,36 @@ mock()
 {
     DIFF=($1)
     FILTER=($2)
-    HEAD="$3"
-    COMMANDS="$4"
+    HEAD=$3
+    COMMANDS=$4
 
     git()
     {
-        if [[ "$1" == "rev-list" && "$2" == "HEAD" && "$3" == "--invert-grep" ]]
+        if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
 
         then
-            echo "$HEAD"
+            echo $HEAD
         fi
 
-        if [[ "$1" == "reset" && "$2" == "--soft" && "$4" == "--quiet" ]]
+        if [[ $1 == "reset" && $2 == "--soft" && $4 == "--quiet" ]]
 
         then
             echo "Mock : git reset --soft $3 --quiet"
         fi
 
-        if [[ "$1" == "diff" && "$2" == "--staged" && "$3" == "--name-only" && "$4" == "--diff-filter=d" ]]
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" && $4 == "--diff-filter=d" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" && "$2" == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
             printf "%s\n" "${FILTER[@]}"
         fi
 
-        if [[ "$1" == "add" ]]
+        if [[ $1 == "add" ]]
 
         then
             echo "Mock : git add ${@:2}"
@@ -74,7 +74,7 @@ mock()
         if [[ -f "$COMMANDS" ]]
 
         then
-            echo "$@" >> "$COMMANDS"
+            echo $@ >> $COMMANDS
         fi
     }
 }
@@ -92,9 +92,9 @@ it_handles_no_manual_commits()
     mock "file.001.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git add file.001.js"
+    echo $output | grep -q "Mock : git add file.001.js"
     assert "Should add modified files even when no manual commit is found"
-    echo "$output" | grep -qv "git reset"
+    echo $output | grep -qv "git reset"
     assert "Should not attempt to reset when no manual commit is found"
 
     unmock
@@ -106,7 +106,7 @@ it_resets_to_manual_commit()
     mock "file.001.js file.002.js" "file.001.js" "foo"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft foo"
+    echo $output | grep -q "Mock : git reset --soft foo"
     assert "Should reset to last manual commit"
 
     unmock
@@ -118,7 +118,7 @@ it_resets_silently()
     mock "file.001.js file.002.js" "file.001.js" "bar"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git reset --soft bar --quiet"
+    echo $output | grep -q "Mock : git reset --soft bar --quiet"
     assert "Should reset to the last non-temporary commit"
 
     unmock
@@ -130,7 +130,7 @@ it_handles_no_staged_files()
     mock
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    [ -z "$output" ]
+    [ -z $output ]
     assert "Should not perform any actions when no files are staged"
 
     unmock
@@ -142,7 +142,7 @@ it_formats_staged_files()
     mock "file.001.js file.002.js" "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "remote_js_lint file.001.js file.002.js"
+    echo $output | grep -q "remote_js_lint file.001.js file.002.js"
     assert "Should run remote lint command for staged files"
 
     unmock
@@ -154,11 +154,11 @@ it_handles_no_modified_files()
     mock "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "remote_js_lint file.001.js"
+    echo $output | grep -q "remote_js_lint file.001.js"
     assert "Should run formatter even if no files are modified afterwards"
-    echo "$output" | grep -qv "git add"
+    echo $output | grep -qv "git add"
     assert "Should not add files if none were modified after formatting"
-    echo "$output" | grep -qv "git reset"
+    echo $output | grep -qv "git reset"
     assert "Should not reset if no files were modified after formatting"
 
     unmock
@@ -170,7 +170,7 @@ it_identifies_modified_files()
     mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
+    echo $output | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
     assert "Should add only modified files from committed files list"
 
     unmock
@@ -182,9 +182,9 @@ it_processes_multiple_files()
     mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js"
 
     output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1 )
-    echo "$output" | grep -q "remote_js_lint file.001.js file.002.js"
+    echo $output | grep -q "remote_js_lint file.001.js file.002.js"
     assert "Should run formatter even if no files are modified afterwards"
-    echo "$output" | grep -q "Mock : git add file.001.js file.002.js"
+    echo $output | grep -q "Mock : git add file.001.js file.002.js"
     assert "Should add modified files"
 
     unmock
@@ -195,21 +195,21 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.js file.002.js" "file.001.js" "bar" "$commands"
+    mock "file.001.js file.002.js" "file.001.js" "bar" $commands
 
     ( source "$TEST/.flint/hooks/pre-pull" > /dev/null 2>&1 )
-    [[ "$( cat "$commands" )" =~ "diff --staged --name-only --diff-filter=d" ]]
+    [[ "$( cat $commands )" =~ "diff --staged --name-only --diff-filter=d" ]]
     assert "Should use correct diff-filter command format"
-    [[ "$( cat "$commands" )" =~ "diff --name-only" ]]
+    [[ "$( cat $commands )" =~ "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( cat "$commands" )" =~ "add file.001.js" ]]
+    [[ "$( cat $commands )" =~ "add file.001.js" ]]
     assert "Should use correct add command format"
-    [[ "$( cat "$commands" )" =~ "rev-list HEAD --invert-grep" ]]
+    [[ "$( cat $commands )" =~ "rev-list HEAD --invert-grep" ]]
     assert "Should use correct rev-list command format"
-    [[ "$( cat "$commands" )" =~ "reset --soft bar" ]]
+    [[ "$( cat $commands )" =~ "reset --soft bar" ]]
     assert "Should use correct reset command format"
 
     unmock
 
-    rm "$commands"
+    rm $commands
 }

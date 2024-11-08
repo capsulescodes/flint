@@ -7,7 +7,7 @@ then
 
     unstaged=$( git diff --name-only )
 
-    format_for_local "$FLINT_CONFIG" "$pulled"
+    format_for_local $FLINT_CONFIG "$pulled"
 
     modified=$( git diff --name-only )
 
@@ -18,19 +18,19 @@ then
     while IFS= read -r file
 
     do
-        if echo "$modified" | grep -Fqx "$file"
+        if echo "$modified" | grep -Fqx $file
 
         then
-            if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
+            if ( ! echo "$staged" | grep -Fqx $file ) && ( ! echo "$unstaged" | grep -Fqx $file )
 
             then
-                before+=( "$file" )
+                before+=( $file )
             fi
 
-            if echo "$staged" | grep -Fqx "$file"
+            if echo "$staged" | grep -Fqx $file
 
             then
-                after+=( "$file" )
+                after+=( $file )
             fi
         fi
     done <<< "$pulled"
