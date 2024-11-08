@@ -34,22 +34,45 @@ afterAll()
 mock()
 {
     DIFF=($1)
-    FILTER=($2)
-    COMMIT="$3"
-    COMMANDS="$4"
+    STAGED=($2)
+    UNSTAGED=($3)
+    MODIFIED=($4)
+    COMMIT="$5"
+    COUNT="$6"
+    COMMANDS="$7"
 
     git()
     {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=ACMRT" ]] && [[ "$4" == "@{1}" ]] && [[ "$5" == "HEAD" ]]
+        if [[ "$1" == "diff" && "$2" == "--diff-filter=d" && "$3" == "--name-only" && "$4" == "@{1}" && "$5" == "HEAD" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=M" ]]
+        if [[ "$1" == "diff" && "$2" == "--staged" && "$3" == "--name-only" ]]
 
         then
-            printf "%s\n" "${FILTER[@]}"
+            printf "%s\n" "${STAGED[@]}"
+        fi
+
+        if [[ "$1" == "diff" && "$2" == "--name-only" ]]
+
+        then
+            if [[ -f "$COUNT" ]]
+
+            then
+                if [[ -z "$( < "$COUNT" )" ]]
+
+                then
+                    printf "%s\n" "${UNSTAGED[@]}"
+                else
+                    printf "%s\n" "${MODIFIED[@]}"
+                fi
+
+                echo 1 >> $COUNT
+            else
+                printf "%s\n" "${UNSTAGED[@]}"
+            fi
         fi
 
         if [[ "$1" == "add" ]]
@@ -58,7 +81,7 @@ mock()
             echo "Mock : git add ${@:2}"
         fi
 
-        if [[ "$1" == "commit" ]] && [[ "$2" == "-m" ]]
+        if [[ "$1" == "commit" && "$2" == "-m" ]]
 
         then
             echo "Mock : git commit -m $COMMIT"
@@ -95,7 +118,7 @@ it_handles_no_pulled_files()
 
 it_formats_pulled_files()
 {
-    mock "file.001.js file.002.js" "file.001.js"
+    mock "file.001.js file.002.js"
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "local_js_lint file.001.js file.002.js"
@@ -110,50 +133,86 @@ it_handles_no_modified_files()
     mock "file.001.js"
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
-    echo "$output" | grep -q "local_js_lint file.001.js"
-    assert "Should run formatter even if no files are modified afterwards"
     echo "$output" | grep -qv "git add"
-    assert "Should not add files if none were modified after formatting"
-    echo "$output" | grep -qv "git commit"
-    assert "Should not create a commit if no files were modified after formatting"
+    assert "Should not add files when there are no modified files"
 
     unmock
 }
 
 
+it_adds_newly_modified_files_before()
+{
+    count=$( mktemp )
+
+    mock "file.001.js file.002.js" "" "" "file.001.js file.002.js" "" $count
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    echo "$output" | grep -q "Mock : git add file.001.js file.002.js"
+    assert "Should add newly modified files before"
+
+    unmock
+
+    rm $count
+}
+
+
+it_does_not_add_already_modified_files_before()
+{
+    mock "file.001.js file.002.js file.003.js" "" "file.003.js" "file.003.js" "" $count
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    echo "$output" | grep -qv "Mock : git add"
+    assert "Should not add already modified files before"
+
+    unmock
+}
+
+
+it_adds_modified_staged_files_after()
+{
+    count=$( mktemp )
+
+    mock "file.001.js file.002.js file.003.js" "file.003.js" "" "file.003.js" "" $count
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    echo "$output" | grep -q "Mock : git add file.003.js"
+    assert "Should add modified staged files after"
+
+    unmock
+
+    rm $count
+}
+
+
 it_identifies_modified_files()
 {
-    mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
+    count=$( mktemp )
+
+    mock "file.001.js file_002.js file!char&003.js" "" "" "file.001.js file_002.js file!char&003.js" "" $count
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
     assert "Should add only modified files from committed files list"
 
     unmock
-}
 
-
-it_adds_modified_files()
-{
-    mock "file.001.js file.002.js" "file.001.js"
-
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
-    echo "$output" | grep -q "Mock : git add file.001.js"
-    assert "Should add modified files"
-
-    unmock
+    rm $count
 }
 
 
 it_creates_temp_commit()
 {
-    mock "file.001.js file.002.js" "file.001.js" "foo"
+    count=$( mktemp )
+
+    mock "file.001.js file.002.js" "" "" "file.001.js" "foo" $count
 
     output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo "$output" | grep -q "Mock : git commit -m foo"
     assert "Should create a temporary commit"
 
     unmock
+
+    rm $count
 }
 
 
@@ -175,21 +234,29 @@ it_sets_and_unsets_environment_variable()
 
 it_uses_correct_git_commands()
 {
+    count=$( mktemp )
+
     commands=$( mktemp )
 
-    mock "file.001.js file.002.js" "file.001.js" "bar" "$commands"
+    mock "file.001.js file.002.js" "" "" "file.001.js" "bar" $count $commands
 
     ( source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
-    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=ACMRT @{1} HEAD" ]]
+    [[ "$( cat $commands )" =~ "diff --diff-filter=d --name-only @{1} HEAD" ]]
     assert "Should use correct diff-filter command format"
-    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=M" ]]
+    [[ "$( cat $commands )" =~ "diff --staged --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( cat "$commands" )" =~ "add" ]]
+    [[ "$( cat $commands )" =~ "diff --name-only" ]]
+    assert "Should use correct diff command format"
+    [[ "$( cat $commands )" =~ "diff --name-only" ]]
+    assert "Should use correct diff command format"
+    [[ "$( cat $commands )" =~ "add file.001.js" ]]
     assert "Should use correct add command format"
-    [[ "$( cat "$commands" )" =~ "commit -m" ]]
+    [[ "$( cat $commands )" =~ "commit -m" ]]
     assert "Should use correct commit command format"
-#
+
     unmock
 
-    rm "$commands"
+    rm $commands
+
+    rm $count
 }

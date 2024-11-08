@@ -1,21 +1,44 @@
 #!/bin/bash
 
-TARGET_FILE="$0"
+TARGET="$0"
+
 
 while [ -h "$TARGET_FILE" ]
 
 do
-    DIR="$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )"
+    DIR="$( cd -P "$( dirname "$TARGET" )" && pwd )"
 
-    TARGET_FILE="$( readlink "$TARGET_FILE" )"
+    TARGET="$( readlink "$TARGET" )"
 
-    [[ "$TARGET_FILE" != /* ]] && TARGET_FILE="$DIR/$TARGET_FILE"
+    [[ "$TARGET" != /* ]] && TARGET="$DIR/$TARGET"
 done
+
+
+
 
 if [[ "$1" == 'init' ]]
 
 then
-    sh "$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )/../dist/init.sh" "$@"
-else
-    sh "$( cd -P "$( dirname "$TARGET_FILE" )" && pwd )/../dist/run.sh"
+    sh "$( cd -P "$( dirname "$TARGET" )" && pwd )/../dist/init.sh" "$@"
+
+    exit 0
 fi
+
+if [[ "$1" == 'run' ]] || [[ -z "$1" ]]
+
+then
+    sh "$( cd -P "$( dirname "$TARGET" )" && pwd )/../dist/run.sh"
+
+    exit 0
+fi
+
+if [[ "$1" == '-h' ]] || [[ "$1" == '--help' ]]
+
+then
+    sh "$( cd -P "$( dirname "$TARGET" )" && pwd )/../dist/help.sh"
+
+    exit 0
+fi
+
+
+echo -e "\n\033[1;30m[ Flint ] Command \"$1\" not found. Run \"-h\" or \"--help\" for more options.\033[0m\n"

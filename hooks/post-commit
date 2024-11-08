@@ -8,7 +8,7 @@ then
     then
         format_for_local "$FLINT_CONFIG" "$committed"
 
-        modified=$( git diff --name-only --diff-filter=M )
+        modified=$( git diff --name-only )
 
         files=()
 

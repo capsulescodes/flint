@@ -6,7 +6,7 @@ function format_for_local
 
     local linters=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
 
-    echo "$linters" | while IFS= read -r linter
+    while IFS= read -r linter
 
     do
         if [[ -z "$linter" ]]
@@ -22,7 +22,7 @@ function format_for_local
         if [[ -z "$binary" ]] || [[ -z "$command" ]]
 
         then
-            echo "\n\033[1;33mWarning : No binary or local command associated with a linter. Skipping.\033[0m\n"
+            printf "\033[1;33mWarning : No binary or local command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
@@ -39,10 +39,10 @@ function format_for_local
             then
                 eval "$binary" "$command" "$filtered"
             else
-                echo "\n\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+                printf "\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
             fi
         fi
-    done
+    done <<< "$linters"
 }
 
 
@@ -55,7 +55,7 @@ function format_for_remote
 
     local linters=$( echo "$( tr -d '\n' < "$config" )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
 
-    echo "$linters" | while IFS= read -r linter
+    while IFS= read -r linter
 
     do
         if [[ -z "$linter" ]]
@@ -71,7 +71,7 @@ function format_for_remote
         if [[ -z "$binary" ]] || [[ -z "$command" ]]
 
         then
-            echo "\n\033[1;33mWarning : No binary or remote command associated with a linter. Skipping.\033[0m\n"
+            printf "\033[1;33mWarning : No binary or remote command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
@@ -88,8 +88,8 @@ function format_for_remote
             then
                 eval "$binary" "$command" "$filtered"
             else
-                echo "\n\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+                printf "\033[1;33mWarning : Binary \""$binary"\" not found. Install it and run 'flint run'. Skipping.\033[0m\n"
             fi
         fi
-    done
+    done <<< "$linters"
 }

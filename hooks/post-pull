@@ -1,13 +1,19 @@
-pulled=$( git diff --name-only --diff-filter=ACMRT @{1} HEAD )
+pulled=$( git diff --diff-filter=d --name-only @{1} HEAD )
 
 if [ -n "$pulled" ]
 
 then
+    staged=$( git diff --staged --name-only )
+
+    unstaged=$( git diff --name-only )
+
     format_for_local "$FLINT_CONFIG" "$pulled"
 
-    modified=$( git diff --name-only --diff-filter=M )
+    modified=$( git diff --name-only )
 
-    files=()
+    before=()
+
+    after=()
 
     while IFS= read -r file
 
@@ -15,20 +21,37 @@ then
         if echo "$modified" | grep -Fqx "$file"
 
         then
-            files+=( "$file" )
+            if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
+
+            then
+                before+=( "$file" )
+            fi
+
+            if echo "$staged" | grep -Fqx "$file"
+
+            then
+                after+=( "$file" )
+            fi
         fi
     done <<< "$pulled"
 
 
-    if [ ${#files[@]} -gt 0 ]
+    if [ ${#before[@]} -gt 0 ]
 
     then
-        git add "${files[@]}"
+        git add "${before[@]}"
 
         export FLINT_FIX_TEMP_COMMIT=1
 
         git commit -m "FLINT-FIX-TEMP-COMMIT" --quiet
 
         unset FLINT_FIX_TEMP_COMMIT
+    fi
+
+
+    if [ ${#after[@]} -gt 0 ]
+
+    then
+        git add "${after[@]}"
     fi
 fi

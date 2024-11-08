@@ -6,14 +6,14 @@ then
     git reset --soft "$manual" --quiet
 fi
 
-staged=$( git diff --cached --name-only --diff-filter=ACMR )
+staged=$( git diff --staged --name-only --diff-filter=d )
 
 if [ -n "$staged" ]
 
 then
     format_for_remote "$FLINT_CONFIG" "$staged"
 
-    modified=$( git diff --name-only --diff-filter=M )
+    modified=$( git diff --name-only )
 
     files=()
 

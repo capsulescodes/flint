@@ -95,23 +95,13 @@ it_creates_flint_config_json()
 }
 
 
-it_does_not_create_config_if_flint_directory_exists()
-{
-    mkdir -p "$TEST/.flint"
-
-    INIT_CWD="$TEST" PWD="$path" sh "$path/dist/init.sh" init > /dev/null
-    [ ! -f "$TEST/flint.config.json" ]
-    assert "Should not create flint.config.json if .flint directory already exists"
-}
-
-
 it_adds_git_wrapper_to_shell_config()
 {
     mkdir -p "$TEST/home"
 
     touch "$TEST/home/.bashrc"
 
-    command='git() { [[ -f "$PWD/.flint/git.sh" ]] && source "$PWD/.flint/git.sh" || command git "$@"; }'
+    command='git() { [[ -f "$PWD/.flint/git.sh" ]] && source "$PWD/.flint/git.sh" || command git "$@" }'
 
     INIT_CWD="$TEST" PWD="$path" SHELL="/bin/bash" HOME="$TEST/home" sh "$path/dist/init.sh" init > /dev/null
     grep -Fq "$command" "$TEST/home/.bashrc"

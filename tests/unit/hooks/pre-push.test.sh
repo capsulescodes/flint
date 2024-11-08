@@ -24,13 +24,13 @@ mock()
 
     git()
     {
-        if [[ "$1" == "rev-list" ]] && [[ "$2" == "HEAD" ]] && [[ "$3" == "--invert-grep" ]]
+        if [[ "$1" == "rev-list" && "$2" == "HEAD" && "$3" == "--invert-grep" ]]
 
         then
             printf "%s\n" "${LIST[@]}"
         fi
 
-        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]] && [[ "$4" == "--quiet" ]]
+        if [[ "$1" == "reset" && "$2" == "--soft" && "$4" == "--quiet" ]]
 
         then
             echo "Mock : git reset --soft $3 --quiet"

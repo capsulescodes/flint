@@ -40,13 +40,13 @@ mock()
 
     git()
     {
-        if [[ "$1" == "diff-tree" ]] && [[ "$2" == "--no-commit-id" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "-r" ]] && [[ "$5" == "HEAD" ]]
+        if [[ "$1" == "diff-tree" && "$2" == "--no-commit-id" && "$3" == "--name-only" && "$4" == "-r" && "$5" == "HEAD" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=M" ]]
+        if [[ "$1" == "diff" && "$2" == "--name-only" ]]
 
         then
             printf "%s\n" "${FILTER[@]}"
@@ -58,7 +58,7 @@ mock()
             echo "Mock : git add ${@:2}"
         fi
 
-        if [[ "$1" == "commit" ]] && [[ "$2" == "-m" ]]
+        if [[ "$1" == "commit" && "$2" == "-m" ]]
 
         then
             echo "Mock : git commit -m $COMMIT"
@@ -208,7 +208,7 @@ it_uses_correct_git_commands()
     ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
     [[ "$( cat "$commands" )" =~ "diff-tree --no-commit-id --name-only -r HEAD" ]]
     assert "Should use correct diff-tree command format"
-    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=M" ]]
+    [[ "$( cat "$commands" )" =~ "diff --name-only" ]]
     assert "Should use correct diff command format"
     [[ "$( cat "$commands" )" =~ "add file.001.js file.002.js" ]]
     assert "Should use correct add command format"

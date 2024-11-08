@@ -25,13 +25,13 @@ mock()
 
     git()
     {
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "--diff-filter=ACMR" ]]
+        if [[ "$1" == "diff" && "$2" == "--staged" && "$3" == "--name-only" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "commit" ]] && [[ "$2" == "-m" ]]
+        if [[ "$1" == "commit" && "$2" == "-m" ]]
 
         then
             echo "Mock : git commit -m $COMMIT"
@@ -125,7 +125,7 @@ it_uses_correct_git_commands()
     mock "file.001.js file.002.js file.003.php" "QUX" "$commands"
 
     ( source "$TEST/.flint/hooks/post-push" > /dev/null 2>&1 )
-    [[ "$( cat "$commands" )" =~ "diff --cached --name-only" ]]
+    [[ "$( cat "$commands" )" =~ "diff --staged --name-only" ]]
     assert "Should use correct diff command format"
     [[ "$( cat "$commands" )" =~ "commit -m" ]]
     assert "Should use correct commit command format"

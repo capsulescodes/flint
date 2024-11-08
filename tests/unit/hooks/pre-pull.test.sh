@@ -40,25 +40,25 @@ mock()
 
     git()
     {
-        if [[ "$1" == "rev-list" ]] && [[ "$2" == "HEAD" ]] && [[ "$3" == "--invert-grep" ]]
+        if [[ "$1" == "rev-list" && "$2" == "HEAD" && "$3" == "--invert-grep" ]]
 
         then
             echo "$HEAD"
         fi
 
-        if [[ "$1" == "reset" ]] && [[ "$2" == "--soft" ]] && [[ "$4" == "--quiet" ]]
+        if [[ "$1" == "reset" && "$2" == "--soft" && "$4" == "--quiet" ]]
 
         then
             echo "Mock : git reset --soft $3 --quiet"
         fi
 
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--cached" ]] && [[ "$3" == "--name-only" ]] && [[ "$4" == "--diff-filter=ACMR" ]]
+        if [[ "$1" == "diff" && "$2" == "--staged" && "$3" == "--name-only" && "$4" == "--diff-filter=d" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
         fi
 
-        if [[ "$1" == "diff" ]] && [[ "$2" == "--name-only" ]] && [[ "$3" == "--diff-filter=M" ]]
+        if [[ "$1" == "diff" && "$2" == "--name-only" ]]
 
         then
             printf "%s\n" "${FILTER[@]}"
@@ -198,9 +198,9 @@ it_uses_correct_git_commands()
     mock "file.001.js file.002.js" "file.001.js" "bar" "$commands"
 
     ( source "$TEST/.flint/hooks/pre-pull" > /dev/null 2>&1 )
-    [[ "$( cat "$commands" )" =~ "diff --cached --name-only --diff-filter=ACMR" ]]
+    [[ "$( cat "$commands" )" =~ "diff --staged --name-only --diff-filter=d" ]]
     assert "Should use correct diff-filter command format"
-    [[ "$( cat "$commands" )" =~ "diff --name-only --diff-filter=M" ]]
+    [[ "$( cat "$commands" )" =~ "diff --name-only" ]]
     assert "Should use correct diff command format"
     [[ "$( cat "$commands" )" =~ "add file.001.js" ]]
     assert "Should use correct add command format"

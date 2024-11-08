@@ -11,9 +11,9 @@ passed=0
 for file in tests/**/**/*.test.sh
 
 do
-    source "$file"
+    source $file
 
-    functions=( $( awk '/^[[:space:]]*[^#[:space:]]+[[:space:]]*\(\)/ && !/=/ {print $1}' "$file" | sed 's/()//' ) )
+    functions=( $( awk '/^[[:space:]]*[^#[:space:]]+[[:space:]]*\(\)/ && !/=/ {print $1}' $file | sed 's/()//' ) )
 
 
     tests=()
@@ -88,7 +88,7 @@ do
 
 
 
-    run "$results" "$file"
+    run $results $file
 
 
     for function in "${functions[@]}"
@@ -98,4 +98,4 @@ do
     done
 done
 
-summary $total $passed
+summarize $total $passed

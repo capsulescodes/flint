@@ -1,6 +1,3 @@
-#!/bin/bash
-
-
 if [ ! -f "$config" ]
 
 then
