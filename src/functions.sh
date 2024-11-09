@@ -15,9 +15,9 @@ function format_for_local
             continue
         fi
 
-        binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
+        local binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
-        command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"local"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
+        local command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"local"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
         if [[ -z "$binary" ]] || [[ -z "$command" ]]
 
@@ -27,9 +27,9 @@ function format_for_local
             continue
         fi
 
-        extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
+        local extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
+        local filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
 
         if [[ -n "$filtered" ]]
 
@@ -64,9 +64,9 @@ function format_for_remote
             continue
         fi
 
-        binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
+        local binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
-        command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"remote"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
+        local command=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"remote"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
         if [[ -z "$binary" ]] || [[ -z "$command" ]]
 
@@ -76,9 +76,9 @@ function format_for_remote
             continue
         fi
 
-        extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
+        local extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
+        local filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
 
         if [[ -n "$filtered" ]]
 

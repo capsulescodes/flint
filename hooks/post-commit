@@ -1,16 +1,16 @@
 if [ -z $FLINT_FIX_TEMP_COMMIT ]
 
 then
-    local committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
+    committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
 
     if [ -n "$committed" ]
 
     then
         format_for_local $FLINT_CONFIG "$committed"
 
-        local modified=$( git diff --name-only )
+        modified=$( git diff --name-only )
 
-        local files=()
+        files=()
 
         while IFS= read -r file
 

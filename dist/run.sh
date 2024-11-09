@@ -42,17 +42,17 @@ fi
 
 
 
-local staged=$( git diff --staged --name-only )
+staged=$( git diff --staged --name-only )
 
-local unstaged=$( git diff --name-only )
+unstaged=$( git diff --name-only )
 
 format_for_local $config
 
-local modified=$( git diff --name-only )
+modified=$( git diff --name-only )
 
-local before=()
+before=()
 
-local after=()
+after=()
 
 while IFS= read -r file
 
