@@ -1,17 +1,20 @@
 #!/bin/bash
 
-TARGET="$0"
+target="$0"
 
 
-while [ -h "$TARGET" ]
+while [ -h "$target" ]
 
 do
-    DIR="$( cd -P "$( dirname $TARGET )" && pwd )"
+    directory="$( cd -P "$( dirname $target )" && pwd )"
 
-    TARGET="$( readlink "$TARGET" )"
+    target="$( readlink "$target" )"
 
-    [[ "$TARGET" != /* ]] && TARGET="$DIR/$TARGET"
+    [[ "$target" != /* ]] && target="$directory/$target"
 done
+
+
+path="$( cd -P "$( dirname $target )" && pwd )/../dist"
 
 
 
@@ -19,7 +22,7 @@ done
 if [[ $1 == 'init' ]]
 
 then
-    sh "$( cd -P "$( dirname $TARGET )" && pwd )/../dist/init.sh" $@
+    sh "$path/init.sh" $@
 
     exit 0
 fi
@@ -27,7 +30,7 @@ fi
 if [[ $1 == 'run' ]] || [[ -z $1 ]]
 
 then
-    sh "$( cd -P "$( dirname $TARGET )" && pwd )/../dist/run.sh"
+    sh "$path/run.sh"
 
     exit 0
 fi
@@ -35,10 +38,10 @@ fi
 if [[ $1 == '-h' ]] || [[ $1 == '--help' ]]
 
 then
-    sh "$( cd -P "$( dirname $TARGET )" && pwd )/../dist/help.sh"
+    sh "$path/help.sh"
 
     exit 0
 fi
 
 
-echo -e "\n\033[1;30m[ Flint ] Command \"$1\" not found. Run \"-h\" or \"--help\" for more options.\033[0m\n"
+printf "\n\033[1;30m[ Flint ] Command \"$1\" not found. Run \"-h\" or \"--help\" for more options.\033[0m\n\n"

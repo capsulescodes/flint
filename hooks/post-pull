@@ -1,33 +1,33 @@
-pulled=$( git diff --diff-filter=d --name-only @{1} HEAD )
+local pulled=$( git diff --diff-filter=d --name-only @{1} HEAD )
 
 if [ -n "$pulled" ]
 
 then
-    staged=$( git diff --staged --name-only )
+    local staged=$( git diff --staged --name-only )
 
-    unstaged=$( git diff --name-only )
+    local unstaged=$( git diff --name-only )
 
     format_for_local $FLINT_CONFIG "$pulled"
 
-    modified=$( git diff --name-only )
+    local modified=$( git diff --name-only )
 
-    before=()
+    local before=()
 
-    after=()
+    local after=()
 
     while IFS= read -r file
 
     do
-        if echo "$modified" | grep -Fqx $file
+        if echo "$modified" | grep -Fqx "$file"
 
         then
-            if ( ! echo "$staged" | grep -Fqx $file ) && ( ! echo "$unstaged" | grep -Fqx $file )
+            if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
 
             then
                 before+=( $file )
             fi
 
-            if echo "$staged" | grep -Fqx $file
+            if echo "$staged" | grep -Fqx "$file"
 
             then
                 after+=( $file )

@@ -7,7 +7,7 @@ Write code in your own style while maintaining team consistency.
 
 <br>
 
-Flint empowers developers to code using their personal style and formatting preferences locally, while ensuring that the codebase remains consistent with the team's standards. By wrapping Git commands with its own wrapper and custom hooks, Flint automatically formats code during pull and push operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
+Flint empowers developers to use their personal style and formatting preferences locally, while ensuring consistency in the remote codebase. By wrapping Git commands with its own wrapper and custom hooks, Flint automatically formats code during pull and push operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
 
 <br>
 

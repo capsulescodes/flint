@@ -1,4 +1,4 @@
-staged=$( git diff --staged --name-only )
+local staged=$( git diff --staged --name-only )
 
 if [ -n "$staged" ]
 

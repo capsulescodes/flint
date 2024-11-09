@@ -67,7 +67,7 @@ it_handles_missing_source_files()
     cp "$path/src/helpers.sh" "$TEST/src/helpers.sh"
 
     output=$( INIT_CWD=$TEST PWD=$path sh "$TEST/dist/init.sh" init 2>&1 ) > /dev/null
-    echo $output | grep -q "Error: Required files not found"
+    echo $output | grep -q "Required files not found"
     assert "Should error when required files are missing"
 
     rm -rf "$TEST/dist"

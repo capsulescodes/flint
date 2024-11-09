@@ -10,7 +10,7 @@ destination="${INIT_CWD:+$INIT_CWD/}.flint"
 if [[ ! -d "$destination" || ! -f "$destination/git.sh" ]]
 
 then
-    printf "\n\033[1;33m[ Flint ] Flint must be configured first. Run 'flint init' to proceed.\033[0m\n"
+    printf "\n\033[1;33m[ Flint ] Flint must be configured first. Run 'flint init' to proceed.\033[0m\n\n"
 
     exit 0
 fi
@@ -42,28 +42,28 @@ fi
 
 
 
-staged=$( git diff --staged --name-only )
+local staged=$( git diff --staged --name-only )
 
-unstaged=$( git diff --name-only )
+local unstaged=$( git diff --name-only )
 
 format_for_local $config
 
-modified=$( git diff --name-only )
+local modified=$( git diff --name-only )
 
-before=()
+local before=()
 
-after=()
+local after=()
 
 while IFS= read -r file
 
 do
-    if ( ! echo "$staged" | grep -Fqx $file ) && ( ! echo "$unstaged" | grep -Fqx $file )
+    if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
 
     then
         before+=( $file )
     fi
 
-    if echo "$staged" | grep -Fqx $file
+    if echo "$staged" | grep -Fqx "$file"
 
     then
         after+=( $file )

@@ -18,7 +18,7 @@ then
     if [[ ! -f "$source/src/wrapper.sh" && ! -d "$source/hooks" ]]
 
     then
-        printf "\n\033[0;31mError: Required files not found at [ $source ].\033[0m\n"
+        printf "\n\033[0;31m[ Flint ] Required files not found at [ $source ].\033[0m\n"
 
         exit 1
     fi
@@ -123,4 +123,6 @@ then
     else
         printf "\033[1;36m[ Flint ] Git wrapper function already exists in '"$( basename $profile )"' file. Skipping.\033[0m\n\n"
     fi
+else
+    printf "\033[1;33m[ Flint ] Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually.\033[0m\n\n"
 fi
