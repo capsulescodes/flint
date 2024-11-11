@@ -29,6 +29,11 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/functions.sh"
 
 
 
+staged=$( git diff --staged --name-only )
+
+unstaged=$( git diff --name-only )
+
+
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
 
 if [ -n $manual ]
@@ -37,12 +42,6 @@ then
     git reset --soft $manual --quiet
 fi
 
-
-
-
-staged=$( git diff --staged --name-only )
-
-unstaged=$( git diff --name-only )
 
 format_for_local $config
 
