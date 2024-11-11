@@ -3,9 +3,6 @@
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/helpers.sh"
 
 
-[[ $INIT_CWD == $PWD ]] && exit 0
-
-
 
 
 destination="${INIT_CWD:+$INIT_CWD/}.flint"

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-[[ $INIT_CWD == $PWD ]] && exit 0
-
 
 
 

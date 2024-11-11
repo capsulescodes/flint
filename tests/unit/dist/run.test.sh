@@ -107,14 +107,6 @@ unmock()
 
 
 
-it_prevents_double_initialization()
-{
-    INIT_CWD=$TEST sh "$path/dist/run.sh" > /dev/null
-    [ $? -eq 0 ]
-    assert "Should exit cleanly when INIT_CWD equals PWD"
-}
-
-
 it_exits_if_destination_does_not_exist()
 {
     mv "$TEST/.flint" "$TEST/bak"
