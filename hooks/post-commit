@@ -1,7 +1,7 @@
 if [ -z $FLINT_FIX_TEMP_COMMIT ]
 
 then
-    committed=$( git diff-tree --no-commit-id --name-only -r HEAD )
+    committed=$( git diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD )
 
     if [ -n "$committed" ]
 

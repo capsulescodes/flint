@@ -40,7 +40,7 @@ mock()
 
     git()
     {
-        if [[ $1 == "diff-tree" && $2 == "--no-commit-id" && $3 == "--name-only" && $4 == "-r" && $5 == "HEAD" ]]
+        if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
@@ -206,7 +206,7 @@ it_uses_correct_git_commands()
     mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js" "bar" $commands
 
     ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
-    [[ "$( cat $commands )" =~ "diff-tree --no-commit-id --name-only -r HEAD" ]]
+    [[ "$( cat $commands )" =~ "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
     assert "Should use correct diff-tree command format"
     [[ "$( cat $commands )" =~ "diff --name-only" ]]
     assert "Should use correct diff command format"

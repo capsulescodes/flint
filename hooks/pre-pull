@@ -6,7 +6,7 @@ then
     git reset --soft $manual --quiet
 fi
 
-staged=$( git diff --staged --name-only --diff-filter=d )
+staged=$( git diff --diff-filter=d --staged --name-only )
 
 if [ -n "$staged" ]
 

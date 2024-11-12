@@ -33,7 +33,6 @@ staged=$( git diff --staged --name-only )
 
 unstaged=$( git diff --name-only )
 
-
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
 
 if [ -n $manual ]
@@ -42,14 +41,36 @@ then
     git reset --soft $manual --quiet
 fi
 
-
 format_for_local $config
+
+reset=$( git diff --staged --name-only )
 
 modified=$( git diff --name-only )
 
 before=()
 
 after=()
+
+while IFS= read -r file
+
+do
+    echo $file
+
+    if ! echo "$staged" | grep -Fqx "$file"
+
+    then
+        before+=( $file )
+    fi
+
+    if echo "$staged" | grep -Fqx "$file"
+
+    then
+        git restore --staged $file
+
+        after+=( $file )
+    fi
+done <<< "$reset"
+
 
 while IFS= read -r file
 

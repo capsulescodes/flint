@@ -52,7 +52,7 @@ mock()
             echo "Mock : git reset --soft $3 --quiet"
         fi
 
-        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" && $4 == "--diff-filter=d" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
             printf "%s\n" "${DIFF[@]}"
@@ -210,7 +210,7 @@ it_uses_correct_git_commands()
     mock "file.001.js file.002.js" "file.001.js" "bar" $commands
 
     ( source "$TEST/.flint/hooks/pre-commit" > /dev/null 2>&1 )
-    [[ "$( cat $commands )" =~ "diff --staged --name-only --diff-filter=d" ]]
+    [[ "$( cat $commands )" =~ "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff-filter command format"
     [[ "$( cat $commands )" =~ "diff --name-only" ]]
     assert "Should use correct diff command format"

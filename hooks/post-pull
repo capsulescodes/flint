@@ -1,12 +1,12 @@
+staged=$( git diff --staged --name-only )
+
+unstaged=$( git diff --name-only )
+
 pulled=$( git diff --diff-filter=d --name-only @{1} HEAD )
 
 if [ -n "$pulled" ]
 
 then
-    staged=$( git diff --staged --name-only )
-
-    unstaged=$( git diff --name-only )
-
     format_for_local $FLINT_CONFIG "$pulled"
 
     modified=$( git diff --name-only )
