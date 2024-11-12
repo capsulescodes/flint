@@ -15,7 +15,7 @@ then
         while IFS= read -r file
 
         do
-            if echo "$modified" | grep -Fqx "$file"
+            if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file"
 
             then
                 files+=( $file )

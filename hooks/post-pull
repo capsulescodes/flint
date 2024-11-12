@@ -18,7 +18,7 @@ then
     while IFS= read -r file
 
     do
-        if echo "$modified" | grep -Fqx "$file"
+        if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file"
 
         then
             if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )

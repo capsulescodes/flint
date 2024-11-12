@@ -54,20 +54,22 @@ after=()
 while IFS= read -r file
 
 do
-    echo $file
-
-    if ! echo "$staged" | grep -Fqx "$file"
+    if [ -n "$file" ] && echo "$reset" | grep -Fqx "$file"
 
     then
-        before+=( $file )
-    fi
+        if ! echo "$staged" | grep -Fqx "$file"
 
-    if echo "$staged" | grep -Fqx "$file"
+        then
+            before+=( $file )
+        fi
 
-    then
-        git restore --staged $file
+        if echo "$staged" | grep -Fqx "$file"
 
-        after+=( $file )
+        then
+            git restore --staged $file --quiet
+
+            after+=( $file )
+        fi
     fi
 done <<< "$reset"
 
@@ -75,16 +77,20 @@ done <<< "$reset"
 while IFS= read -r file
 
 do
-    if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
+    if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file"
 
     then
-        before+=( $file )
-    fi
+        if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
 
-    if echo "$staged" | grep -Fqx "$file"
+        then
+            before+=( $file )
+        fi
 
-    then
-        after+=( $file )
+        if echo "$staged" | grep -Fqx "$file"
+
+        then
+            after+=( $file )
+        fi
     fi
 done <<< "$modified"
 
