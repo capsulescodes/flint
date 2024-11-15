@@ -96,9 +96,9 @@ it_uses_correct_git_commands()
     mock "baz" $commands
 
     ( source "$TEST/.flint/hooks/pre-push" > /dev/null 2>&1 )
-    [[ "$( cat $commands )" =~ "rev-list HEAD --invert-grep" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
     assert "Should use correct rev-list command format"
-    [[ "$( cat $commands )" =~ "reset --soft" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "reset --soft baz --quiet" ]]
     assert "Should use correct reset command format"
 
     unmock

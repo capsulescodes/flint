@@ -9,7 +9,10 @@ fi
 
 
 
-if [ -f "$config" ] && [[ -f "$PWD/$hooks/pre-$1" ]]
+path=$( [[ "$hooks" == /* ]] && echo "$hooks" || echo "$PWD/$hooks" )
+
+
+if [ -f "$config" ] && [[ -f "$path/pre-$1" ]]
 
 then
     export FLINT_CONFIG=$config
@@ -33,7 +36,7 @@ return=$?
 
 
 
-if [ -f "$config" ] && [[ -f "$PWD/$hooks/post-$1" ]]
+if [ -f "$config" ] && [[ -f "$path/post-$1" ]]
 
 then
     export FLINT_CONFIG=$config

@@ -1,19 +1,19 @@
 {
     "linters" : [
         {
-            "extensions" : [ "js" ],
+            "extensions" : [ "foo" ],
             "binary" : "echo",
             "commands" : {
-                "local" : "local_js_lint",
-                "remote" : "remote_js_lint"
+                "local" : "local_foo_lint",
+                "remote" : "remote_foo_lint"
             }
         },
         {
-            "extensions" : [ "php" ],
+            "extensions" : [ "bar" ],
             "binary" : "echo",
             "commands" : {
-                "local" : "local_php_lint",
-                "remote" : "remote_php_lint"
+                "local" : "local_bar_lint",
+                "remote" : "remote_bar_lint"
             }
         }
     ]

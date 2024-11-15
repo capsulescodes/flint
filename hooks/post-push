@@ -1,4 +1,4 @@
-staged=$( git diff --staged --name-only )
+staged=$( git diff --diff-filter=d --staged --name-only )
 
 if [ -n "$staged" ]
 

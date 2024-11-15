@@ -32,7 +32,7 @@ then
 
     hooks="$( get_relative_path $INIT_CWD $source )/hooks"
 
-    if [[ $2 == "--with-hooks" ]]
+    if [[ $@ =~ "--with-hooks" ]]
 
     then
         if [ ! -d "$destination/hooks" ]

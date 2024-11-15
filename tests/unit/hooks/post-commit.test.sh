@@ -6,7 +6,7 @@ beforeAll()
 
     cp "$PWD/hooks/post-commit" "$TEST/.flint/hooks/post-commit"
 
-    cp "$PWD/tests/fixtures/config.004.json" "$TEST/flint.config.json"
+    cp "$PWD/tests/fixtures/config.003.json" "$TEST/flint.config.json"
 
     cp "$PWD/tests/fixtures/echo" "$TEST/echo"
 
@@ -95,10 +95,10 @@ it_skips_when_temp_commit()
 
 it_formats_committed_files()
 {
-    mock "file.001.js file.002.js" "file.001.js"
+    mock "file.001.foo file.002.foo" "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_js_lint file.001.js file.002.js"
+    echo $output | grep -q "local_foo_lint file.001.foo file.002.foo"
     assert "Should run local lint command for committed files"
 
     unmock
@@ -107,10 +107,10 @@ it_formats_committed_files()
 
 it_adds_modified_files()
 {
-    mock "file.001.js file.002.js" "file.001.js"
+    mock "file.001.foo file.002.foo" "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "Mock : git add file.001.js"
+    echo $output | grep -q "Mock : git add file.001.foo"
     assert "Should add modified files"
 
     unmock
@@ -119,7 +119,7 @@ it_adds_modified_files()
 
 it_creates_temp_commit()
 {
-    mock "file.001.js file.002.js" "file.001.js" "foo"
+    mock "file.001.foo file.002.foo" "file.001.foo" "foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
     echo $output | grep -q "Mock : git commit -m foo"
@@ -143,10 +143,10 @@ it_handles_no_committed_files()
 
 it_handles_no_modified_files_after_formatting()
 {
-    mock "file.001.js"
+    mock "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_js_lint file.001.js"
+    echo $output | grep -q "local_foo_lint file.001.foo"
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -qv "git add"
     assert "Should not add files if none were modified after formatting"
@@ -159,10 +159,10 @@ it_handles_no_modified_files_after_formatting()
 
 it_identifies_modified_files()
 {
-    mock "file.001.js file_002.js file!char&003.js" "file.001.js file_002.js file!char&003.js"
+    mock "file.001.foo file_002.foo file!char&003.foo" "file.001.foo file_002.foo file!char&003.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "Mock : git add file.001.js file_002.js file!char&003.js"
+    echo $output | grep -q "Mock : git add file.001.foo file_002.foo file!char&003.foo"
     assert "Should add only modified files from committed files list"
 
     unmock
@@ -171,12 +171,12 @@ it_identifies_modified_files()
 
 it_processes_multiple_files()
 {
-    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js"
+    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_js_lint file.001.js file.002.js"
+    echo $output | grep -q "local_foo_lint file.001.foo file.002.foo"
     assert "Should process all committed files"
-    echo $output | grep -q "Mock : git add file.001.js file.002.js"
+    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should add all modified files"
 
     unmock
@@ -185,7 +185,7 @@ it_processes_multiple_files()
 
 it_sets_and_unsets_environment_variable()
 {
-    mock "file.001.js file.002.js" "file.001.js"
+    mock "file.001.foo file.002.foo" "file.001.foo"
 
     [ -z $FLINT_FIX_TEMP_COMMIT ]
     assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
@@ -203,16 +203,16 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.js file.002.js file.003.php" "file.001.js file.002.js" "bar" $commands
+    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo" "bar" $commands
 
     ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
-    [[ "$( cat $commands )" =~ "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
     assert "Should use correct diff-tree command format"
-    [[ "$( cat $commands )" =~ "diff --name-only" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( cat $commands )" =~ "add file.001.js file.002.js" ]]
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "add file.001.foo file.002.foo" ]]
     assert "Should use correct add command format"
-    [[ "$( cat $commands )" =~ "commit -m" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" =~ "commit -m" ]]
     assert "Should use correct commit command format"
 
     unmock

@@ -1,5 +1,6 @@
 source "$PWD/tests/helpers.sh"
 
+source "$PWD/tests/mocker.sh"
 
 
 
