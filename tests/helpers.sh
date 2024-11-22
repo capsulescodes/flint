@@ -4,6 +4,7 @@ assert()
 
     then
         code=$1
+        line="${BASH_LINENO[0]}"
     fi
 }
 
@@ -21,7 +22,7 @@ test()
 
         return 0
     else
-        printf "\033[1;31m\xE2\x9C\x96\033[1;30m $1 \033[0m-\033[1;31m $code \033[0m\n"
+        printf "\033[1;31m\xE2\x9C\x96\033[1;30m $1 \033[0m-\033[1;31m $code : at line $line \033[0m\n"
 
         return 1
     fi

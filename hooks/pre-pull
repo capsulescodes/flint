@@ -1,4 +1,4 @@
-manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
+manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
 if [ -n "$manual" ]
 
@@ -6,12 +6,16 @@ then
     git reset --soft $manual --quiet
 fi
 
+unstaged=$( git diff --name-only )
+
 staged=$( git diff --diff-filter=d --staged --name-only )
 
-if [ -n "$staged" ]
+combined=$( ( echo "$unstaged"; echo "$staged" ) | sort | uniq )
+
+if [ -n "$combined" ]
 
 then
-    format_for_remote $FLINT_CONFIG "$staged"
+    eval_for_remote $FLINT_CONFIG "$combined"
 
     modified=$( git diff --name-only )
 
@@ -20,12 +24,12 @@ then
     while IFS= read -r file
 
     do
-        if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file"
+        if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file"
 
         then
             files+=( $file )
         fi
-    done <<< "$staged"
+    done <<< "$combined"
 
 
     if [ ${#files[@]} -gt 0 ]

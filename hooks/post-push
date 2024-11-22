@@ -3,9 +3,9 @@ staged=$( git diff --diff-filter=d --staged --name-only )
 if [ -n "$staged" ]
 
 then
-    export FLINT_FIX_TEMP_COMMIT=1
+    export FLINT_TEMPORARY_COMMIT=1
 
-    git commit -m "FLINT-FIX-TEMP-COMMIT" --quiet
+    git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
 
-    unset FLINT_FIX_TEMP_COMMIT
+    unset FLINT_TEMPORARY_COMMIT
 fi

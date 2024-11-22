@@ -83,13 +83,13 @@ it_sets_and_unsets_environment_variable()
 {
     mock "file.001.foo file.002.foo" "bar"
 
-    [ -z $FLINT_FIX_TEMP_COMMIT ]
-    assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
     ( source "$TEST/.flint/hooks/post-push" > /dev/null 2>&1 )
 
-    [ -z $FLINT_FIX_TEMP_COMMIT ]
-    assert "FLINT_FIX_TEMP_COMMIT should be unset after running the hook"
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
 
     unmock
 }

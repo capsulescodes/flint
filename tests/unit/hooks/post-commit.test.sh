@@ -83,13 +83,13 @@ unmock()
 
 it_skips_when_temp_commit()
 {
-    export FLINT_FIX_TEMP_COMMIT=1
+    export FLINT_TEMPORARY_COMMIT=1
 #
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
     [ -z $output ]
-    assert "Should skip execution when FLINT_FIX_TEMP_COMMIT is set"
+    assert "Should skip execution when FLINT_TEMPORARY_COMMIT is set"
 #
-    unset FLINT_FIX_TEMP_COMMIT
+    unset FLINT_TEMPORARY_COMMIT
 }
 
 
@@ -98,7 +98,7 @@ it_formats_committed_files()
     mock "file.001.foo file.002.foo" "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_foo_lint file.001.foo file.002.foo"
+    echo $output | grep -q "local_foo file.001.foo file.002.foo"
     assert "Should run local lint command for committed files"
 
     unmock
@@ -146,7 +146,7 @@ it_handles_no_modified_files_after_formatting()
     mock "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_foo_lint file.001.foo"
+    echo $output | grep -q "local_foo file.001.foo"
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -qv "git add"
     assert "Should not add files if none were modified after formatting"
@@ -174,7 +174,7 @@ it_processes_multiple_files()
     mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_foo_lint file.001.foo file.002.foo"
+    echo $output | grep -q "local_foo file.001.foo file.002.foo"
     assert "Should process all committed files"
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should add all modified files"
@@ -187,13 +187,13 @@ it_sets_and_unsets_environment_variable()
 {
     mock "file.001.foo file.002.foo" "file.001.foo"
 
-    [ -z $FLINT_FIX_TEMP_COMMIT ]
-    assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
     ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
 
-    [ -z $FLINT_FIX_TEMP_COMMIT ]
-    assert "FLINT_FIX_TEMP_COMMIT should be unset after running the hook"
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
 
     unmock
 }

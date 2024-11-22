@@ -89,13 +89,13 @@ unmock()
 
 it_skips_when_temp_commit()
 {
-    export FLINT_FIX_TEMP_COMMIT=1
+    export FLINT_TEMPORARY_COMMIT=1
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
     [ -z $output ]
-    assert "Should skip execution when FLINT_FIX_TEMP_COMMIT is set"
+    assert "Should skip execution when FLINT_TEMPORARY_COMMIT is set"
 
-    unset FLINT_FIX_TEMP_COMMIT
+    unset FLINT_TEMPORARY_COMMIT
 }
 
 
@@ -154,7 +154,7 @@ it_formats_staged_files()
     mock "file.001.foo file.002.foo" "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
-    echo $output | grep -q "remote_foo_lint file.001.foo file.002.foo"
+    echo $output | grep -q "remote_foo file.001.foo file.002.foo"
     assert "Should run remote lint command for staged files"
 
     unmock
@@ -166,7 +166,7 @@ it_handles_no_modified_files()
     mock "file.001.foo"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
-    echo $output | grep -q "remote_foo_lint file.001.foo"
+    echo $output | grep -q "remote_foo file.001.foo"
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -qv "git add"
     assert "Should not add files if none were modified after formatting"
@@ -194,7 +194,7 @@ it_processes_multiple_files()
     mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.flint/hooks/pre-commit" 2>&1 )
-    echo $output | grep -q "remote_foo_lint file.001.foo file.002.foo"
+    echo $output | grep -q "remote_foo file.001.foo file.002.foo"
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should add modified files"

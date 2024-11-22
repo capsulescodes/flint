@@ -31,15 +31,14 @@ afterAll()
 
 mock()
 {
-    STAGED=($1)
-    UNSTAGED=($2)
-    RESET=($3)
-    MODIFIED=($4)
-    HEAD=$5
-    COMMIT=$6
-    STAGED_COUNT=$7
-    UNSTAGED_COUNT=$8
-    COMMANDS=$9
+    UNSTAGED=($1)
+    STAGED=($2)
+    MODIFIED=($3)
+    HEAD=$4
+    COMMIT=$5
+    COMMANDS=$6
+
+    count=$( mktemp )
 
     git()
     {
@@ -57,30 +56,16 @@ mock()
 
         if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
         then
-            if [[ -f "$STAGED_COUNT" ]]
-
-            then
-                if [[ -z "$( < $STAGED_COUNT )" ]]
-
-                then
-                    printf "%s\n" "${STAGED[@]}"
-                else
-                    printf "%s\n" "${RESET[@]}"
-                fi
-
-                echo 1 >> $STAGED_COUNT
-            else
-                printf "%s\n" "${STAGED[@]}"
-            fi
+            printf "%s\n" "${STAGED[@]}"
         fi
 
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            if [[ -f "$UNSTAGED_COUNT" ]]
+            if [[ -f "$count" ]]
 
             then
-                if [[ -z "$( < $UNSTAGED_COUNT )" ]]
+                if [[ -z "$( < $count )" ]]
 
                 then
                     printf "%s\n" "${UNSTAGED[@]}"
@@ -88,7 +73,7 @@ mock()
                     printf "%s\n" "${MODIFIED[@]}"
                 fi
 
-                echo 1 >> $UNSTAGED_COUNT
+                echo 1 >> $count
             else
                 printf "%s\n" "${UNSTAGED[@]}"
             fi
@@ -98,6 +83,12 @@ mock()
 
         then
             echo "Mock : git add ${@:2}"
+        fi
+
+        if [[ $1 == "restore" && $2 == "--staged" ]]
+
+        then
+            echo "Mock : git restore ${@:3}"
         fi
 
         if [[ $1 == "commit" && $2 == "-m" ]]
@@ -117,6 +108,8 @@ mock()
 unmock()
 {
     unset -f git
+
+    rm $count
 }
 
 
@@ -148,11 +141,11 @@ it_exits_if_git_file_does_not_exist()
 
 it_loads_config_if_destination_exists()
 {
-    mock "" "" "" "" "foo"
+    mock "" "" "" "foo"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
     echo $output | grep -q "Mock : git reset --soft foo"
-    assert "Should call format_for_local with the correct config value"
+    assert "Should call eval_for_local with the correct config value"
 
     unmock
 }
@@ -172,7 +165,7 @@ it_handles_no_manual_commits()
 
 it_resets_to_manual_commit()
 {
-    mock "" "" "" "" "bar"
+    mock "" "" "" "bar"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
     echo $output | grep -q "Mock : git reset --soft bar"
@@ -184,7 +177,7 @@ it_resets_to_manual_commit()
 
 it_resets_silently()
 {
-    mock "" "" "" "" "baz"
+    mock "" "" "" "baz"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
     echo $output | grep -q "Mock : git reset --soft baz --quiet"
@@ -199,56 +192,16 @@ it_formats_all_files()
     mock
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
-    echo $output | grep -q "local_foo_lint ."
+    echo $output | grep -q "local_foo ."
     assert "Should run formatter on current directory"
 
     unmock
 }
 
 
-it_adds_staged_reset_files_before()
-{
-    count=$( mktemp )
-
-    mock "" "" "file.001.foo file.002.foo" "" "" "qux" $count
-
-    output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
-    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
-    assert "Should not add already modified files before"
-    echo $output | grep -q "Mock : git commit -m qux"
-    assert "Should use correct commit command format"
-
-    unmock
-
-    rm $count
-}
-
-
-it_adds_restored_staged_files_after()
-{
-    count=$( mktemp )
-
-    mock "file.001.foo" "" "file.001.foo file.002.foo" "" "" "quux" $count
-
-    output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
-    echo $output | grep -q "Mock : git add file.002.foo"
-    assert "Should not add already modified files before"
-    echo $output | grep -q "Mock : git commit -m quux"
-    assert "Should use correct commit command format"
-    echo $output | grep -q "Mock : git add file.001.foo"
-    assert "Should not add already modified files before"
-
-    unmock
-
-    rm $count
-}
-
-
 it_adds_newly_modified_files_before()
 {
-    count=$( mktemp )
-
-    mock "" "" "" "file.001.foo file.002.foo" "" "corge" "" $count
+    mock "" "" "file.001.foo file.002.foo" "" "corge"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -257,8 +210,6 @@ it_adds_newly_modified_files_before()
     assert "Should use correct commit command format"
 
     unmock
-
-    rm $count
 }
 
 
@@ -276,17 +227,19 @@ it_does_not_add_already_modified_files_before()
 
 it_adds_modified_staged_files_after()
 {
-    count=$( mktemp )
-
-    mock "file.001.foo file.002.foo" "" "" "file.001.foo" "" "" "" $count
+    mock "" "file.001.foo" "file.001.foo file.002.foo" "" "quux"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
+    echo $output | grep -q "Mock : git add file.002.foo"
+    assert "Should not add already modified files before"
+    echo $output | grep -q "Mock : git restore file.001.foo"
+    assert "Should restore added files before"
+    echo $output | grep -q "Mock : git commit -m quux"
+    assert "Should use correct commit command format"
     echo $output | grep -q "Mock : git add file.001.foo"
-    assert "Should add modified staged files after"
+    assert "Should add files after"
 
     unmock
-
-    rm $count
 }
 
 
@@ -304,9 +257,7 @@ it_handles_no_modified_files()
 
 it_creates_temp_commit()
 {
-    count=$( mktemp )
-
-    mock "" "" "" "file.001.foo file.002.foo" "" "qux" "" $count
+    mock "" "" "file.001.foo file.002.foo" "" "qux"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -315,67 +266,53 @@ it_creates_temp_commit()
     assert "Should commit modified files with the correct message"
 
     unmock
-
-    rm $count
 }
 
 
 it_sets_and_unsets_environment_variable()
 {
-    count=$( mktemp )
+    mock "" "" "" "file.001.foo file.002.foo" "" "qux"
 
-    mock "" "" "" "file.001.foo file.002.foo" "" "qux" "" $count
-
-    [ -z $FLINT_FIX_TEMP_COMMIT ]
-    assert "FLINT_FIX_TEMP_COMMIT should not be set before running the hook"
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
     ( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" > /dev/null 2>&1 )
 
-    [ -z $FLINT_FIX_TEMP_COMMIT ]
-    assert "FLINT_FIX_TEMP_COMMIT should be unset after running the hook"
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
 
     unmock
-
-    rm $count
 }
 
 
 it_uses_correct_git_commands()
 {
-    staged=$( mktemp )
-
-    unstaged=$( mktemp )
-
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "" "file.001.foo file.003.foo file.005.foo" "grault" "" $staged $unstaged $commands
+    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.001.foo file.003.foo file.005.foo" "grault" "" $commands
 
     ( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" > /dev/null 2>&1 )
 
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
-    assert "Should use correct diff staged command format"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
     assert "Should use correct diff command format"
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
+    assert "Should use correct diff staged command format"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" =~  "rev-list HEAD --invert-grep" ]]
     assert "Should use correct rev-list command format"
     [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "reset --soft grault --quiet" ]]
     assert "Should use correct reset command format"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
-    assert "Should use correct diff staged command format"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "add file.005.foo" ]]
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "add file.005.foo" ]]
     assert "Should use correct add command format"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
+    assert "Should use correct restore command format"
     [[ "$( head -n 8 "$commands" | tail -n 1 )" =~  "commit -m" ]]
     assert "Should use correct commit command format"
-    [[ "$( head -n 9 "$commands" | tail -n 1 )" ==  "add file.001.foo" ]]
+    [[ "$( head -n 9 "$commands" | tail -n 1 )" ==  "add file.003.foo file.004.foo" ]]
     assert "Should use correct add command format"
 
     unmock
 
     rm $commands
-
-    rm $unstaged
-
-    rm $staged
 }

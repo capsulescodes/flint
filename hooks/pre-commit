@@ -1,7 +1,7 @@
-if [ -z $FLINT_FIX_TEMP_COMMIT ]
+if [ -z $FLINT_TEMPORARY_COMMIT ]
 
 then
-    manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
+    manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
     if [ -n "$manual" ]
 
@@ -14,7 +14,7 @@ then
     if [ -n "$staged" ]
 
     then
-        format_for_remote $FLINT_CONFIG "$staged"
+        eval_for_remote $FLINT_CONFIG "$staged"
 
         modified=$( git diff --name-only )
 

@@ -1,4 +1,4 @@
-function format_for_local
+function eval_for_local
 {
     local config=$1
 
@@ -47,7 +47,7 @@ function format_for_local
 
 
 
-function format_for_remote
+function eval_for_remote
 {
     local config=$1
 

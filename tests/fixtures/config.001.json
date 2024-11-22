@@ -4,16 +4,16 @@
             "extensions" : [ "foo" ],
             "binary" : "echo",
             "commands" : {
-                "local" : "local_foo_lint",
-                "remote" : "remote_foo_lint"
+                "local" : "local_foo",
+                "remote" : "remote_foo"
             }
         },
         {
             "extensions" : [ "bar" ],
             "binary" : "echo",
             "commands" : {
-                "local" : "local_bar_lint",
-                "remote" : "remote_bar_lint"
+                "local" : "local_bar",
+                "remote" : "remote_bar"
             }
         }
     ]

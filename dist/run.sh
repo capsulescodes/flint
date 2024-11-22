@@ -29,11 +29,11 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/functions.sh"
 
 
 
-staged=$( git diff --staged --name-only )
-
 unstaged=$( git diff --name-only )
 
-manual=$( git rev-list HEAD --invert-grep --grep='FLINT-FIX-TEMP-COMMIT' --max-count=1 )
+staged=$( git diff --staged --name-only )
+
+manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
 if [ -n $manual ]
 
@@ -41,77 +41,36 @@ then
     git reset --soft $manual --quiet
 fi
 
-format_for_local $config
-
-reset=$( git diff --staged --name-only )
+eval_for_local $config
 
 modified=$( git diff --name-only )
 
-before=()
-
-after=()
-
-while IFS= read -r file
-
-do
-    if [ -n "$file" ] && echo "$reset" | grep -Fqx "$file"
-
-    then
-        if ! echo "$staged" | grep -Fqx "$file"
-
-        then
-            before+=( $file )
-        fi
-
-        if echo "$staged" | grep -Fqx "$file"
-
-        then
-            git restore --staged $file --quiet
-
-            after+=( $file )
-        fi
-    fi
-done <<< "$reset"
+files=()
 
 
 while IFS= read -r file
 
 do
-    if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file"
+    if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
 
     then
-        if ( ! echo "$staged" | grep -Fqx "$file" ) && ( ! echo "$unstaged" | grep -Fqx "$file" )
-
-        then
-            before+=( $file )
-        fi
-
-        if echo "$staged" | grep -Fqx "$file"
-
-        then
-            after+=( $file )
-        fi
+        files+=( $file )
     fi
 done <<< "$modified"
 
 
-
-
-if [ ${#before[@]} -gt 0 ]
+if [ ${#files[@]} -gt 0 ]
 
 then
-    git add "${before[@]}"
+    git add "${files[@]}"
 
-    export FLINT_FIX_TEMP_COMMIT=1
+    [[ -n "$staged" ]] && git restore --staged "$staged"
 
-    git commit -m "FLINT-FIX-TEMP-COMMIT" --quiet
+    export FLINT_TEMPORARY_COMMIT=1
 
-    unset FLINT_FIX_TEMP_COMMIT
-fi
+    git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
 
+    unset FLINT_TEMPORARY_COMMIT
 
-if [ ${#after[@]} -gt 0 ]
-
-then
-    git add "${after[@]}"
+    [[ -n "$staged" ]] && git add "$staged"
 fi

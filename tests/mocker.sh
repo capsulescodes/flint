@@ -1,16 +1,101 @@
-mock()
+function mock
 {
     LOCAL=$1
     REMOTE=$2
 
-    flint()
+    function flint
     {
         [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" || git "$@"
     }
 
-
-    git()
+    function eval_for_local
     {
+        files=()
+
+        for file in ${@:2}
+
+        do
+            if [[ -n "$file" ]]
+
+            then
+                cp "$file" "$file.bak"
+
+                mock_for_local $1 "$LOCAL/$file"
+
+                if ! diff -q "$LOCAL/$file" "$LOCAL/$file.bak" > /dev/null
+
+                then
+                    files+=( "$file" )
+                fi
+
+                rm "$LOCAL/$file.bak"
+            fi
+        done
+
+        git modify "${files[@]}"
+    }
+
+    function eval_for_remote
+    {
+        files=()
+
+        for file in ${@:2}
+
+        do
+            if [[ -n "$file" ]]
+
+            then
+                cp "$LOCAL/$file" "$LOCAL/$file.bak"
+
+                mock_for_remote $1 "$LOCAL/$file"
+
+                if ! diff -q "$LOCAL/$file" "$LOCAL/$file.bak" > /dev/null
+
+                then
+                    files+=( "$file" )
+                fi
+
+                rm "$LOCAL/$file.bak"
+            fi
+        done
+
+        git modify "${files[@]}"
+    }
+
+    function git
+    {
+        if [[ $1 == "modify" ]]
+
+        then
+            for file in ${@:2}
+
+            do
+                if [[ -f "$LOCAL/.git/staged/$file" ]]
+
+                then
+                    rm "$LOCAL/.git/staged/$file"
+                fi
+
+                mkdir -p "$LOCAL/.git/modified"
+
+                cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
+
+                suffix=1
+
+                cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
+
+                while [ -f "$cache" ]
+
+                do
+                    (( suffix++ ))
+
+                    cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
+                done
+
+                cp "$LOCAL/.git/modified/$file" "$cache"
+            done
+        fi
+
         if [[ $1 == "add" ]]
 
         then
@@ -20,19 +105,21 @@ mock()
                 if [[ -n "$file" ]]
 
                 then
-                    if [[ ! -d "$LOCAL/.git/staged" ]]
+                    if [[ -f "$LOCAL/.git/modified/$file" ]]
 
                     then
-                        mkdir "$LOCAL/.git/staged"
+                        rm "$LOCAL/.git/modified/$file"
                     fi
 
-                    cp "$file" "$LOCAL/.git/staged"
+                    mkdir -p "$LOCAL/.git/staged"
+
+                    cp "$LOCAL/$file" "$LOCAL/.git/staged/$file"
 
                     suffix=1
 
                     cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
 
-                    while [ -e "$cache" ]
+                    while [ -f "$cache" ]
 
                     do
                         (( suffix++ ))
@@ -40,7 +127,7 @@ mock()
                         cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
                     done
 
-                    cp "$file" "$cache"
+                    cp "$LOCAL/.git/staged/$file" "$cache"
                 fi
             done
         fi
@@ -48,11 +135,7 @@ mock()
         if [[ $1 == "commit" && $2 == "-m" ]]
 
         then
-            if [[ ! -d "$LOCAL/.git/committed" ]]
-
-            then
-                mkdir "$LOCAL/.git/committed"
-            fi
+            mkdir -p "$LOCAL/.git/committed"
 
             mv "$LOCAL/.git/staged/"[^.]* "$LOCAL/.git/committed/"
 
@@ -63,7 +146,7 @@ mock()
 
                 cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
 
-                while [ -e "$cache" ]
+                while [ -f "$cache" ]
 
                 do
                     (( suffix++ ))
@@ -71,7 +154,7 @@ mock()
                     cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
                 done
 
-                cp "$file" "$cache"
+                cp "$LOCAL/.git/committed/$file" "$cache"
             done
 
             echo $3 >> "$LOCAL/.git/commits"
@@ -80,187 +163,91 @@ mock()
         if [[ $1 == "push" ]]
 
         then
-            mv "$LOCAL/.git/committed"/.[!.]* "$REMOTE"
+            cp "$LOCAL/.git/committed"/.[!.]* "$REMOTE"
+        fi
+
+        if [[ $1 == "pull" ]]
+
+        then
+            cp "$REMOTE"/[^.]* "$LOCAL"
+
+            echo $4 >> "$LOCAL/.git/commits"
         fi
 
 
 
 
-        if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
+        if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" && $4 == "--grep=FLINT-TEMPORARY-COMMIT" && $5 == "--max-count=1" ]]
 
         then
-            echo "$( tail -n 1 "$LOCAL/.git/commits" )"
+            [[ -f "$LOCAL/.git/commits" && "$( tail -n 1 "$LOCAL/.git/commits" )" == "FLINT-TEMPORARY-COMMIT" ]] && echo "FLINT-TEMPORARY-COMMIT" || echo ""
         fi
 
-        if [[ "$1" == "reset" && "$2" == "--soft" && "$4" == "--quiet" ]]
+        if [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
 
         then
-            if [[ "$( tail -n 1 "$LOCAL/.git/commits" )" == "FLINT-FIX-TEMP-COMMIT" ]]
+            for file in $( ls "$LOCAL/.git/committed/" )
 
-            then
-                mv "$LOCAL/.git/committed/"[^.]* "$LOCAL/.git/staged/"
+            do
+                if [[ -f "$LOCAL/.git/committed/$file" ]]
 
-                sed -i "" "\$s|FLINT-FIX-TEMP-COMMIT|DELETED-TEMP-COMMIT|" "$LOCAL/.git/commits"
-            fi
+                then
+                    mv "$LOCAL/.git/committed/$file" "$LOCAL/.git/staged/$file"
+                fi
+            done
+
+            sed -i "" "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
-            [[ -d "$LOCAL/.git/staged" ]] && echo "$( ls "$LOCAL/.git/staged" )" || echo ""
+            [[ -d "$LOCAL/.git/staged" ]] && ls "$LOCAL/.git/staged" || echo ""
         fi
 
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            echo "$( ls "$LOCAL" )"
+            [[ -d "$LOCAL/.git/modified" ]] && ls "$LOCAL/.git/modified" || echo ""
         fi
 
         if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
 
         then
-            [[ -d "$LOCAL/.git/committed" ]] && echo "$( ls "$LOCAL/.git/committed" )" || echo ""
+            [[ -d "$LOCAL/.git/committed" ]] && ls "$LOCAL/.git/committed" || echo ""
         fi
 
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
 
+        then
+            ls "$REMOTE"
+        fi
 
+        if [[ $1 == "restore" && $2 == "--staged" ]]
+
+        then
+            for file in ${@:3}
+
+            do
+                if [[ -f "$LOCAL/.git/staged/$file" ]]
+
+                then
+                    mv "$LOCAL/.git/staged/$file" "$LOCAL/$file"
+                fi
+            done
+        fi
 
         echo $@ >> "$LOCAL/.git/commands"
     }
 }
 
-unmock()
+function unmock
 {
     unset -f flint
 
+    unset -f eval_for_local
+
+    unset -f eval_for_remote
+
     unset -f git
 }
-
-
-# mock()
-# {
-#     flint()
-#     {
-#         [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" || git "$@"
-#     }
-
-
-#     git()
-#     {
-#         if [[ $1 == "add" ]]
-
-#         then
-#             for file in "${@:2}"
-
-#             do
-#                 if [[ -n "$file" ]]
-
-#                 then
-#                     if [[ ! -d "$LOCAL/.git/staged" ]]
-
-#                     then
-#                         mkdir "$LOCAL/.git/staged"
-#                     fi
-
-#                     cp "$file" "$LOCAL/.git/staged"
-
-#                     suffix=1
-
-#                     cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
-
-#                     while [ -e "$cache" ]
-
-#                     do
-#                         (( suffix++ ))
-
-#                         cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
-#                     done
-
-#                     cp "$file" "$cache"
-#                 fi
-#             done
-#         fi
-
-#         if [[ $1 == "commit" && $2 == "-m" ]]
-
-#         then
-#             if [[ ! -d "$LOCAL/.git/committed" ]]
-
-#             then
-#                 mkdir "$LOCAL/.git/committed"
-#             fi
-
-#             mv "$LOCAL/.git/staged/"[^.]* "$LOCAL/.git/committed/"
-
-#             for file in "$( ls "$LOCAL/.git/committed" )"
-
-#             do
-#                 suffix=1
-
-#                 cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
-
-#                 while [ -e "$cache" ]
-
-#                 do
-#                     (( suffix++ ))
-
-#                     cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
-#                 done
-
-#                 cp "$file" "$cache"
-#             done
-
-#             echo $3 >> "$LOCAL/.git/commits"
-#         fi
-
-#         if [[ $1 == "push" ]]
-
-#         then
-#             mv "$LOCAL/.git/committed"/.[!.]* "$REMOTE"
-#         fi
-
-
-
-
-#         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
-
-#         then
-#             echo "$( tail -n 1 "$LOCAL/.git/commits" )"
-#         fi
-
-#         if [[ "$1" == "reset" && "$2" == "--soft" && "$4" == "--quiet" ]]
-
-#         then
-#             if [[ "$( tail -n 1 "$LOCAL/.git/commits" )" == "FLINT-FIX-TEMP-COMMIT" ]]
-
-#             then
-#                 mv "$LOCAL/.git/committed/"[^.]* "$LOCAL/.git/staged/"
-
-#                 sed -i "" "\$s|FLINT-FIX-TEMP-COMMIT|DELETED-TEMP-COMMIT|" "$LOCAL/.git/commits"
-#             fi
-#         fi
-
-#         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
-
-#         then
-#             echo "$( ls "$LOCAL/.git/staged" )"
-#         fi
-
-#         if [[ $1 == "diff" && $2 == "--name-only" ]]
-
-#         then
-#             echo "$( ls "$LOCAL" )"
-#         fi
-
-#         if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
-
-#         then
-#             echo "$( ls "$LOCAL/.git/committed" )"
-#         fi
-
-
-
-
-#         echo $@ >> "$LOCAL/.git/commands"
-#     }
-# }

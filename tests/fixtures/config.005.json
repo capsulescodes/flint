@@ -4,8 +4,8 @@
             "extensions" : [ "foo" ],
             "binary" : "foo/bar/echo",
             "commands" : {
-                "local" : "local_foo_lint",
-                "remote" : "remote_foo_lint"
+                "local" : "local_foo",
+                "remote" : "remote_foo"
             }
         }
     ]

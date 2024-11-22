@@ -4,7 +4,7 @@
             "extensions" : [ "foo" ],
             "binary" : "echo",
             "commands" : {
-                "local" : "local_foo_lint"
+                "local" : "local_foo"
             }
         }
     ]
