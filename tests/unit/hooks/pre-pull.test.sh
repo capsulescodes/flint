@@ -210,6 +210,24 @@ it_processes_multiple_files()
 }
 
 
+it_sets_environment_variable_if_staged_files_exist()
+{
+    mock "" "file.001.foo file.002.foo " "file.002.foo"
+
+    variable=""
+
+    output=$( source "$TEST/.flint/hooks/pre-pull" 2>&1; echo $FLINT_STAGED_FILES )
+    echo $output | grep -q "remote_foo file.001.foo"
+    assert "Should run formatter even if no files are modified afterwards"
+    echo $output | grep -q "Mock : git add file.002.foo"
+    assert "Should add modified files"
+    echo $output | grep -q "file.001.foo file.002.foo"
+    assert "Should list staged files"
+
+    unmock
+}
+
+
 it_uses_correct_git_commands()
 {
     commands=$( mktemp )
@@ -218,17 +236,19 @@ it_uses_correct_git_commands()
 
     ( source "$TEST/.flint/hooks/pre-pull" > /dev/null 2>&1 )
 
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
-    assert "Should use correct rev-list command format"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
-    assert "Should use correct reset command format"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff-filter command format"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
+    assert "Should use correct rev-list command format"
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
+    assert "Should use correct reset command format"
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    assert "Should use correct diff-filter command format"
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "add file.001.foo" ]]
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "Should use correct add command format"
 
     unmock

@@ -18,7 +18,7 @@ then
     while IFS= read -r file
 
     do
-        if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
+        if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file"
 
         then
             files+=( $file )
@@ -31,14 +31,14 @@ then
     then
         git add "${files[@]}"
 
-        [[ -n "$staged" ]] && git restore --staged "$staged"
+        [[ -n "$FLINT_STAGED_FILES" ]] && git restore --staged "$FLINT_STAGED_FILES"
 
-        export FLINT_FIX_TEMP_COMMIT=1
+        export FLINT_TEMPORARY_COMMIT=1
 
         git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
 
-        unset FLINT_FIX_TEMP_COMMIT
+        unset FLINT_TEMPORARY_COMMIT
 
-        [[ -n "$staged" ]] && git add "$staged"
+        [[ -n "$FLINT_STAGED_FILES" ]] && git add "$FLINT_STAGED_FILES" && unset FLINT_STAGED_FILES
     fi
 fi

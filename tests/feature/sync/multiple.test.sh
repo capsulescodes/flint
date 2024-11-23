@@ -53,7 +53,7 @@ it_creates_two_files_add_them_commit_them_and_push_them()
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -61,7 +61,7 @@ it_creates_two_files_add_them_commit_them_and_push_them()
     [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "local" ]]
     assert "first add - Should keep file content"
 
-    echo "local" > "file.002.foo"
+    echo "local" > file.002.foo
 
     output=$( flint add file.002.foo )
     [[ -f "$LOCAL/.git/staged/file.002.foo" ]]
@@ -124,7 +124,7 @@ it_creates_two_files_add_them_commit_them_and_push_them()
     [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command format"
     [[ "$( head -n 14 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct reve-list command format"
+    assert "commands - Should use correct rev-list command format"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command format"
     [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "push origin branch" ]]
@@ -136,15 +136,15 @@ it_creates_two_files_add_them_commit_them_and_push_them()
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq 5 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq 5 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.002.foo.001|.file.002.foo.002)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.002.foo.001|.file.002.foo.002)$" ) -eq 4 ]]
     assert "files - Modified files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003)$" ) -eq 6 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003)$" ) -eq 6 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003|file.002.foo)$" ) -eq 8 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003|file.002.foo)$" ) -eq 8 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.002.foo.001|.file.002.foo.002)$" ) -eq 4 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.002.foo.001|.file.002.foo.002)$" ) -eq 4 ]]
     assert "files - Pushed files should be present"
 
     rm file.002.foo
@@ -157,7 +157,7 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_commits_it_and
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -183,7 +183,7 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_commits_it_and
     [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.002" )" == "local" && -f "$LOCAL/.git/committed/file.001.foo" ]]
     assert "first commit - Should commit file"
 
-    echo "local" > "file.002.foo"
+    echo "local" > file.002.foo
 
     output=$( flint add file.002.foo )
     [[ -f "$LOCAL/.git/staged/file.002.foo" ]]
@@ -274,7 +274,7 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_commits_it_and
     assert "commands - Should use correct commit command format"
 
     [[ "$( head -n 26 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct reve-list command format"
+    assert "commands - Should use correct rev-list command format"
     [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command format"
     [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "push origin branch" ]]
@@ -286,15 +286,15 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_commits_it_and
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq 5 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq 5 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.002.foo.001|.file.002.foo.002)$" ) -eq 6 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.002.foo.001|.file.002.foo.002)$" ) -eq 6 ]]
     assert "files - Modified files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003)$" ) -eq 8 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003)$" ) -eq 8 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003|file.001.foo|file.002.foo)$" ) -eq 10 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003|file.001.foo|file.002.foo)$" ) -eq 10 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.002.foo.001|.file.002.foo.002)$" ) -eq 6 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.002.foo.001|.file.002.foo.002)$" ) -eq 6 ]]
     assert "files - Pushed files should be present"
 
     rm file.002.foo
@@ -307,7 +307,7 @@ it_creates_a_file_adds_it_commits_it_pushes_it_creates_another_file_adds_it_comm
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -341,7 +341,7 @@ it_creates_a_file_adds_it_commits_it_pushes_it_creates_another_file_adds_it_comm
     [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.003" )" == "local" && -f "$LOCAL/.git/committed/file.001.foo" ]]
     assert "first push - Should commit file"
 
-    echo "local" > "file.002.foo"
+    echo "local" > file.002.foo
 
     output=$( flint add file.002.foo )
     [[ -f "$LOCAL/.git/staged/file.002.foo" ]]
@@ -405,7 +405,7 @@ it_creates_a_file_adds_it_commits_it_pushes_it_creates_another_file_adds_it_comm
     assert "commands - Should use correct commit command format"
 
     [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct reve-list command format"
+    assert "commands - Should use correct rev-list command format"
     [[ "$( head -n 14 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command format"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "push origin branch" ]]
@@ -443,7 +443,7 @@ it_creates_a_file_adds_it_commits_it_pushes_it_creates_another_file_adds_it_comm
     assert "commands - Should use correct commit command format"
 
     [[ "$( head -n 31 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct reve-list command format"
+    assert "commands - Should use correct rev-list command format"
     [[ "$( head -n 32 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command format"
     [[ "$( head -n 33 "$LOCAL/.git/commands" | tail -n 1 )" == "push origin branch" ]]
@@ -455,15 +455,15 @@ it_creates_a_file_adds_it_commits_it_pushes_it_creates_another_file_adds_it_comm
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq 5 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq 5 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.002.foo.001|.file.002.foo.002)$" ) -eq 6 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.002.foo.001|.file.002.foo.002)$" ) -eq 6 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003)$" ) -eq 8 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003)$" ) -eq 8 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.001.foo.006|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003|file.001.foo|file.002.foo)$" ) -eq 11 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.001.foo.006|.file.002.foo.001|.file.002.foo.002|.file.002.foo.003|file.001.foo|file.002.foo)$" ) -eq 11 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002)$" ) -eq 7 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.002.foo.001|.file.002.foo.002)$" ) -eq 7 ]]
     assert "files - Pushed files should be present"
 
     rm file.002.foo

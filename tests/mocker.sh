@@ -70,29 +70,34 @@ function mock
             for file in ${@:2}
 
             do
-                if [[ -f "$LOCAL/.git/staged/$file" ]]
+                if [[ -n "$file" ]]
 
                 then
-                    rm "$LOCAL/.git/staged/$file"
-                fi
 
-                mkdir -p "$LOCAL/.git/modified"
+                    if [[ -f "$LOCAL/.git/staged/$file" ]]
 
-                cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
+                    then
+                        rm "$LOCAL/.git/staged/$file"
+                    fi
 
-                suffix=1
+                    mkdir -p "$LOCAL/.git/modified"
 
-                cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
+                    cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
 
-                while [ -f "$cache" ]
-
-                do
-                    (( suffix++ ))
+                    suffix=1
 
                     cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
-                done
 
-                cp "$LOCAL/.git/modified/$file" "$cache"
+                    while [ -f "$cache" ]
+
+                    do
+                        (( suffix++ ))
+
+                        cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
+                    done
+
+                    cp "$LOCAL/.git/modified/$file" "$cache"
+                fi
             done
         fi
 

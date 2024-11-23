@@ -177,7 +177,7 @@ it_adds_modified_staged_files_after()
 {
     mock "" "file.002.foo" "file.001.foo file.002.foo file.003.foo" "file.003.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( FLINT_STAGED_FILES="file.002.foo" source "$TEST/.flint/hooks/post-pull" 2>&1 )
     echo $output | grep -q "Mock : git add file.003.foo"
     assert "Should add modified staged files after"
     echo $output | grep -q "Mock : git restore file.002.foo"
@@ -213,17 +213,43 @@ it_creates_temp_commit()
 }
 
 
+it_restores_and_adds_again_staged_files_from_environment_variable()
+{
+    FLINT_STAGED_FILES="file.001.foo"
+
+    mock "" "" "file.002.foo file.003.foo" "file.002.foo"
+
+    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    echo $output | grep -q "Mock : git add file.002.foo"
+    assert "Should add modified staged files after"
+    echo $output | grep -q "Mock : git restore file.001.foo"
+    assert "Should add modified staged files after"
+    echo $output | grep -q "Mock : git add file.001.foo"
+    assert "Should add modified staged files after"
+
+    unmock
+
+    unset FLINT_STAGED_FILES
+}
+
+
 it_sets_and_unsets_environment_variable()
 {
-    mock "" "" "file.001.foo file.002.foo" "file.001.foo"
+    mock "" "" "file.002.foo file.003.foo" "file.002.foo"
 
-    [ -z $FLINT_TEMPORARY_COMMIT ]
-    assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
-
-    ( source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
+    [ -z $FLINT_STAGED_FILES ]
+    assert "FLINT_STAGED_FILES should be unset after running the hook"
 
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
+
+    ( FLINT_STAGED_FILES="file.001.foo" source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
+
+    [ -z $FLINT_TEMPORARY_COMMIT ]
+    assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
+
+    [ -z $FLINT_STAGED_FILES ]
+    assert "FLINT_STAGED_FILES should be unset after running the hook"
 
     unmock
 }
@@ -235,7 +261,7 @@ it_uses_correct_git_commands()
 
     mock "" "file.003.foo" "file.001.foo file.002.foo" "file.001.foo" "bar" $commands
 
-    ( source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
+    ( FLINT_STAGED_FILES="file.003.foo" source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
     [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "Should use correct diff command format"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]

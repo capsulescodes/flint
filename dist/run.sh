@@ -51,7 +51,7 @@ files=()
 while IFS= read -r file
 
 do
-    if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
+    if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file"
 
     then
         files+=( $file )

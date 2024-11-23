@@ -53,7 +53,7 @@ it_creates_a_file_adds_it_commits_it_and_pushes_it()
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -126,15 +126,15 @@ it_creates_a_file_adds_it_commits_it_and_pushes_it()
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
     assert "files - Modified files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003)$" ) -eq 3 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003)$" ) -eq 3 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq 4 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
     assert "files - Pushed files should be present"
 
     rm file.001.foo
@@ -145,7 +145,7 @@ it_creates_a_file_adds_it_modifies_it_adds_it_commits_it_and_pushes_it()
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -153,7 +153,7 @@ it_creates_a_file_adds_it_modifies_it_adds_it_commits_it_and_pushes_it()
     [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "local" ]]
     assert "add - Should keep file content"
 
-    echo "foo" >> "file.001.foo"
+    echo "foo" >> file.001.foo
 
     output=$( git modify "file.001.foo" )
     [[ -f "$LOCAL/.git/modified/file.001.foo" ]]
@@ -240,15 +240,15 @@ it_creates_a_file_adds_it_modifies_it_adds_it_commits_it_and_pushes_it()
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
     assert "files - Modified files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003)$" ) -eq 3 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003)$" ) -eq 3 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq 4 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
     assert "files - Pushed files should be present"
 
     rm file.001.foo
@@ -259,7 +259,7 @@ it_creates_a_file_adds_it_commits_it_modifies_it_adds_it_commits_it_and_pushes_i
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -292,7 +292,7 @@ it_creates_a_file_adds_it_commits_it_modifies_it_adds_it_commits_it_and_pushes_i
     assert "add - Should modify file"
     [[ ! -f "$LOCAL/.git/staged/file.001.foo" ]]
     assert "add - Should unstage file"
-    [[ "$(cat "$LOCAL/.git/modified/.file.001.foo.003")" == $'local\nfoo' ]]
+    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.003" )" == $'local\nfoo' ]]
     assert "add - Should keep file content"
 
     output=$( flint add file.001.foo )
@@ -396,15 +396,15 @@ it_creates_a_file_adds_it_commits_it_modifies_it_adds_it_commits_it_and_pushes_i
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
     assert "files - Modified files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003)$" ) -eq 3 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003)$" ) -eq 3 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq 4 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq 2 ]]
     assert "files - Pushed files should be present"
 
     rm file.001.foo
@@ -416,7 +416,7 @@ it_creates_a_file_adds_it_commits_it_pushed_it_modifies_it_adds_it_commits_it_an
 {
     # PROCESS
 
-    echo "local" > "file.001.foo"
+    echo "local" > file.001.foo
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -454,11 +454,11 @@ it_creates_a_file_adds_it_commits_it_pushed_it_modifies_it_adds_it_commits_it_an
 
     output=$( git modify "file.001.foo" )
     [[ -f "$LOCAL/.git/modified/file.001.foo" ]]
-    assert "add - Should modify file"
+    assert "modify - Should modify file"
     [[ ! -f "$LOCAL/.git/staged/file.001.foo" ]]
-    assert "add - Should unstage file"
+    assert "modify - Should unstage file"
     [[ "$(cat "$LOCAL/.git/modified/.file.001.foo.003")" == $'local\nfoo' ]]
-    assert "add - Should keep file content"
+    assert "modify - Should keep file content"
 
     output=$( flint add file.001.foo )
     [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
@@ -571,15 +571,15 @@ it_creates_a_file_adds_it_commits_it_pushed_it_modifies_it_adds_it_commits_it_an
 
     # DIRECTORIES
 
-    [[ $( ls -a "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
+    [[ $( ls -A "$LOCAL" | grep -Ec "^(.flint|.git|file.001.foo|flint.config.json)$" ) -eq 4 ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -a "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005)$" ) -eq 5 ]]
+    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005)$" ) -eq 5 ]]
     assert "files - Modified files should be present"
-    [[ $( ls -a "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.001.foo.006)$" ) -eq 6 ]]
+    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.001.foo.006)$" ) -eq 6 ]]
     assert "files - Staged files should be present"
-    [[ $( ls -a "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.001.foo.006|file.001.foo)$" ) -eq 7 ]]
+    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005|.file.001.foo.006|file.001.foo)$" ) -eq 7 ]]
     assert "files - Committed files should be present"
-    [[ $( ls -a "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005)$" ) -eq 5 ]]
+    [[ $( ls -A "$REMOTE" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.001.foo.004|.file.001.foo.005)$" ) -eq 5 ]]
     assert "files - Pushed files should be present"
 
     rm file.001.foo

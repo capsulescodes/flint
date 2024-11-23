@@ -230,7 +230,7 @@ it_adds_modified_staged_files_after()
     mock "" "file.001.foo" "file.001.foo file.002.foo" "" "quux"
 
     output=$( INIT_CWD=$TEST PWD=$path source "$path/dist/run.sh" 2>&1 )
-    echo $output | grep -q "Mock : git add file.002.foo"
+    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should not add already modified files before"
     echo $output | grep -q "Mock : git restore file.001.foo"
     assert "Should restore added files before"
@@ -303,7 +303,7 @@ it_uses_correct_git_commands()
     assert "Should use correct reset command format"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
     assert "Should use correct diff command format"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "add file.005.foo" ]]
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "add file.003.foo file.005.foo" ]]
     assert "Should use correct add command format"
     [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
     assert "Should use correct restore command format"
