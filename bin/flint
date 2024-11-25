@@ -30,7 +30,7 @@ fi
 if [[ $1 == 'run' ]] || [[ -z $1 ]]
 
 then
-    sh "$path/run.sh"
+    sh "$path/run.sh" $@
 
     exit 0
 fi
@@ -44,4 +44,4 @@ then
 fi
 
 
-printf "\n[ Flint ] Command \"$1\" not found. Run \"-h\" or \"--help\" for more options.\n\n"
+printf "\n[ Flint ] Command '$1' not found. Run '-h' or '--help' for more options.\n\n"

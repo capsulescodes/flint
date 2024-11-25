@@ -5,22 +5,27 @@ function mock
 
     function flint
     {
-        [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" || git "$@"
+        source "$LOCAL/.core/bin/flint" $@
     }
 
-    function eval_for_local
+    function wrap
     {
-        files=()
+        [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" || git $@
+    }
 
-        for file in ${@:2}
+    function eval_for_command
+    {
+        local files=()
+
+        for file in $( [[ -z "${@:3}" ]] && ls -1 "$LOCAL" || echo "${@:3}" )
 
         do
-            if [[ -n "$file" ]]
+            if [[ -n $file ]]
 
             then
                 cp "$file" "$file.bak"
 
-                mock_for_local $1 "$LOCAL/$file"
+                mock_for_command $1 $2 "$LOCAL/$file"
 
                 if ! diff -q "$LOCAL/$file" "$LOCAL/$file.bak" > /dev/null
 
@@ -32,34 +37,7 @@ function mock
             fi
         done
 
-        git modify "${files[@]}"
-    }
-
-    function eval_for_remote
-    {
-        files=()
-
-        for file in ${@:2}
-
-        do
-            if [[ -n "$file" ]]
-
-            then
-                cp "$LOCAL/$file" "$LOCAL/$file.bak"
-
-                mock_for_remote $1 "$LOCAL/$file"
-
-                if ! diff -q "$LOCAL/$file" "$LOCAL/$file.bak" > /dev/null
-
-                then
-                    files+=( "$file" )
-                fi
-
-                rm "$LOCAL/$file.bak"
-            fi
-        done
-
-        git modify "${files[@]}"
+        [[ ${#files[@]} -gt 0 ]] && git modify "${files[@]}"
     }
 
     function git
@@ -70,10 +48,9 @@ function mock
             for file in ${@:2}
 
             do
-                if [[ -n "$file" ]]
+                if [[ -n $file ]]
 
                 then
-
                     if [[ -f "$LOCAL/.git/staged/$file" ]]
 
                     then
@@ -84,11 +61,11 @@ function mock
 
                     cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
 
-                    suffix=1
+                    local suffix=1
 
-                    cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
+                    local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/modified" "$file" "$suffix" )
 
-                    while [ -f "$cache" ]
+                    while [[ -f $cache ]]
 
                     do
                         (( suffix++ ))
@@ -107,7 +84,7 @@ function mock
             for file in ${@:2}
 
             do
-                if [[ -n "$file" ]]
+                if [[ -n $file ]]
 
                 then
                     if [[ -f "$LOCAL/.git/modified/$file" ]]
@@ -120,11 +97,11 @@ function mock
 
                     cp "$LOCAL/$file" "$LOCAL/.git/staged/$file"
 
-                    suffix=1
+                    local suffix=1
 
-                    cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
+                    local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
 
-                    while [ -f "$cache" ]
+                    while [[ -f $cache ]]
 
                     do
                         (( suffix++ ))
@@ -142,14 +119,22 @@ function mock
         then
             mkdir -p "$LOCAL/.git/committed"
 
-            mv "$LOCAL/.git/staged/"[^.]* "$LOCAL/.git/committed/"
+            for file in $( ls "$LOCAL/.git/staged" )
+
+            do
+                if [[ -f "$LOCAL/.git/staged/$file" ]]
+
+                then
+                    mv "$LOCAL/.git/staged/$file" "$LOCAL/.git/committed/$file"
+                fi
+            done
 
             for file in $( ls "$LOCAL/.git/committed" )
 
             do
-                suffix=1
+                local suffix=1
 
-                cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
+                local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
 
                 while [ -f "$cache" ]
 
@@ -168,13 +153,21 @@ function mock
         if [[ $1 == "push" ]]
 
         then
-            cp "$LOCAL/.git/committed"/.[!.]* "$REMOTE"
+            for file in $( ls -A "$LOCAL/.git/committed" )
+
+            do
+                [[ $file == .* ]] && cp "$LOCAL/.git/committed/$file" "$REMOTE/$file"
+            done
         fi
 
         if [[ $1 == "pull" ]]
 
         then
-            cp "$REMOTE"/[^.]* "$LOCAL"
+            for file in $( ls "$REMOTE" )
+
+            do
+                cp "$REMOTE/$file" "$LOCAL/$file"
+            done
 
             echo $4 >> "$LOCAL/.git/commits"
         fi
@@ -250,9 +243,9 @@ function unmock
 {
     unset -f flint
 
-    unset -f eval_for_local
+    unset -f wrap
 
-    unset -f eval_for_remote
+    unset -f eval_for_command
 
     unset -f git
 }

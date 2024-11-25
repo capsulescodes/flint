@@ -4,41 +4,40 @@ staged=$( git diff --diff-filter=d --staged --name-only )
 
 pulled=$( git diff --diff-filter=d --name-only @{1} HEAD )
 
-combined=$( ( echo "$unstaged"; echo "$staged"; echo "$pulled" ) | sort | uniq )
+combined=$( printf "%s\n%s\n%s\n" "$unstaged" "$staged" "$pulled" | sort | uniq )
 
-if [ -n "$combined" ]
+files=()
+
+if [[ -n $combined ]]
 
 then
-    eval_for_local $FLINT_CONFIG "$combined"
+    eval_for_command "local" $FLINT_CONFIG "$combined"
 
     modified=$( git diff --name-only )
-
-    files=()
 
     while IFS= read -r file
 
     do
-        if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file"
+        if [[ -n "$file" ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$FLINT_STAGED_FILES" | grep -Fqx "$file"
 
         then
             files+=( $file )
         fi
     done <<< "$combined"
+fi
 
+[[ ${#files[@]} -gt 0 ]] && git add "${files[@]}"
 
-    if [ ${#files[@]} -gt 0 ]
+if [[ ${#files[@]} -gt 0 || ! "$reset" == "$staged" ]]
 
-    then
-        git add "${files[@]}"
+then
+    [[ -n $FLINT_STAGED_FILES ]] && git restore --staged "$FLINT_STAGED_FILES"
 
-        [[ -n "$FLINT_STAGED_FILES" ]] && git restore --staged "$FLINT_STAGED_FILES"
+    export FLINT_TEMPORARY_COMMIT=1
 
-        export FLINT_TEMPORARY_COMMIT=1
+    git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
 
-        git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
+    unset FLINT_TEMPORARY_COMMIT
 
-        unset FLINT_TEMPORARY_COMMIT
-
-        [[ -n "$FLINT_STAGED_FILES" ]] && git add "$FLINT_STAGED_FILES" && unset FLINT_STAGED_FILES
-    fi
+    [[ -n $FLINT_STAGED_FILES ]] && git add "$FLINT_STAGED_FILES" && unset FLINT_STAGED_FILES
 fi

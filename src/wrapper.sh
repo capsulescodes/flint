@@ -19,7 +19,7 @@ then
 
     export FLINT_HOOKS=$hooks
 
-    source "$PWD/$hooks/pre-$1"
+    source "$path/pre-$1"
 
     unset FLINT_CONFIG
 
@@ -43,7 +43,7 @@ then
 
     export FLINT_HOOKS=$hooks
 
-    source "$PWD/$hooks/post-$1"
+    source "$path/post-$1"
 
     unset FLINT_CONFIG
 

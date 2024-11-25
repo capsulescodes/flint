@@ -6,7 +6,7 @@ then
     if [ -n "$committed" ]
 
     then
-        eval_for_local $FLINT_CONFIG "$committed"
+        eval_for_command "local" $FLINT_CONFIG "$committed"
 
         modified=$( git diff --name-only )
 
@@ -15,7 +15,7 @@ then
         while IFS= read -r file
 
         do
-            if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file"
+            if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file"
 
             then
                 files+=( $file )
@@ -23,7 +23,7 @@ then
         done <<< "$committed"
 
 
-        if [ ${#files[@]} -gt 0 ]
+        if [[ ${#files[@]} -gt 0 ]]
 
         then
             git add "${files[@]}"

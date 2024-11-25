@@ -236,14 +236,14 @@ it_uses_correct_git_commands()
 
     ( source "$TEST/.flint/hooks/pre-pull" > /dev/null 2>&1 )
 
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "Should use correct diff command format"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff-filter command format"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
     assert "Should use correct rev-list command format"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
     assert "Should use correct reset command format"
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "Should use correct diff command format"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff-filter command format"
     [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --name-only" ]]

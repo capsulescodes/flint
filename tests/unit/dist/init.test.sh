@@ -101,7 +101,7 @@ it_adds_git_wrapper_to_shell_config()
 
     touch "$TEST/home/.bashrc"
 
-    command="git() { [[ -f \"\$PWD/.flint/git.sh\" ]] && source \"\$PWD/.flint/git.sh\" || command git \"\$@\" }"
+    command="git() { [[ -f \"\$PWD/.flint/git.sh\" ]] && source \"\$PWD/.flint/git.sh\" || command git \$@ }"
 
     INIT_CWD=$TEST PWD=$path SHELL="/bin/bash" HOME="$TEST/home" sh "$path/dist/init.sh" init > /dev/null
     grep -Fq "$command" "$TEST/home/.bashrc"

@@ -8,7 +8,7 @@ Options:
     init               Initiates the Flint configuration and mandatory files.
 
     run                Runs the Flint process. If no parameters are passed,
-                       Flint will default to "run" mode and execute the process.
+                       Flint will default to 'run' mode and execute the process.
 
     -h, --help         Displays this help message with information on usage
                        and available options.

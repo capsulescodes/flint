@@ -1,11 +1,15 @@
 staged=$( git diff --diff-filter=d --staged --name-only )
 
-if [ -n "$staged" ]
+if [[ -n $staged ]] && [[ ! $staged == $FLINT_STAGED_FILES ]]
 
 then
+    [[ -n $FLINT_STAGED_FILES ]] && git restore --staged "$FLINT_STAGED_FILES"
+
     export FLINT_TEMPORARY_COMMIT=1
 
     git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
 
     unset FLINT_TEMPORARY_COMMIT
+
+    [[ -n $FLINT_STAGED_FILES ]] && git add "$FLINT_STAGED_FILES" && unset FLINT_STAGED_FILES
 fi

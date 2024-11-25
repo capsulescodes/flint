@@ -5,7 +5,8 @@
             "binary" : ".core/replace",
             "commands" : {
                 "local" : "remote local",
-                "remote" : "local remote"
+                "remote" : "local remote",
+                "bar" : "foo bar"
             }
         }
     ]
