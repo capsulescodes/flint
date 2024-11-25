@@ -1,6 +1,6 @@
 staged=$( git diff --diff-filter=d --staged --name-only )
 
-if [[ -n $staged ]] && [[ ! $staged == $FLINT_STAGED_FILES ]]
+if [[ -n $staged && ! $staged == $FLINT_STAGED_FILES ]]
 
 then
     [[ -n $FLINT_STAGED_FILES ]] && git restore --staged "$FLINT_STAGED_FILES"

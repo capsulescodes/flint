@@ -2,15 +2,18 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    mkdir "$TEST/.flint"
 
-    cp "$PWD/src/functions.sh" "$TEST/.flint/functions.sh"
+    mkdir "$TEST/.core"
 
-    cp "$PWD/tests/fixtures/"* $TEST
+    cp -r "$PWD/src/functions.sh" "$TEST/.core/functions.sh"
+
+    cp "$PWD/tests/fixtures/echo" "$TEST/.core/echo"
+
+    cp "$PWD/tests/fixtures/config"* $TEST
 
     cd $TEST > /dev/null || exit 1
 
-    source .flint/functions.sh > /dev/null
+    source "$TEST/.core/functions.sh"
 }
 
 afterAll()
@@ -56,7 +59,7 @@ it_checks_if_binary_file_exists()
 
     mkdir -p "$TEST/foo/bar"
 
-    cp "$TEST/echo" "$TEST/foo/bar/echo"
+    cp "$TEST/.core/echo" "$TEST/foo/bar/echo"
 
     output=$( eval_for_command "local" "config.005.json" "file.foo" )
     echo $output | grep -q "local_foo file.foo"
@@ -78,7 +81,7 @@ it_handles_empty_file_list()
 }
 
 
-it_formats_for_local()
+it_evals_for_local()
 {
     output=$( eval_for_command "local" "config.001.json" "file.foo file.bar file.baz" )
     echo $output | grep -q "local_foo file.foo"
@@ -90,7 +93,7 @@ it_formats_for_local()
 }
 
 
-it_formats_for_remote()
+it_evals_for_remote()
 {
     output=$( eval_for_command "remote" "config.001.json" "file.foo file.bar file.baz" )
     echo $output | grep -q "remote_foo file.foo"

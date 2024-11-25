@@ -2,13 +2,13 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    mkdir -p "$TEST/.flint/hooks"
+    mkdir -p "$TEST/.core/hooks"
 
-    cp "$PWD/hooks/post-pull" "$TEST/.flint/hooks/post-pull"
+    cp "$PWD/hooks/post-pull" "$TEST/.core/hooks/post-pull"
 
     cp "$PWD/tests/fixtures/config.003.json" "$TEST/flint.config.json"
 
-    cp "$PWD/tests/fixtures/echo" "$TEST/echo"
+    cp "$PWD/tests/fixtures/echo" "$TEST/.core/echo"
 
     source "$PWD/src/functions.sh"
 
@@ -16,7 +16,7 @@ beforeAll()
 
     export FLINT_CONFIG="$TEST/flint.config.json"
 
-    export FLINT_HOOKS="$TEST/.flint/hooks"
+    export FLINT_HOOKS="$TEST/.core/hooks"
 }
 
 afterAll()
@@ -47,20 +47,14 @@ mock()
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            if [[ -f "$count" ]]
+            if [[ -s $count ]]
 
             then
-                if [[ -z "$( < "$count" )" ]]
-
-                then
-                    printf "%s\n" "${UNSTAGED[@]}"
-                else
-                    printf "%s\n" "${MODIFIED[@]}"
-                fi
-
-                echo 1 >> $count
+                printf "%s\n" "${MODIFIED[@]}"
             else
                 printf "%s\n" "${UNSTAGED[@]}"
+
+                echo 1 >> $count
             fi
         fi
 
@@ -117,7 +111,7 @@ it_handles_no_pulled_files()
 {
     mock
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     [ -z $output ]
     assert "Should not perform any actions when no files are pulled"
 
@@ -129,7 +123,7 @@ it_formats_pulled_files()
 {
     mock "" "" "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -q "local_foo file.001.foo file.002.foo"
     assert "Should run local lint command for pulled files"
 
@@ -141,7 +135,7 @@ it_handles_no_modified_files()
 {
     mock "" "" "file.001.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -qv "git add"
     assert "Should not add files when there are no modified files"
 
@@ -153,7 +147,7 @@ it_adds_newly_modified_files_before()
 {
     mock "" "" "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should add newly modified files before"
 
@@ -165,7 +159,7 @@ it_does_not_add_already_modified_files_before()
 {
     mock "file.003.foo" "" "file.001.foo file.002.foo file.003.foo" "file.003.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -qv "Mock : git add"
     assert "Should not add already modified files before"
 
@@ -177,7 +171,7 @@ it_adds_modified_staged_files_after()
 {
     mock "" "file.002.foo" "file.001.foo file.002.foo file.003.foo" "file.003.foo"
 
-    output=$( FLINT_STAGED_FILES="file.002.foo" source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( FLINT_STAGED_FILES="file.002.foo" source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -q "Mock : git add file.003.foo"
     assert "Should add modified staged files after"
     echo $output | grep -q "Mock : git restore file.002.foo"
@@ -193,7 +187,7 @@ it_identifies_modified_files()
 {
     mock "" "" "file.001.foo file_002.foo file!char003.foo" "file.001.foo file_002.foo file!char003.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -q "Mock : git add file!char003.foo file.001.foo file_002.foo"
     assert "Should add only modified files from committed files list"
 
@@ -205,7 +199,7 @@ it_creates_temp_commit()
 {
     mock "" "" "file.001.foo file.002.foo" "file.001.foo" "foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -q "Mock : git commit -m foo"
     assert "Should create a temporary commit"
 
@@ -219,7 +213,7 @@ it_restores_and_adds_again_staged_files_from_environment_variable()
 
     mock "" "" "file.002.foo file.003.foo" "file.002.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-pull" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-pull" 2>&1 )
     echo $output | grep -q "Mock : git add file.002.foo"
     assert "Should add modified staged files after"
     echo $output | grep -q "Mock : git restore file.001.foo"
@@ -243,7 +237,7 @@ it_sets_and_unsets_environment_variable()
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
 
-    ( FLINT_STAGED_FILES="file.001.foo" source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
+    ( FLINT_STAGED_FILES="file.001.foo" source "$TEST/.core/hooks/post-pull" > /dev/null 2>&1 )
 
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
@@ -261,7 +255,7 @@ it_uses_correct_git_commands()
 
     mock "" "file.003.foo" "file.001.foo file.002.foo" "file.001.foo" "bar" $commands
 
-    ( FLINT_STAGED_FILES="file.003.foo" source "$TEST/.flint/hooks/post-pull" > /dev/null 2>&1 )
+    ( FLINT_STAGED_FILES="file.003.foo" source "$TEST/.core/hooks/post-pull" > /dev/null 2>&1 )
     [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "Should use correct diff command format"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]

@@ -2,7 +2,7 @@
     "linters" : [
         {
             "extensions" : [ "foo" ],
-            "binary" : "echo",
+            "binary" : ".core/echo",
             "commands" : {
                 "local" : "local_foo"
             }

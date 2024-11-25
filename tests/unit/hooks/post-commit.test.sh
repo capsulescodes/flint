@@ -2,13 +2,13 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    mkdir -p "$TEST/.flint/hooks"
+    mkdir -p "$TEST/.core/hooks"
 
-    cp "$PWD/hooks/post-commit" "$TEST/.flint/hooks/post-commit"
+    cp "$PWD/hooks/post-commit" "$TEST/.core/hooks/post-commit"
 
     cp "$PWD/tests/fixtures/config.003.json" "$TEST/flint.config.json"
 
-    cp "$PWD/tests/fixtures/echo" "$TEST/echo"
+    cp "$PWD/tests/fixtures/echo" "$TEST/.core/echo"
 
     source "$PWD/src/functions.sh"
 
@@ -16,7 +16,7 @@ beforeAll()
 
     export FLINT_CONFIG="$TEST/flint.config.json"
 
-    export FLINT_HOOKS="$TEST/.flint/hooks"
+    export FLINT_HOOKS="$TEST/.core/hooks"
 }
 
 afterAll()
@@ -33,8 +33,8 @@ afterAll()
 
 mock()
 {
-    DIFF=($1)
-    FILTER=($2)
+    COMMITTED=($1)
+    MODIFIED=($2)
     COMMIT=$3
     COMMANDS=$4
 
@@ -43,13 +43,13 @@ mock()
         if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
 
         then
-            printf "%s\n" "${DIFF[@]}"
+            printf "%s\n" "${COMMITTED[@]}"
         fi
 
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            printf "%s\n" "${FILTER[@]}"
+            printf "%s\n" "${MODIFIED[@]}"
         fi
 
         if [[ $1 == "add" ]]
@@ -65,7 +65,7 @@ mock()
         fi
 
 
-        if [[ -f "$COMMANDS" ]]
+        if [[ -f $COMMANDS ]]
 
         then
             echo $@ >> $COMMANDS
@@ -85,8 +85,8 @@ it_skips_when_temp_commit()
 {
     export FLINT_TEMPORARY_COMMIT=1
 #
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    [ -z $output ]
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
+    [[ -z $output ]]
     assert "Should skip execution when FLINT_TEMPORARY_COMMIT is set"
 #
     unset FLINT_TEMPORARY_COMMIT
@@ -97,7 +97,7 @@ it_formats_committed_files()
 {
     mock "file.001.foo file.002.foo" "file.001.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
     echo $output | grep -q "local_foo file.001.foo file.002.foo"
     assert "Should run local lint command for committed files"
 
@@ -109,7 +109,7 @@ it_adds_modified_files()
 {
     mock "file.001.foo file.002.foo" "file.001.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
     echo $output | grep -q "Mock : git add file.001.foo"
     assert "Should add modified files"
 
@@ -121,7 +121,7 @@ it_creates_temp_commit()
 {
     mock "file.001.foo file.002.foo" "file.001.foo" "foo"
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
     echo $output | grep -q "Mock : git commit -m foo"
     assert "Should create a temporary commit"
 
@@ -133,8 +133,8 @@ it_handles_no_committed_files()
 {
     mock
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
-    [ -z $output ]
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
+    [[ -z $output ]]
     assert "Should not perform any actions when no files are committed"
 
     unmock
@@ -145,7 +145,7 @@ it_handles_no_modified_files_after_formatting()
 {
     mock "file.001.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
     echo $output | grep -q "local_foo file.001.foo"
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -qv "git add"
@@ -161,7 +161,7 @@ it_identifies_modified_files()
 {
     mock "file.001.foo file_002.foo file!char&003.foo" "file.001.foo file_002.foo file!char&003.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
     echo $output | grep -q "Mock : git add file.001.foo file_002.foo file!char&003.foo"
     assert "Should add only modified files from committed files list"
 
@@ -173,7 +173,7 @@ it_processes_multiple_files()
 {
     mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.flint/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
     echo $output | grep -q "local_foo file.001.foo file.002.foo"
     assert "Should process all committed files"
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -190,7 +190,7 @@ it_sets_and_unsets_environment_variable()
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
-    ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
+    ( source "$TEST/.core/hooks/post-commit" > /dev/null 2>&1 )
 
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
@@ -205,7 +205,7 @@ it_uses_correct_git_commands()
 
     mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo" "bar" $commands
 
-    ( source "$TEST/.flint/hooks/post-commit" > /dev/null 2>&1 )
+    ( source "$TEST/.core/hooks/post-commit" > /dev/null 2>&1 )
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
     assert "Should use correct diff-tree command format"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]

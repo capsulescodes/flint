@@ -12,7 +12,7 @@ unstaged=$( git diff --name-only )
 
 reset=$( git diff --diff-filter=d --staged --name-only )
 
-combined=$( ( echo "$unstaged"; echo "$reset" ) | sort | uniq )
+combined=$( printf "%s\n%s\n" "$unstaged" "$reset" | sort | uniq )
 
 if [[ -n $combined ]]
 

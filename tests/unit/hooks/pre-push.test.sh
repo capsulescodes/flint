@@ -2,9 +2,9 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    mkdir -p "$TEST/.flint/hooks"
+    mkdir -p "$TEST/.core/hooks"
 
-    cp "$PWD/hooks/pre-push" "$TEST/.flint/hooks/pre-push"
+    cp "$PWD/hooks/pre-push" "$TEST/.core/hooks/pre-push"
 
     cd $TEST > /dev/null || exit 1
 }
@@ -19,15 +19,22 @@ afterAll()
 
 mock()
 {
-    LIST=$1
-    COMMANDS=$2
+    STAGED=($1)
+    HEAD=$2
+    COMMANDS=$3
 
     git()
     {
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${STAGED[@]}"
+        fi
+
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
 
         then
-            printf "%s\n" "${LIST[@]}"
+            echo $HEAD
         fi
 
         if [[ $1 == "reset" && $2 == "--soft" && $4 == "--quiet" ]]
@@ -57,7 +64,7 @@ it_handles_no_manual_commits()
 {
     mock
 
-    output=$( source "$TEST/.flint/hooks/pre-push" 2>&1 )
+    output=$( source "$TEST/.core/hooks/pre-push" 2>&1 )
     echo $output | grep -qv "git reset"
     assert "Should do nothing when no manual commits are found"
 
@@ -67,9 +74,9 @@ it_handles_no_manual_commits()
 
 it_resets_to_last_manual_commit()
 {
-    mock "foo"
+    mock "" "foo"
 
-    output=$( source "$TEST/.flint/hooks/pre-push" 2>&1 )
+    output=$( source "$TEST/.core/hooks/pre-push" 2>&1 )
     echo $output | grep -q "Mock : git reset --soft foo"
     assert "Should reset to the last non-temporary commit"
 
@@ -79,11 +86,25 @@ it_resets_to_last_manual_commit()
 
 it_resets_silently()
 {
-    mock "bar"
+    mock "" "bar"
 
-    output=$( source "$TEST/.flint/hooks/pre-push" 2>&1 )
+    output=$( source "$TEST/.core/hooks/pre-push" 2>&1 )
     echo $output | grep -q "Mock : git reset --soft bar --quiet"
     assert "Should reset to the last non-temporary commit"
+
+    unmock
+}
+
+
+it_sets_environment_variable_if_staged_files_exist()
+{
+    mock "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/hooks/pre-push" 2>&1; echo $FLINT_STAGED_FILES )
+    echo $output | grep -q "file.001.foo file.002.foo"
+    assert "Should list staged files"
+    [ -n $FLINT_STAGED_FILES ]
+    assert "FLINT_STAGED_FILES should be unset after running the hook"
 
     unmock
 }
@@ -93,9 +114,9 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "baz" $commands
+    mock "" "baz" $commands
 
-    ( source "$TEST/.flint/hooks/pre-push" > /dev/null 2>&1 )
+    ( source "$TEST/.core/hooks/pre-push" > /dev/null 2>&1 )
     [[ "$( head -n 1 "$commands" | tail -n 1 )" =~ "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff-filter command format"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
