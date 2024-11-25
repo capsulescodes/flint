@@ -39,17 +39,17 @@ afterEach()
 
 
 
-it_runs_flint_init_correctly()
+it_runs_flint_i()
 {
-    output=$( flint --init )
+    output=$( flint -i )
     [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
     assert "Should create flint files and directories"
 }
 
 
-it_runs_flint_i_correctly()
+it_runs_flint_init()
 {
-    output=$( flint -i )
+    output=$( flint --init )
     [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
     assert "Should create flint files and directories"
 }

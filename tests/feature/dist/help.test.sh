@@ -29,17 +29,17 @@ afterEach()
 
 
 
-it_displays_help_section_with_long_command()
+it_runs_flint_h()
 {
-    output=$( flint --help )
+    output=$( flint -h )
     echo $output | grep -q "Usage: flint"
     assert "Should display help section"
 }
 
 
-it_displays_help_section_with_short_command()
+it_runs_flint_help()
 {
-    output=$( flint -h )
+    output=$( flint --help )
     echo $output | grep -q "Usage: flint"
     assert "Should display help section"
 }

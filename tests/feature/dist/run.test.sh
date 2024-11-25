@@ -55,6 +55,34 @@ afterEach()
 
 
 
+it_runs_flint_r()
+{
+    echo "remote" > file.001.foo
+
+    output=$( flint -r )
+    [[ -f "$LOCAL/file.001.foo" ]]
+    assert "flint - Should pull file"
+    [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
+    assert "flint - Should modify file locally"
+
+    rm file.001.foo
+}
+
+
+it_runs_flint_run()
+{
+    echo "remote" > file.001.foo
+
+    output=$( flint --run )
+    [[ -f "$LOCAL/file.001.foo" ]]
+    assert "flint - Should pull file"
+    [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
+    assert "flint - Should modify file locally"
+
+    rm file.001.foo
+}
+
+
 it_returns_a_warning_if_flint_directory_does_not_exist()
 {
     INIT_CWD="foo"
@@ -92,34 +120,6 @@ it_returns_a_warning_if_binary_file_does_not_exist()
     output=$( flint --run )
     echo $output | grep -q "Binary '.core/replace' not found. Install it and run 'flint run'. Skipping."
     assert "Should output error message"
-
-    rm file.001.foo
-}
-
-
-it_runs_flint_run_locally_by_default()
-{
-    echo "remote" > file.001.foo
-
-    output=$( flint --run )
-    [[ -f "$LOCAL/file.001.foo" ]]
-    assert "flint - Should pull file"
-    [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
-    assert "flint - Should modify file locally"
-
-    rm file.001.foo
-}
-
-
-it_runs_flint_r_locally_by_default()
-{
-    echo "remote" > file.001.foo
-
-    output=$( flint -r )
-    [[ -f "$LOCAL/file.001.foo" ]]
-    assert "flint - Should pull file"
-    [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
-    assert "flint - Should modify file locally"
 
     rm file.001.foo
 }
