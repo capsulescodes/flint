@@ -136,7 +136,7 @@ function mock
 
                 local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
 
-                while [ -f "$cache" ]
+                while [[ -f $cache ]]
 
                 do
                     (( suffix++ ))

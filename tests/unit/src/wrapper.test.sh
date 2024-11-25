@@ -2,11 +2,19 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
-    INIT_CWD=$TEST sh "$PWD/dist/init.sh" init --with-hooks > /dev/null
+
+    mkdir "$TEST/.core"
+
+    cp "$PWD/src/wrapper.sh" "$TEST/.core/wrapper.sh"
+
+    cp "$PWD/template.config.json" "$TEST/flint.config.json"
+
+    sed -i '' $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$TEST/.core/wrapper.sh"
+
+    sed -i "" "s|command git \$@|echo \"git\"|" "$TEST/.core/wrapper.sh"
+
 
     cd $TEST > /dev/null || exit 1
-
-    source .flint/git.sh > /dev/null
 }
 
 afterAll()
@@ -19,48 +27,41 @@ afterAll()
 
 
 
-it_checks_if_flint_hook()
-{
-    [[ -f "$PWD/$hooks/pre-commit" ]]
-    assert "pre-commit should be recognized as a Flint hook"
-
-    [[ -f "$PWD/$hooks/post-pull" ]]
-    assert "post-pull should be recognized as a Flint hook"
-
-    ! [[ -f "$PWD/$hooks/random-hook" ]]
-    assert "random-hook should not be recognized as a Flint hook"
-}
-
-
 it_checks_if_config_file_exists()
 {
-    mv "$TEST/flint.config.json" "$TEST/flint.config.json.bak"
-
-    output=$( bash .flint/git.sh commit 2>&1 )
-    echo $output | grep -q "Warning : The \"flint.config.json\" file does not exist"
+    output=$( config="foo" source "$TEST/.core/wrapper.sh" commit )
+    echo $output | grep -q "The 'foo' file does not exist"
     assert "Should warn when flint.config.json is missing"
-
-    mv "$TEST/flint.config.json.bak" "$TEST/flint.config.json"
 }
 
 
 it_can_run_pre_hook()
 {
-    echo "echo 'Pre-hook executed'" > .flint/hooks/pre-commit
+    mkdir -p "$TEST/.flint/hooks"
 
-    chmod +x .flint/hooks/pre-commit
-    output=$( bash .flint/git.sh commit 2>&1 )
+    echo "echo 'Pre-hook executed'" > "$TEST/.flint/hooks/pre-commit"
+
+    chmod +x "$TEST/.flint/hooks/pre-commit"
+
+    output=$( config="$TEST/flint.config.json" hooks="$TEST/.flint/hooks" source "$TEST/.core/wrapper.sh" commit )
     echo $output | grep -q "Pre-hook executed"
     assert "Pre-commit hook should be executed"
+
+    rm -r "$TEST/.flint/hooks"
 }
 
 
 it_can_run_post_hook()
 {
-    echo "echo 'Post-hook executed'" > .flint/hooks/post-commit
+    mkdir -p "$TEST/.flint/hooks"
 
-    chmod +x .flint/hooks/post-commit
-    output=$( bash .flint/git.sh commit 2>&1 )
+    echo "echo 'Post-hook executed'" >  "$TEST/.flint/hooks/post-commit"
+
+    chmod +x "$TEST/.flint/hooks/post-commit"
+
+    output=$( config="$TEST/flint.config.json" hooks="$TEST/.flint/hooks" source "$TEST/.core/wrapper.sh" commit )
     echo $output | grep -q "Post-hook executed"
     assert "Post-commit hook should be executed"
+
+    rm -r "$TEST/.flint/hooks"
 }

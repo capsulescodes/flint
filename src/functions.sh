@@ -11,7 +11,7 @@ function eval_for_command
     while IFS= read -r linter
 
     do
-        if [[ -z "$linter" ]]
+        if [[ -z $linter ]]
 
         then
             continue
@@ -21,7 +21,7 @@ function eval_for_command
 
         local command=$( echo "$linter" | tr -d '\n\r' | sed -n "s/.*\"$name\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" )
 
-        if [[ -z "$binary" ]] || [[ -z "$command" ]]
+        if [[ -z $binary || -z $command ]]
 
         then
             printf "\033[1;33mWarning : No binary or '$name' command associated with a linter. Skipping.\033[0m\n"
@@ -31,12 +31,12 @@ function eval_for_command
 
         local extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        local filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
+        local filtered=$( [[ -n $files ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
 
-        if [[ -n "$filtered" ]]
+        if [[ -n $filtered ]]
 
         then
-            if [[ -x "$binary" ]]
+            if [[ -x $binary ]]
 
             then
                 eval $binary $command "$filtered"

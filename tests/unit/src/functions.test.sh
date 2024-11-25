@@ -65,7 +65,7 @@ it_checks_if_binary_file_exists()
     echo $output | grep -q "local_foo file.foo"
     assert "Should run the lint command when binary exists"
 
-    rm -rf "$TEST/foo"
+    rm -r "$TEST/foo"
 }
 
 

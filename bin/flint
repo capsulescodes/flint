@@ -1,16 +1,16 @@
 #!/bin/bash
 
-target="$0"
+target=$0
 
 
-while [ -h "$target" ]
+while [[ -h $target ]]
 
 do
     directory="$( cd -P "$( dirname $target )" && pwd )"
 
     target="$( readlink "$target" )"
 
-    [[ "$target" != /* ]] && target="$directory/$target"
+    [[ $target != /* ]] && target="$directory/$target"
 done
 
 
@@ -35,7 +35,7 @@ then
     exit 0
 fi
 
-if [[ $1 == '-h' ]] || [[ $1 == '--help' ]]
+if [[ $1 == '-h' || $1 == '--help' ]]
 
 then
     sh "$path/help.sh"

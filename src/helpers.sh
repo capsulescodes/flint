@@ -2,7 +2,7 @@ get_absolute_path()
 {
     local path=$1
 
-    if [ -f "$path" ]
+    if [[ -f $path ]]
 
     then
         local dir="$( cd "$( dirname $path )" && pwd )"
@@ -22,7 +22,7 @@ get_relative_path()
     source="$( get_absolute_path $source )"
     target="$( get_absolute_path $target )"
 
-    if [ -f "$source" ]
+    if [[ -f $source ]]
 
     then
         source=$( dirname $source )
@@ -31,7 +31,7 @@ get_relative_path()
     source="${source%/}"
     target="${target%/}"
 
-    if [ $source = $target ]
+    if [[ $source = $target ]]
 
     then
         echo ""
@@ -47,7 +47,7 @@ get_relative_path()
     for (( i=0; i < ${#source_parts[@]} && i < ${#target_parts[@]}; i++ ))
 
     do
-        if [ "${source_parts[i]}" = "${target_parts[i]}" ]
+        if [[ "${source_parts[i]}" = "${target_parts[i]}" ]]
 
         then
             (( common_length++ ))
@@ -56,7 +56,7 @@ get_relative_path()
         fi
     done
 
-   if [ $common_length -eq 0 ]
+   if [[ $common_length -eq 0 ]]
 
    then
         echo "$target"
@@ -68,6 +68,7 @@ get_relative_path()
     local result=""
 
     for (( i=common_length; i < ${#source_parts[@]}; i++ ))
+
     do
         result+="../"
     done
@@ -77,7 +78,7 @@ get_relative_path()
     do
         result+="${target_parts[i]}"
 
-        if [ $i -lt $(( ${#target_parts[@]} - 1 )) ]
+        if [[ $i -lt $(( ${#target_parts[@]} - 1 )) ]]
 
         then
             result+="/"
