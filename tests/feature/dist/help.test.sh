@@ -49,9 +49,9 @@ it_lists_options()
 {
     output=$( flint --help )
     echo $output | grep -q "
-    init               Initiates the Flint configuration and mandatory files.
+    -i, --init         Initiates the Flint configuration and mandatory files.
 
-    run                Runs the Flint process. If no parameters are passed,
+    -r, --run          Runs the Flint process. If no parameters are passed,
                        Flint will default to 'run' mode and execute the process.
 
     -h, --help         Displays this help message with information on usage
@@ -64,7 +64,7 @@ it_lists_examples()
 {
     output=$( flint --help )
     echo $output | grep -q "
-    flint init         # Initializes Flint configuration
+    flint --init       # Initializes Flint configuration
     flint              # Runs Flint ( default action )
     flint -h           # Shows help information."
     assert "Should display examples"

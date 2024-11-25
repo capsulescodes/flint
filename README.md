@@ -35,10 +35,10 @@ composer require-dev capsulescodes/flint
 
 ```bash
 # NPM
-node_modules/.bin/flint init
+node_modules/.bin/flint --init
 
 # Composer
-vendor/bin/flint init
+vendor/bin/flint --init
 ```
 
 <br>
@@ -106,9 +106,12 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
     "linters" :
     [
         {
-            "extensions" : [ "js", "ts" ],
-            "remote" : "node_modules/.bin/eslint --fix --config remote.config.js",
-            "local" : "node_modules/.bin/eslint --fix --config local.config.js"
+            "extensions" : [ "js" ],
+            "binary" : "node_modules/.bin/eslint",
+            "commands" : {
+                "local" : "--fix --config eslint.local.config.js",
+                "remote" : "--fix --config eslint.remote.config.js"
+            }
         }
     ]
 }
@@ -125,32 +128,44 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
 
 ## Options
 
+<br>
+
 **- Init flint hooks in your project**
 
-If you want to modify the flint hooks, you can run the command with the `--with-hooks` flag.
-
-<br>
+If you want to modify your own flint hooks, you can run the `--init` or `-i` command with the `--with-hooks` flag.
 
 ```bash
 # NPM
-node_modules/.bin/flint init --with-hooks
+node_modules/.bin/flint -i --with-hooks
 
 # Composer
-vendor/bin/flint init --with-hooks
+vendor/bin/flint -i --with-hooks
 ```
+
+<br>
 
 **- Run Flint manually**
 
-If you want to run your Flint configuration manually, you can run the `run` command.
-
-<br>
+If you want to run your Flint configuration manually, you can run the `--run` or `-r` command.
 
 ```bash
 # NPM
-node_modules/.bin/flint run
+node_modules/.bin/flint --run
 
 # Composer
-vendor/bin/flint run
+vendor/bin/flint --run
+```
+
+<br>
+
+if you want to run a specific command from configuration file like `local` or `remote`, you can run your command after the `--run` or `-r` command.
+
+```bash
+# NPM
+node_modules/.bin/flint -r remote
+
+# Composer
+vendor/bin/flint -r remote
 ```
 
 <br>

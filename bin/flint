@@ -19,7 +19,7 @@ path="$( cd -P "$( dirname $target )" && pwd )/../dist"
 
 
 
-if [[ $1 == 'init' ]]
+if [[ $1 == '-i' || $1 == '--init' ]]
 
 then
     sh "$path/init.sh" $@
@@ -27,7 +27,7 @@ then
     exit 0
 fi
 
-if [[ $1 == 'run' ]] || [[ -z $1 ]]
+if [[ -z $1 || $1 == '-r' || $1 == '--run' ]]
 
 then
     sh "$path/run.sh" $@
