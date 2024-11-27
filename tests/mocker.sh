@@ -3,6 +3,16 @@ function mock
     LOCAL=$1
     REMOTE=$2
 
+    mkdir "$LOCAL/.git"
+
+    mkdir "$LOCAL/.git/modified"
+    mkdir "$LOCAL/.git/staged"
+    mkdir "$LOCAL/.git/committed"
+
+    touch "$LOCAL/.git/commits"
+    touch "$LOCAL/.git/commands"
+
+
     function flint
     {
         source "$LOCAL/.core/bin/flint" $@
@@ -37,15 +47,21 @@ function mock
             fi
         done
 
-        [[ ${#files[@]} -gt 0 ]] && git modify "${files[@]}"
+        if [[ ${#files[@]} -gt 0 ]]
+
+        then
+            git modify "${files[@]}"
+        fi
     }
 
     function git
     {
-        if [[ $1 == "modify" ]]
+        if [[ $1 == "modify" ]] || [[ $1 == "restore" && $2 == "--staged" ]]
 
         then
-            for file in ${@:2}
+            files=$( [[ $1 == "modify" ]] && echo "${@:2}" || echo "${@:3}" )
+
+            for file in $files
 
             do
                 if [[ -n $file ]]
@@ -57,7 +73,11 @@ function mock
                         rm "$LOCAL/.git/staged/$file"
                     fi
 
-                    mkdir -p "$LOCAL/.git/modified"
+                    if [[ -f "$LOCAL/.git/committed/$file" ]]
+
+                    then
+                        rm "$LOCAL/.git/committed/$file"
+                    fi
 
                     cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
 
@@ -78,22 +98,25 @@ function mock
             done
         fi
 
-        if [[ $1 == "add" ]]
+
+        if [[ $1 == "add" ]] || [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
 
         then
-            for file in ${@:2}
+            files=$( [[ $1 == "add" ]] && echo "${@:2}" || echo "$( ls "$LOCAL/.git/committed/" )" )
+
+            directory=$( [[ $1 == "add" ]] && echo "modified" || echo "committed" )
+
+            for file in $files
 
             do
                 if [[ -n $file ]]
 
                 then
-                    if [[ -f "$LOCAL/.git/modified/$file" ]]
+                    if [[ -f "$LOCAL/.git/$directory/$file" ]]
 
                     then
-                        rm "$LOCAL/.git/modified/$file"
+                        rm "$LOCAL/.git/$directory/$file"
                     fi
-
-                    mkdir -p "$LOCAL/.git/staged"
 
                     cp "$LOCAL/$file" "$LOCAL/.git/staged/$file"
 
@@ -117,8 +140,6 @@ function mock
         if [[ $1 == "commit" && $2 == "-m" ]]
 
         then
-            mkdir -p "$LOCAL/.git/committed"
-
             for file in $( ls "$LOCAL/.git/staged" )
 
             do
@@ -156,7 +177,7 @@ function mock
             for file in $( ls -A "$LOCAL/.git/committed" )
 
             do
-                [[ $file == .* ]] && cp "$LOCAL/.git/committed/$file" "$REMOTE/$file"
+                cp "$LOCAL/.git/committed/$file" "$REMOTE/$file"
             done
         fi
 
@@ -178,61 +199,41 @@ function mock
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" && $4 == "--grep=FLINT-TEMPORARY-COMMIT" && $5 == "--max-count=1" ]]
 
         then
-            [[ -f "$LOCAL/.git/commits" && "$( tail -n 1 "$LOCAL/.git/commits" )" == "FLINT-TEMPORARY-COMMIT" ]] && echo "FLINT-TEMPORARY-COMMIT" || echo ""
+            if [[ "$( tail -n 1 "$LOCAL/.git/commits" )" == "FLINT-TEMPORARY-COMMIT" ]]
+
+            then
+                echo "FLINT-TEMPORARY-COMMIT"
+            fi
         fi
 
         if [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
 
         then
-            for file in $( ls "$LOCAL/.git/committed/" )
-
-            do
-                if [[ -f "$LOCAL/.git/committed/$file" ]]
-
-                then
-                    mv "$LOCAL/.git/committed/$file" "$LOCAL/.git/staged/$file"
-                fi
-            done
-
             sed -i "" "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
-            [[ -d "$LOCAL/.git/staged" ]] && ls "$LOCAL/.git/staged" || echo ""
+            ls "$LOCAL/.git/staged"
         fi
 
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            [[ -d "$LOCAL/.git/modified" ]] && ls "$LOCAL/.git/modified" || echo ""
+            ls "$LOCAL/.git/modified"
         fi
 
         if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
 
         then
-            [[ -d "$LOCAL/.git/committed" ]] && ls "$LOCAL/.git/committed" || echo ""
+            ls "$LOCAL/.git/committed"
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
 
         then
             ls "$REMOTE"
-        fi
-
-        if [[ $1 == "restore" && $2 == "--staged" ]]
-
-        then
-            for file in ${@:3}
-
-            do
-                if [[ -f "$LOCAL/.git/staged/$file" ]]
-
-                then
-                    mv "$LOCAL/.git/staged/$file" "$LOCAL/$file"
-                fi
-            done
         fi
 
         echo $@ >> "$LOCAL/.git/commands"
@@ -248,4 +249,6 @@ function unmock
     unset -f eval_for_command
 
     unset -f git
+
+    rm -r "$LOCAL/.git"
 }

@@ -7,7 +7,7 @@ jobs :
     runs-on : ubuntu-latest
     steps :
       - uses : actions/checkout@v4
-      -  run : bash tests/tester.sh
+      -  run : bash tests/runner.sh
       - uses : actions/setup-node@v4
         with :
           node-version : '22.x'

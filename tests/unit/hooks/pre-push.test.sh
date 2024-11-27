@@ -2,9 +2,11 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
+
     mkdir -p "$TEST/.core/hooks"
 
     cp "$PWD/hooks/pre-push" "$TEST/.core/hooks/pre-push"
+
 
     cd $TEST > /dev/null || exit 1
 }
@@ -43,6 +45,12 @@ mock()
             echo "Mock : git reset --soft $3 --quiet"
         fi
 
+        if [[ $1 == "restore" && $2 == "--staged" ]]
+
+        then
+            echo "Mock : git restore --staged $3"
+        fi
+
 
         if [[ -f "$COMMANDS" ]]
 
@@ -64,7 +72,7 @@ it_handles_no_manual_commits()
 {
     mock
 
-    output=$( source "$TEST/.core/hooks/pre-push" 2>&1 )
+    output=$( source "$TEST/.core/hooks/pre-push" )
     echo $output | grep -qv "git reset"
     assert "Should do nothing when no manual commits are found"
 
@@ -76,7 +84,7 @@ it_resets_to_last_manual_commit()
 {
     mock "" "foo"
 
-    output=$( source "$TEST/.core/hooks/pre-push" 2>&1 )
+    output=$( source "$TEST/.core/hooks/pre-push" )
     echo $output | grep -q "Mock : git reset --soft foo"
     assert "Should reset to the last non-temporary commit"
 
@@ -88,9 +96,21 @@ it_resets_silently()
 {
     mock "" "bar"
 
-    output=$( source "$TEST/.core/hooks/pre-push" 2>&1 )
+    output=$( source "$TEST/.core/hooks/pre-push" )
     echo $output | grep -q "Mock : git reset --soft bar --quiet"
     assert "Should reset to the last non-temporary commit"
+
+    unmock
+}
+
+
+it_restores_staged_files_if_staged_files_exist()
+{
+    mock "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/hooks/pre-push" )
+    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
+    assert "Should restore staged files"
 
     unmock
 }
@@ -100,11 +120,11 @@ it_sets_environment_variable_if_staged_files_exist()
 {
     mock "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.core/hooks/pre-push" 2>&1; echo $FLINT_STAGED_FILES )
-    echo $output | grep -q "file.001.foo file.002.foo"
+    source "$TEST/.core/hooks/pre-push" > /dev/null
+    echo $FLINT_STAGED_FILES | grep -q "file.001.foo file.002.foo"
     assert "Should list staged files"
-    [ -n $FLINT_STAGED_FILES ]
-    assert "FLINT_STAGED_FILES should be unset after running the hook"
+    [[ -n $FLINT_STAGED_FILES ]]
+    assert "FLINT_STAGED_FILES should be set after running the hook"
 
     unmock
 }
@@ -114,15 +134,17 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "" "baz" $commands
+    mock "file.001.foo" "baz" $commands
 
-    ( source "$TEST/.core/hooks/pre-push" > /dev/null 2>&1 )
+    source "$TEST/.core/hooks/pre-push" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" =~ "diff --diff-filter=d --staged --name-only" ]]
-    assert "Should use correct diff-filter command format"
+    assert "Should use correct diff-filter command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
-    assert "Should use correct rev-list command format"
+    assert "Should use correct rev-list command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" == "reset --soft baz --quiet" ]]
-    assert "Should use correct reset command format"
+    assert "Should use correct reset command"
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "restore --staged file.001.foo" ]]
+    assert "Should use correct reset command"
 
     unmock
 

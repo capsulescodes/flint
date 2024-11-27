@@ -15,7 +15,7 @@ test()
 
     $1
 
-    if [ -z "$code" ]
+    if [[ -z $code ]]
 
     then
         printf "\033[1;32m\xE2\x9C\x94\033[1;30m $1 \033[0m\n"
@@ -31,7 +31,7 @@ test()
 
 run()
 {
-    if [ $1 -eq 0 ]
+    if [[ $1 -eq 0 ]]
 
     then
         printf "\n\033[1;32mTest file : $2 successful.\033[0m\n\n"

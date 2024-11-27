@@ -39,7 +39,7 @@
         "template.config.json"
     ],
     "scripts" : {
-        "test" : "sh tests/tester.sh"
+        "test" : "sh tests/runner.sh"
     },
     "bin" : {
         "flint" : "bin/flint"

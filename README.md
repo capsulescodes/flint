@@ -187,7 +187,7 @@ npm run test
 composer test
 
 # Bash
-sh tests/tester.sh
+sh tests/runner.sh
 ```
 
 <br>

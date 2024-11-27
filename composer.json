@@ -27,7 +27,7 @@
         }
     ],
     "scripts" : {
-        "test" : [ "sh ./tests/tester.sh" ]
+        "test" : [ "sh ./tests/runner.sh" ]
     },
     "bin" : [ "bin/flint" ]
 }

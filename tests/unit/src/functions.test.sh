@@ -81,7 +81,7 @@ it_handles_empty_file_list()
 }
 
 
-it_evals_for_local()
+it_evaluates_for_local()
 {
     output=$( eval_for_command "local" "config.001.json" "file.foo file.bar file.baz" )
     echo $output | grep -q "local_foo file.foo"
@@ -93,7 +93,7 @@ it_evals_for_local()
 }
 
 
-it_evals_for_remote()
+it_evaluates_for_remote()
 {
     output=$( eval_for_command "remote" "config.001.json" "file.foo file.bar file.baz" )
     echo $output | grep -q "remote_foo file.foo"

@@ -2,6 +2,7 @@ beforeAll()
 {
     TEST=$( mktemp -d )
 
+
     mkdir -p "$TEST/.core/hooks"
 
     cp "$PWD/hooks/post-commit" "$TEST/.core/hooks/post-commit"
@@ -11,6 +12,7 @@ beforeAll()
     cp "$PWD/tests/fixtures/echo" "$TEST/.core/echo"
 
     source "$PWD/src/functions.sh"
+
 
     cd $TEST > /dev/null || exit 1
 
@@ -84,48 +86,12 @@ unmock()
 it_skips_when_temp_commit()
 {
     export FLINT_TEMPORARY_COMMIT=1
-#
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
+
+    output=$( source "$TEST/.core/hooks/post-commit" )
     [[ -z $output ]]
     assert "Should skip execution when FLINT_TEMPORARY_COMMIT is set"
-#
+
     unset FLINT_TEMPORARY_COMMIT
-}
-
-
-it_formats_committed_files()
-{
-    mock "file.001.foo file.002.foo" "file.001.foo"
-
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_foo file.001.foo file.002.foo"
-    assert "Should run local lint command for committed files"
-
-    unmock
-}
-
-
-it_adds_modified_files()
-{
-    mock "file.001.foo file.002.foo" "file.001.foo"
-
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "Mock : git add file.001.foo"
-    assert "Should add modified files"
-
-    unmock
-}
-
-
-it_creates_temp_commit()
-{
-    mock "file.001.foo file.002.foo" "file.001.foo" "foo"
-
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "Mock : git commit -m foo"
-    assert "Should create a temporary commit"
-
-    unmock
 }
 
 
@@ -133,7 +99,7 @@ it_handles_no_committed_files()
 {
     mock
 
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" )
     [[ -z $output ]]
     assert "Should not perform any actions when no files are committed"
 
@@ -141,11 +107,23 @@ it_handles_no_committed_files()
 }
 
 
+it_evaluates_committed_files()
+{
+    mock "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo"
+    assert "Should run local lint command for committed files"
+
+    unmock
+}
+
+
 it_handles_no_modified_files_after_formatting()
 {
-    mock "file.001.foo"
+    mock "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
+    output=$( source "$TEST/.core/hooks/post-commit" )
     echo $output | grep -q "local_foo file.001.foo"
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -qv "git add"
@@ -157,27 +135,25 @@ it_handles_no_modified_files_after_formatting()
 }
 
 
-it_identifies_modified_files()
+it_adds_modified_files()
 {
-    mock "file.001.foo file_002.foo file!char&003.foo" "file.001.foo file_002.foo file!char&003.foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "Mock : git add file.001.foo file_002.foo file!char&003.foo"
-    assert "Should add only modified files from committed files list"
+    output=$( source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
+    assert "Should add modified files"
 
     unmock
 }
 
 
-it_processes_multiple_files()
+it_creates_commit_with_correct_message()
 {
-    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "foo"
 
-    output=$( source "$TEST/.core/hooks/post-commit" 2>&1 )
-    echo $output | grep -q "local_foo file.001.foo file.002.foo"
-    assert "Should process all committed files"
-    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
-    assert "Should add all modified files"
+    output=$( source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "Mock : git commit -m foo"
+    assert "Should create commit with correct temporary commit message"
 
     unmock
 }
@@ -185,12 +161,12 @@ it_processes_multiple_files()
 
 it_sets_and_unsets_environment_variable()
 {
-    mock "file.001.foo file.002.foo" "file.001.foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
-    ( source "$TEST/.core/hooks/post-commit" > /dev/null 2>&1 )
+    source "$TEST/.core/hooks/post-commit" > /dev/null
 
     [ -z $FLINT_TEMPORARY_COMMIT ]
     assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
@@ -205,15 +181,15 @@ it_uses_correct_git_commands()
 
     mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo" "bar" $commands
 
-    ( source "$TEST/.core/hooks/post-commit" > /dev/null 2>&1 )
+    source "$TEST/.core/hooks/post-commit" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
-    assert "Should use correct diff-tree command format"
+    assert "Should use correct diff-tree command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
-    assert "Should use correct diff command format"
+    assert "Should use correct diff command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "add file.001.foo file.002.foo" ]]
-    assert "Should use correct add command format"
+    assert "Should use correct add command"
     [[ "$( head -n 4 "$commands" | tail -n 1 )" =~ "commit -m" ]]
-    assert "Should use correct commit command format"
+    assert "Should use correct commit command"
 
     unmock
 

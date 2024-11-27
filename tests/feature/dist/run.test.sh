@@ -34,8 +34,6 @@ beforeEach()
 
     cd $LOCAL > /dev/null || exit 1
 
-    mkdir "$LOCAL/.git"
-
     source "$LOCAL/.core/src/functions.sh"
 
     mock $LOCAL
@@ -45,7 +43,7 @@ beforeEach()
 
 afterEach()
 {
-    unmock
+    unmock $LOCAL
 
     cd - > /dev/null || exit 1
 
@@ -159,50 +157,45 @@ it_creates_a_file_and_runs_flint()
 
     echo "remote" > file.001.foo
 
+    output=$( git modify "file.001.foo" )
+    [[ "$(cat "$LOCAL/.git/modified/.file.001.foo.001")" == "remote" && -f "$LOCAL/.git/modified/file.001.foo" ]]
+    assert "add - Should create file"
+
     output=$( flint --run )
-    [[ -f "$LOCAL/file.001.foo" ]]
-    assert "flint - Should pull file"
-    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.001" )" == "local" ]]
+    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.002" )" == "local" && -f "$LOCAL/.git/modified/file.001.foo" ]]
     assert "flint - Should modify file locally"
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "local" ]]
-    assert "flint - Should add file"
-    [[ "$( head -n 1 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
-    assert "flint - Should commit temporary"
-    [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.001" )" == "local" ]]
-    assert "flint - Should commit file"
 
     # COMMANDS
 
-    [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
-    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
-    [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct rev-list command format"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
-    [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
-    assert "commands - Should use correct modify command format"
-    [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
-    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct commit command format"
+    [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
+    assert "commands - Should use correct diff command"
+    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff command"
+    [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
+    assert "commands - Should use correct rev-list command"
+    [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
+    assert "commands - Should use correct modify command"
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff command"
 
     # DIRECTORIES
 
-    [[ $( ls -A "$LOCAL" | grep -Ec "^(.core|.flint|.git|file.001.foo|flint.config.json)$" ) -eq $( ls -A "$LOCAL" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL" )" == "$( echo ".core|.flint|.git|file.001.foo|flint.config.json" | tr "|" "\n" )" ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001)$" ) -eq $( ls -A "$LOCAL/.git/modified" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/modified" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|file.001.foo" | tr "|" "\n" )" ]]
     assert "files - Modified files should be present"
-    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001)$" ) -eq $( ls -A "$LOCAL/.git/staged" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/staged" )" == "$( echo "" | tr "|" "\n" )" ]]
     assert "files - Staged files should be present"
-    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|file.001.foo)$" ) -eq $( ls -A "$LOCAL/.git/committed" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo "" | tr "|" "\n" )" ]]
     assert "files - Committed files should be present"
 
     rm file.001.foo
 }
+
 
 it_creates_a_file_adds_it_and_runs_flint()
 {
@@ -211,43 +204,45 @@ it_creates_a_file_adds_it_and_runs_flint()
     echo "remote" > file.001.foo
 
     output=$( wrap add file.001.foo )
-    [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
-    assert "add - Should add created file"
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote" ]]
-    assert "add - Should keep file content"
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote"  && -f "$LOCAL/.git/staged/file.001.foo" ]]
+    assert "add - Should add file"
 
     output=$( flint --run )
-    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.001" )" == "local" ]]
+    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.001" )" == "remote" ]]
+    assert "flint - Should reset file"
+    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.002" )" == "local" ]]
     assert "flint - Should modify file locally"
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.002" )" == "local" ]]
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.002" )" == "local" && -f "$LOCAL/.git/staged/file.001.foo" ]]
     assert "flint - Should add file"
 
     # COMMANDS
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
+    assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct rev-list command format"
-    [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
-    [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
-    assert "commands - Should use correct modify command format"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
-    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct rev-list command"
+    [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.001.foo" ]]
+    assert "commands - Should use correct diff command"
+    [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
+    assert "commands - Should use correct modify command"
+    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff command"
+    [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
+    assert "commands - Should use correct add command"
 
     # DIRECTORIES
 
-    [[ $( ls -A "$LOCAL" | grep -Ec "^(.core|.flint|.git|file.001.foo|flint.config.json)$" ) -eq $( ls -A "$LOCAL" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL" )" == "$( echo ".core|.flint|.git|file.001.foo|flint.config.json" | tr "|" "\n" )" ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001)$" ) -eq $( ls -A "$LOCAL/.git/modified" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/modified" )" == "$( echo ".file.001.foo.001|.file.001.foo.002" | tr "|" "\n" )" ]]
     assert "files - Modified files should be present"
-    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|file.001.foo)$" ) -eq $( ls -A "$LOCAL/.git/staged" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/staged" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|file.001.foo" | tr "|" "\n" )" ]]
     assert "files - Staged files should be present"
 
     rm file.001.foo
@@ -261,10 +256,8 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     echo "remote" > file.001.foo
 
     output=$( wrap add file.001.foo )
-    [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
-    assert "add - Should add created file"
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote" ]]
-    assert "add - Should keep file content"
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote" && -f "$LOCAL/.git/staged/file.001.foo"  ]]
+    assert "add - Should add file"
 
     output=$( wrap commit -m "foo" )
     [[ "$( head -n 1 "$LOCAL/.git/commits" | tail -n 1 )" == "foo" ]]
@@ -281,9 +274,9 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     assert "commit - Should commit file"
 
     output=$( flint --run )
-    [[ "$( head -n 2 "$LOCAL/.git/commits" | tail -n 1 )" == "DELETED-TEMPORARY-COMMIT" ]]
-    assert "flint - Should reset Flint temporary commit"
-    [[ "$( head -n 3 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.003" )" == "local" ]]
+    assert "flint - Should reset temporary commit"
+    [[ "$( head -n 2 "$LOCAL/.git/commits" | tail -n 1 )" == "DELETED-TEMPORARY-COMMIT" && "$( head -n 3 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
     assert "flint - Should commit temporary"
     [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.003" )" == "local" && -f "$LOCAL/.git/committed/file.001.foo" ]]
     assert "flint - Should commit file"
@@ -291,49 +284,49 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     # COMMANDS
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct rev-list command format"
+    assert "commands - Should use correct rev-list command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
+    assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m foo" ]]
-    assert "commands - Should use correct commit command format"
+    assert "commands - Should use correct commit command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
-    assert "commands - Should use correct diff-tree command format"
+    assert "commands - Should use correct diff-tree command"
     [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
-    assert "commands - Should use correct modify locally command format"
+    assert "commands - Should use correct modify locally command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct commit command format"
+    assert "commands - Should use correct commit command"
     [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
+    assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct rev-list command format"
+    assert "commands - Should use correct rev-list command"
     [[ "$( head -n 14 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct reset command format"
+    assert "commands - Should use correct reset command"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
+    assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct commit command format"
+    assert "commands - Should use correct commit command"
 
     # DIRECTORIES
 
-    [[ $( ls -A "$LOCAL" | grep -Ec "^(.core|.flint|.git|file.001.foo|flint.config.json)$" ) -eq $( ls -A "$LOCAL" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL" )" == "$( echo ".core|.flint|.git|file.001.foo|flint.config.json" | tr "|" "\n" )" ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001)$" ) -eq $( ls -A "$LOCAL/.git/modified" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/modified" )" == "$( echo ".file.001.foo.001" | tr "|" "\n" )" ]]
     assert "files - Modified files should be present"
-    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002)$" ) -eq $( ls -A "$LOCAL/.git/staged" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/staged" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|.file.001.foo.003" | tr "|" "\n" )" ]]
     assert "files - Staged files should be present"
-    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq $( ls -A "$LOCAL/.git/committed" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo" | tr "|" "\n" )" ]]
     assert "files - Committed files should be present"
 
     rm file.001.foo
@@ -347,10 +340,8 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     echo "remote" > file.001.foo
 
     output=$( wrap add file.001.foo )
-    [[ -f "$LOCAL/.git/staged/file.001.foo" ]]
-    assert "first add - Should add created file"
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote" ]]
-    assert "first add - Should keep file content"
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote"  && -f "$LOCAL/.git/staged/file.001.foo" ]]
+    assert "first add - Should add file"
 
     output=$( wrap commit -m "foo" )
     [[ "$( head -n 1 "$LOCAL/.git/commits" | tail -n 1 )" == "foo" ]]
@@ -369,77 +360,77 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     echo "remote" > file.002.foo
 
     output=$( wrap add file.002.foo )
-    [[ -f "$LOCAL/.git/staged/file.002.foo" ]]
-    assert "second add - Should add created file"
-    [[ "$( cat "$LOCAL/.git/staged/.file.002.foo.001" )" == "remote" ]]
-    assert "second add - Should keep file content"
+    [[ "$( cat "$LOCAL/.git/staged/.file.002.foo.001" )" == "remote" && -f "$LOCAL/.git/staged/file.002.foo" ]]
+    assert "second add - Should add file"
 
     output=$( flint --run )
-    [[ "$( cat "$LOCAL/.git/modified/.file.002.foo.001" )" == "local" ]]
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.003" )" == "local" ]]
+    assert "flint - Should reset file"
+    [[ "$( cat "$LOCAL/.git/modified/.file.002.foo.001" )" == "remote" ]]
+    assert "flint - Should restore file"
+    [[ "$( cat "$LOCAL/.git/modified/.file.002.foo.002" )" == "local" ]]
     assert "flint - Should modify file locally"
-    [[ "$( cat "$LOCAL/.git/staged/.file.002.foo.002" )" == "local" ]]
-    assert "flint - Should add file"
-    [[ "$( head -n 2 "$LOCAL/.git/commits" | tail -n 1 )" == "DELETED-TEMPORARY-COMMIT" ]]
-    assert "flint - Should reset Flint temporary commit"
-    [[ "$( head -n 3 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
+    [[ "$( head -n 2 "$LOCAL/.git/commits" | tail -n 1 )" == "DELETED-TEMPORARY-COMMIT" && "$( head -n 3 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
     assert "flint - Should commit temporary"
     [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.003" )" == "local" && -f "$LOCAL/.git/committed/file.001.foo" ]]
     assert "flint - Should commit file"
+    [[ "$( cat "$LOCAL/.git/staged/.file.002.foo.002" )" == "local" && -f "$LOCAL/.git/staged/file.002.foo"  ]]
+    assert "flint - Should add file"
 
     # COMMANDS
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct rev-list command format"
+    assert "commands - Should use correct rev-list command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
+    assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m foo" ]]
-    assert "commands - Should use correct commit command format"
+    assert "commands - Should use correct commit command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
-    assert "commands - Should use correct diff-tree command format"
+    assert "commands - Should use correct diff-tree command"
     [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
-    assert "commands - Should use correct modify locally command format"
+    assert "commands - Should use correct modify locally command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct commit command format"
+    assert "commands - Should use correct commit command"
     [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.002.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
+    assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 14 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "commands - Should use correct rev-list command format"
+    assert "commands - Should use correct rev-list command"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct reset command format"
-    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command format"
-    [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.002.foo" ]]
-    assert "commands - Should use correct modify command format"
-    [[ "$( head -n 18 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "commands - Should use correct diff command format"
-    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.002.foo" ]]
-    assert "commands - Should use correct restore command format"
+    assert "commands - Should use correct reset command"
+    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.002.foo" ]]
+    assert "commands - Should use correct restore command"
+    [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 18 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.002.foo" ]]
+    assert "commands - Should use correct modify command"
+    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff command"
     [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
-    assert "commands - Should use correct commit command format"
+    assert "commands - Should use correct commit command"
     [[ "$( head -n 21 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.002.foo" ]]
-    assert "commands - Should use correct add command format"
+    assert "commands - Should use correct add command"
 
     # DIRECTORIES
 
-    [[ $( ls -A "$LOCAL" | grep -Ec "^(.core|.flint|.git|file.001.foo|file.002.foo|flint.config.json)$" ) -eq $( ls -A "$LOCAL" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL" )" == "$( echo ".core|.flint|.git|file.001.foo|file.002.foo|flint.config.json" | tr "|" "\n" )" ]]
     assert "files - Unstaged files should be present"
-    [[ $( ls -A "$LOCAL/.git/modified" | grep -Ec "^(.file.001.foo.001|.file.002.foo.001)$" ) -eq $( ls -A "$LOCAL/.git/modified" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/modified" )" == "$( echo ".file.001.foo.001|.file.002.foo.001|.file.002.foo.002" | tr "|" "\n" )" ]]
     assert "files - Modified files should be present"
-    [[ $( ls -A "$LOCAL/.git/staged" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.002.foo.001|.file.002.foo.002|file.002.foo)$" ) -eq $( ls -A "$LOCAL/.git/staged" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/staged" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|.file.001.foo.003|.file.002.foo.001|.file.002.foo.002|file.002.foo" | tr "|" "\n" )" ]]
     assert "files - Staged files should be present"
-    [[ $( ls -A "$LOCAL/.git/committed" | grep -Ec "^(.file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo)$" ) -eq $( ls -A "$LOCAL/.git/committed" | wc -l ) ]]
+    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|.file.001.foo.003|file.001.foo" | tr "|" "\n" )" ]]
     assert "files - Committed files should be present"
 
     rm file.001.foo

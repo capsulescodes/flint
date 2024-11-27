@@ -19,7 +19,7 @@ beforeEach()
 
 afterEach()
 {
-    unmock
+    unmock $LOCAL
 
     cd - > /dev/null || exit 1
 
@@ -33,7 +33,7 @@ it_runs_flint_h()
 {
     output=$( flint -h )
     echo $output | grep -q "Usage: flint"
-    assert "Should display help section"
+    assert "Should output help section"
 }
 
 
@@ -41,7 +41,7 @@ it_runs_flint_help()
 {
     output=$( flint --help )
     echo $output | grep -q "Usage: flint"
-    assert "Should display help section"
+    assert "Should output help section"
 }
 
 
@@ -56,7 +56,7 @@ it_lists_options()
 
     -h, --help         Displays this help message with information on usage
                        and available options."
-    assert "Should display options"
+    assert "Should output options"
 }
 
 
@@ -67,5 +67,5 @@ it_lists_examples()
     flint --init       # Initializes Flint configuration
     flint              # Runs Flint ( default action )
     flint -h           # Shows help information."
-    assert "Should display examples"
+    assert "Should output examples"
 }

@@ -31,7 +31,7 @@ then
         done <<< "$staged"
 
 
-        if [[ ${#files[@]} -gt 0 ]]
+        if [[ -n ${files[0]} ]]
 
         then
             git add "${files[@]}"

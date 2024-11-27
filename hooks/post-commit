@@ -1,9 +1,9 @@
-if [ -z $FLINT_TEMPORARY_COMMIT ]
+if [[ -z $FLINT_TEMPORARY_COMMIT ]]
 
 then
     committed=$( git diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD )
 
-    if [ -n "$committed" ]
+    if [[ -n $committed ]]
 
     then
         eval_for_command "local" $FLINT_CONFIG "$committed"
@@ -23,7 +23,7 @@ then
         done <<< "$committed"
 
 
-        if [[ ${#files[@]} -gt 0 ]]
+        if [[ -n ${files[0]} ]]
 
         then
             git add "${files[@]}"

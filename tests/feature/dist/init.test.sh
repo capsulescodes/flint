@@ -29,7 +29,7 @@ beforeEach()
 
 afterEach()
 {
-    unmock
+    unmock $LOCAL
 
     cd - > /dev/null || exit 1
 
@@ -63,7 +63,7 @@ it_warns_if_source_hooks_directory_is_missing()
     [[ ! -d "$LOCAL/.core/hooks" ]]
     assert "Should not have hooks directory"
     echo $output | grep -q "Required files not found at '$LOCAL/.core'."
-    assert "Should display message"
+    assert "Should output message"
 
     mv "$LOCAL/.core/hooks-bak" "$LOCAL/.core/hooks"
 }
@@ -77,7 +77,7 @@ it_warns_if_source_hooks_directory_is_missing()
     [[ ! -d "$LOCAL/.core/hooks" ]]
     assert "Should not have hooks directory"
     echo $output | grep -q "Required files not found at '$LOCAL/.core'."
-    assert "Should display message"
+    assert "Should output message"
 
     mv "$LOCAL/.core/hooks-bak" "$LOCAL/.core/hooks"
 }
@@ -91,7 +91,7 @@ it_warns_if_source_wrapper_file_is_missing()
     [[ ! -f "$LOCAL/.core/wrapper.sh" ]]
     assert "Should not have wrapper file"
     echo $output | grep -q "Required files not found at '$LOCAL/.core'."
-    assert "Should display message"
+    assert "Should output message"
 
     mv "$LOCAL/.core/src/wrapper.sh.bak" "$LOCAL/.core/src/wrapper.sh"
 }
@@ -103,7 +103,7 @@ it_creates_flint_directory()
     [[ -d "$LOCAL/.flint" ]]
     assert "Should create flint directory"
     echo $output | grep -q "Directory '.flint' added to project root."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -113,7 +113,7 @@ it_skips_flint_directory_creation_if_it_already_exists()
 
     output=$( flint --init )
     echo $output | grep -q "Directory '.flint' already exists in project root. Skipping."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -125,7 +125,7 @@ it_creates_hooks_directory_inside_flint_directory_if_mentionned()
     echo "$( cat "$LOCAL/.flint/git.sh" )" | grep -q "hooks=\".flint/hooks\""
     assert "Should modify file"
     echo $output | grep -q "Hooks directory 'hooks' added to '.flint' directory."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -135,7 +135,7 @@ it_creates_a_configuration_file()
     [[ -f "$LOCAL/flint.config.json" ]]
     assert "Should create configuration file"
     echo $output | grep -q "Base config file 'flint.config.json' added to project root."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -145,7 +145,7 @@ it_skips_configuration_file_creation_if_it_already_exists()
 
     output=$( flint --init )
     echo $output | grep -q "Base config file 'flint.config.json' already exists in project root. Skipping."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -191,7 +191,7 @@ it_warns_if_no_bash_profile_file_is_found()
 {
     output=$( SHELL="bash" HOME=$LOCAL flint --init )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -227,7 +227,7 @@ it_warns_if_no_zsh_profile_file_is_found()
 {
     output=$( SHELL="zsh" HOME=$LOCAL flint --init )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -267,7 +267,7 @@ it_warns_if_no_fish_profile_file_is_found()
 {
     output=$( SHELL="fish" HOME=$LOCAL flint --init )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
-    assert "Should display message"
+    assert "Should output message"
 }
 
 
@@ -275,5 +275,5 @@ it_warns_if_no_shell_is_found()
 {
     output=$( SHELL="foo" flint --init )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
-    assert "Should display message"
+    assert "Should output message"
 }

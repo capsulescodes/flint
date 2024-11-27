@@ -41,11 +41,18 @@ then
     git reset --soft $manual --quiet
 fi
 
+if [[ -n $staged ]]
+
+then
+    git restore --staged "$staged"
+fi
+
+
+
+
 reset=$( git diff --diff-filter=d --staged --name-only )
 
-command=$( [[ -n $2 ]] && echo "$2" || echo "local" )
-
-eval_for_command $command $config
+eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config
 
 modified=$( git diff --name-only )
 
@@ -55,7 +62,7 @@ files=()
 while IFS= read -r file
 
 do
-    if [ -n "$file" ] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
+    if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
 
     then
         files+=( $file )
@@ -63,13 +70,17 @@ do
 done <<< "$modified"
 
 
-[[ ${#files[@]} -gt 0 ]] && git add "${files[@]}"
 
-if [[ ${#files[@]} -gt 0 || ! "$reset" == "$staged" ]]
+
+if [[ -n ${files[0]} ]]
 
 then
-    [[ -n $staged ]] && git restore --staged "$staged"
+    git add "${files[@]}"
+fi
 
+if [[ -n ${files[0]} || -n $reset ]]
+
+then
     export FLINT_TEMPORARY_COMMIT=1
 
     git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
@@ -77,4 +88,8 @@ then
     unset FLINT_TEMPORARY_COMMIT
 fi
 
-[[ -n $staged ]] && git add "$staged"
+if [[ -n $staged ]]
+
+then
+    git add "$staged"
+fi

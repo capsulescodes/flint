@@ -1,3 +1,5 @@
+unstaged=$( git diff --name-only )
+
 staged=$( git diff --diff-filter=d --staged --name-only )
 
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
@@ -8,37 +10,29 @@ then
     git reset --soft $manual --quiet
 fi
 
-unstaged=$( git diff --name-only )
+if [[ -n $unstaged ]]
+
+then
+    export FLINT_UNSTAGED_FILES=$unstaged
+fi
+
+if [[ -n $staged ]]
+
+then
+    git restore --staged "$staged"
+
+    export FLINT_STAGED_FILES=$staged
+fi
+
+
+restore=$( git diff --name-only )
 
 reset=$( git diff --diff-filter=d --staged --name-only )
 
-combined=$( printf "%s\n%s\n" "$unstaged" "$reset" | sort | uniq )
+combined=$( printf "%s\n%s\n" "$restore" "$reset" | sort | uniq )
 
 if [[ -n $combined ]]
 
 then
     eval_for_command "remote" $FLINT_CONFIG "$combined"
-
-    modified=$( git diff --name-only )
-
-    files=()
-
-    while IFS= read -r file
-
-    do
-        if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file"
-
-        then
-            files+=( $file )
-        fi
-    done <<< "$combined"
-
-
-    if [[ ${#files[@]} -gt 0 ]]
-
-    then
-        git add "${files[@]}"
-    fi
 fi
-
-[[ -n $staged ]] && export FLINT_STAGED_FILES=$staged
