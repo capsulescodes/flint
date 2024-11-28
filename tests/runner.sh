@@ -9,7 +9,7 @@ total=0
 passed=0
 
 
-for filename in tests/**/**/helpers.test.sh
+for filename in tests/**/**/*.test.sh
 
 do
     source $filename
