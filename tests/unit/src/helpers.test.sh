@@ -124,7 +124,7 @@ it_handles_same_directory()
 it_handles_parent_to_child()
 {
     output=$( get_relative_path "$TEST" "$TEST/foo/bar" )
-    [[ $output = "./foo/bar" ]]
+    [[ $output = "foo/bar" ]]
     assert "Should handle path from parent to child directory"
 }
 

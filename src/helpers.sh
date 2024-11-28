@@ -76,11 +76,5 @@ get_relative_path()
         fi
     done
 
-    if [[ $result != ../* && $result != /* ]]
-
-    then
-        result="./$result"
-    fi
-
     echo "$result"
 }
