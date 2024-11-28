@@ -20,7 +20,7 @@ function mock
 
     function wrap
     {
-        [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" || git $@
+        [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" $@ || git $@
     }
 
     function eval_for_command
