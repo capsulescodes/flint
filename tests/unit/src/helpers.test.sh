@@ -116,7 +116,7 @@ it_preserves_trailing_slashes_in_absolute_path()
 it_handles_same_directory()
 {
     output=$( get_relative_path "$TEST/foo" "$TEST/foo" )
-    [[ -z $output ]]
+    [[ $output = "." ]]
     assert "Relative path between same directories should be empty"
 }
 
@@ -124,7 +124,7 @@ it_handles_same_directory()
 it_handles_parent_to_child()
 {
     output=$( get_relative_path "$TEST" "$TEST/foo/bar" )
-    [[ $output = "foo/bar" ]]
+    [[ $output = "./foo/bar" ]]
     assert "Should handle path from parent to child directory"
 }
 
@@ -200,6 +200,6 @@ it_preserves_trailing_slashes_in_relative_path()
 it_handles_no_common_path()
 {
     output=$( get_relative_path "/usr/local/bin" "$TEST/foo/bar" )
-    [[ $output = "$TEST/foo/bar" ]]
+    [[ $output = "../../..$TEST/foo/bar" ]]
     assert "Should return the target's absolute path when no common parts exist"
 }

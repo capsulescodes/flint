@@ -31,10 +31,10 @@ get_relative_path()
     source="${source%/}"
     target="${target%/}"
 
-    if [[ $source = $target ]]
+    if [[ $source == $target ]]
 
     then
-        echo ""
+        echo "."
 
         return
     fi
@@ -44,10 +44,10 @@ get_relative_path()
 
     local common_length=0
 
-    for (( i=0; i < ${#source_parts[@]} && i < ${#target_parts[@]}; i++ ))
+    for (( i = 0; i < ${#source_parts[@]} && i < ${#target_parts[@]}; i++ ))
 
     do
-        if [[ "${source_parts[i]}" = "${target_parts[i]}" ]]
+        if [[ "${source_parts[i]}" == "${target_parts[i]}" ]]
 
         then
             (( common_length++ ))
@@ -56,24 +56,15 @@ get_relative_path()
         fi
     done
 
-   if [[ $common_length -eq 0 ]]
-
-   then
-        echo "$target"
-
-        return
-    fi
-
-
     local result=""
 
-    for (( i=common_length; i < ${#source_parts[@]}; i++ ))
+    for (( i = common_length; i < ${#source_parts[@]}; i++ ))
 
     do
         result+="../"
     done
 
-    for (( i=common_length; i < ${#target_parts[@]}; i++ ))
+    for (( i = common_length; i < ${#target_parts[@]}; i++ ))
 
     do
         result+="${target_parts[i]}"
@@ -84,6 +75,12 @@ get_relative_path()
             result+="/"
         fi
     done
+
+    if [[ $result != ../* && $result != /* ]]
+
+    then
+        result="./$result"
+    fi
 
     echo "$result"
 }

@@ -30,7 +30,7 @@ then
 
 
 
-    hooks="$( get_relative_path $INIT_CWD $source )/hooks"
+    hooks="$( get_relative_path "$INIT_CWD" "$source" )/hooks"
 
     if [[ $@ =~ "--with-hooks" ]]
 
@@ -45,7 +45,7 @@ then
 
 
 
-    wrapper="$( get_relative_path $INIT_CWD "$source/src/wrapper.sh" )"
+    wrapper="$( get_relative_path "$INIT_CWD" "$source/src/wrapper.sh" )"
 
     printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\n\nsource \"$( [[ $wrapper == /* ]] && echo $wrapper || echo "\$PWD/$wrapper" )\" \$@" > "$destination/git.sh"
 
