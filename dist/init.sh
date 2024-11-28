@@ -47,7 +47,7 @@ then
 
     wrapper="$( get_relative_path "$INIT_CWD" "$source/src/wrapper.sh" )"
 
-    printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\n\nsource \"$( [[ $wrapper == /* ]] && echo $wrapper || echo "\$PWD/$wrapper" )\" \"\$@\"" > "$destination/git.sh"
+    printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\n\nsource \"$( [[ $wrapper == /* ]] && echo $wrapper || echo "\$PWD/$wrapper" )\" \$@" > "$destination/git.sh"
 
     chmod +x "$destination/git.sh"
 else
@@ -107,7 +107,7 @@ fi
 if [ -f "$profile" ]
 
 then
-    command='git() { [[ -f "$PWD/.flint/git.sh" ]] && source "$PWD/.flint/git.sh" || command git "$@" }'
+    command='git() { [[ -f "$PWD/.flint/git.sh" ]] && sh "$PWD/.flint/git.sh" $@ || command git $@ }'
 
     if [[ ! "$( cat $profile | tr -d '[:space:]' )" == *"$( echo $command | tr -d '[:space:]' )"* ]]
 
