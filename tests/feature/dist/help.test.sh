@@ -29,32 +29,18 @@ afterEach()
 
 
 
-it_runs_flint_h()
-{
-    output=$( flint -h )
-    echo $output | grep -q "Usage: flint"
-    assert "Should output help section"
-}
-
-
-it_runs_flint_help()
-{
-    output=$( flint --help )
-    echo $output | grep -q "Usage: flint"
-    assert "Should output help section"
-}
-
-
 it_lists_options()
 {
     output=$( flint --help )
     echo $output | grep -q "
-    -i, --init         Initiates the Flint configuration and mandatory files.
+    -i, --init         Initializes the configuration.
+        --with-hooks   Initializes the configuration with modifiable hooks included.
+        --no-wrap      Initializes the configuration without the Git wrapper function.
 
-    -r, --run          Runs the Flint process. If no parameters are passed,
-                       Flint will default to 'run' mode and execute the process.
+    -r, --run          Execute the process.
+                       Defaults to 'local' mode if no parameters are specified.
 
-    -h, --help         Displays this help message with information on usage
+    -h, --help         Display this help guide with information on usage
                        and available options."
     assert "Should output options"
 }
@@ -64,8 +50,8 @@ it_lists_examples()
 {
     output=$( flint --help )
     echo $output | grep -q "
-    flint --init       # Initializes Flint configuration
-    flint              # Runs Flint ( default action )
-    flint -h           # Shows help information."
+    flint --init       Initializes the configuration.
+    flint              Run Flint wrapped Git functionality.
+    flint -h           Shows help information."
     assert "Should output examples"
 }

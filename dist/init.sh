@@ -70,54 +70,60 @@ else
 fi
 
 
-
-
-shell=$( basename $SHELL )
-
-
-if [ $shell == "bash" ]
+if [[ ! $@ =~ "--no-wrap" ]]
 
 then
-    if [ -f "$HOME/.bash_profile" ]
+    shell=$( basename $SHELL )
+
+
+    if [ $shell == "bash" ]
 
     then
-        profile="$HOME/.bash_profile"
+        if [ -f "$HOME/.bash_profile" ]
+
+        then
+            profile="$HOME/.bash_profile"
+        fi
+
+        if [ -f "$HOME/.bashrc" ]
+
+        then
+            profile="$HOME/.bashrc"
+        fi
     fi
 
-    if [ -f "$HOME/.bashrc" ]
+    if [ $shell == "zsh" ]
 
     then
-        profile="$HOME/.bashrc"
+        profile="$HOME/.zshrc"
     fi
-fi
 
-if [ $shell == "zsh" ]
-
-then
-    profile="$HOME/.zshrc"
-fi
-
-if [ $shell == "fish" ]
-
-then
-    profile="$HOME/.config/fish/config.fish"
-fi
-
-
-if [ -f "$profile" ]
-
-then
-    command='git() { [[ -f "$PWD/.flint/git.sh" ]] && sh "$PWD/.flint/git.sh" $@ || command git $@ }'
-
-    if [[ ! "$( cat $profile | tr -d '[:space:]' )" == *"$( echo $command | tr -d '[:space:]' )"* ]]
+    if [ $shell == "fish" ]
 
     then
-        printf "\n\n\n\n# Flint git wrapper\n$command\n\n" >> $profile
+        profile="$HOME/.config/fish/config.fish"
+    fi
 
-        printf "\033[1;32m[ Flint ] Git wrapper function written in '$( basename $profile )' file.\033[0m\n\n"
+
+    if [ -f "$profile" ]
+
+    then
+        command='git() { [[ -f "$PWD/.flint/git.sh" ]] && sh "$PWD/.flint/git.sh" $@ || command git $@ }'
+
+        if [[ ! "$( cat $profile | tr -d '[:space:]' )" == *"$( echo $command | tr -d '[:space:]' )"* ]]
+
+        then
+            printf "\n\n\n\n# Flint git wrapper\n$command\n\n" >> $profile
+
+            printf "\033[1;32m[ Flint ] Git wrapper function written in '$( basename $profile )' file.\033[0m\n\n"
+        else
+            printf "\033[1;36m[ Flint ] Git wrapper function already exists in '$( basename $profile )' file. Skipping.\033[0m\n\n"
+        fi
     else
-        printf "\033[1;36m[ Flint ] Git wrapper function already exists in '$( basename $profile )' file. Skipping.\033[0m\n\n"
+        printf "\033[1;33m[ Flint ] Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually.\033[0m\n\n"
     fi
 else
-    printf "\033[1;33m[ Flint ] Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually.\033[0m\n\n"
+    printf "\033[1;30m[ Flint ] Git wrapper function not required. Skipping..\033[0m\n"
 fi
+
+exit 0

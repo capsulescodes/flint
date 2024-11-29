@@ -35,7 +35,7 @@ it_checks_if_config_file_exists()
 }
 
 
-it_can_run_pre_hook()
+it_runs_pre_hook()
 {
     mkdir -p "$TEST/.flint/hooks"
 
@@ -51,7 +51,7 @@ it_can_run_pre_hook()
 }
 
 
-it_can_run_post_hook()
+it_runs_post_hook()
 {
     mkdir -p "$TEST/.flint/hooks"
 

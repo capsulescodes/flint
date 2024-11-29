@@ -31,8 +31,6 @@ fi
 
 command git $@
 
-return=$?
-
 
 
 
@@ -49,8 +47,3 @@ then
 
     unset FLINT_HOOKS
 fi
-
-
-
-
-return $return

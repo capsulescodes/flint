@@ -19,22 +19,6 @@ path="$( cd -P "$( dirname $target )" && pwd )/../dist"
 
 
 
-if [[ $1 == '-i' || $1 == '--init' ]]
-
-then
-    sh "$path/init.sh" $@
-
-    exit 0
-fi
-
-if [[ -z $1 || $1 == '-r' || $1 == '--run' ]]
-
-then
-    sh "$path/run.sh" $@
-
-    exit 0
-fi
-
 if [[ $1 == '-h' || $1 == '--help' ]]
 
 then
@@ -43,5 +27,29 @@ then
     exit 0
 fi
 
+if [[ $1 == '-i' || $1 == '--init' ]]
 
-printf "\n[ Flint ] Command '$1' not found. Run '-h' or '--help' for more options.\n\n"
+then
+    sh "$path/init.sh" $@
+
+    exit $?
+fi
+
+if [[ $1 == '-r' || $1 == '--run' ]]
+
+then
+    sh "$path/run.sh" $@
+
+    exit $?
+fi
+
+
+
+
+if [[ -f "$PWD/.flint/git.sh" ]]
+
+then
+    sh "$PWD/.flint/git.sh" $@
+else
+    command git $@
+fi

@@ -10,7 +10,7 @@ if [[ ! -d $destination || ! -f "$destination/git.sh" ]]
 then
     printf "\n\033[1;33m[ Flint ] Flint must be configured first. Run 'flint init' to proceed.\033[0m\n\n"
 
-    exit 0
+    exit 1
 fi
 
 config="$( grep '^config=' "$destination/git.sh" | cut -d '=' -f 2 | tr -d '"')"
@@ -20,7 +20,7 @@ if [[ ! -f $config ]]
 then
     printf "\n\033[1;33m[ Flint ] The '$config' file does not exist in the root directory.\033[0m\n\n"
 
-    exit 0
+    exit 1
 fi
 
 

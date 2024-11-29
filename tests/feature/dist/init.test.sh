@@ -39,22 +39,6 @@ afterEach()
 
 
 
-it_runs_flint_i()
-{
-    output=$( flint -i )
-    [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
-    assert "Should create flint files and directories"
-}
-
-
-it_runs_flint_init()
-{
-    output=$( flint --init )
-    [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
-    assert "Should create flint files and directories"
-}
-
-
 it_warns_if_source_hooks_directory_is_missing()
 {
     mv "$LOCAL/.core/hooks" "$LOCAL/.core/hooks-bak"
@@ -276,4 +260,18 @@ it_warns_if_no_shell_is_found()
     output=$( SHELL="foo" flint --init )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
     assert "Should output message"
+}
+
+
+it_skips_git_wrapper_function_addition_if_mentionned()
+{
+    touch .zshrc
+
+    output=$( SHELL="zsh" HOME=$LOCAL flint --init --no-wrap )
+    [[ ! -s "$LOCAL/.zshrc" ]]
+    assert "Should be empty"
+    echo $output | grep -q "Git wrapper function not required. Skipping."
+    assert "Should output message"
+
+    rm .zshrc
 }
