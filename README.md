@@ -3,11 +3,11 @@
 
 <br>
 
-Write code in your own style while maintaining team consistency.
+Write code your way while ensuring team consistency.
 
 <br>
 
-Flint empowers developers to use their personal style and formatting preferences locally, while ensuring consistency in the remote codebase. By wrapping Git commands with its own wrapper and custom hooks, Flint automatically formats code during pull and push operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
+Flint empowers developers to use their personal style and formatting preferences locally, while maintaining a consistent remote codebase. By integrating with Git, Flint automatically formats code during pull and push operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
 
 <br>
 
@@ -18,7 +18,7 @@ Flint empowers developers to use their personal style and formatting preferences
 
 ## Installation
 
-**1. Install package with your project's package manager**
+**1. Install Flint using your package manager**
 
 ```bash
 # NPM
@@ -43,25 +43,25 @@ vendor/bin/flint --init
 
 <br>
 
-It will do multiple things :
+This will :
 
-- Create the .flint directory on your project's root if not present
-- Create the flint.config.json on your project's root if not present
-- Write the Flint git wrapper in your shell's RC file if not present
+- Create a `.flint` directory in your project's root [ if not already present ].
+- Create the `flint.config.json` file in your project's root [ if not already present ].
+- Add the Flint git wrapper function to your shell's RC file [ if not already present ].
 
 <br>
 
 ## Usage
 
-Once installed and initialized, Flint seamlessly integrates with your Git workflow.
+Once installed and initialized, Flint seamlessly integrates into your Git workflow.
 
 - **Local Development** : Write and format your code according to your personal preferences.
 - **Pulling Code** : When you pull code from the repository, Flint formats it to match your local style, making it easier for you to read and work with.
-- **Committing and Pushing** : Before code is committed and pushed to the repository, Flint reformats it to adhere to the team's style guidelines based on remote config, ensuring consistency across the codebase.
+- **Committing and Pushing Code** : Before code is committed and pushed to the repository, Flint reformats it to adhere to the team's style guidelines based on remote config, ensuring consistency across the codebase.
 
 <br>
 
-This process helps in :
+This esnures :
 
 - **Maintaining Code Consistency** : The remote repository always reflects the team's agreed-upon code style.
 - **Improving Readability** : Developers can work in an environment tailored to their preferences without affecting others.
@@ -71,7 +71,7 @@ This process helps in :
 
 ## Caveats
 
-Flint creates a hidden temporary commit between certain `git` commands, which may sometimes cause the following message to appear when running `git status` :
+Flint creates a hidden temporary commit during some `git` operations, which may sometimes cause the following message to appear when running `git status` :
 
 ```diff
 On branch main
@@ -93,11 +93,11 @@ git branch --unset-upstream <branch-name>
 
 ## Configuration
 
-Flint uses the `flint.config.json` file for configuration. You can specify your local and team formatting rules here.
+Flint uses the `flint.config.json` file for configuration. Specify your local and team formatting rules here.
 
 <br>
 
-Here is a basic config file formatting Javascript and Typescript files with ESLint with `remote.config.js` file remotely and `local.config.js` locally.
+Here is a basic config file formatting Javascript and Typescript files with ESLint with `eslint.remote.config.js` file remotely and `eslint.local.config.js` locally.
 
 <br>
 
@@ -119,7 +119,7 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
 
 <br>
 
-## Supported Package Managers [ WIP ]
+## Supported Package Managers
 
 - [x] Flint is available on NPM.
 - [x] Flint is available on Composer.
@@ -169,6 +169,8 @@ node_modules/.bin/flint --run
 # Composer
 vendor/bin/flint --run
 ```
+
+- At this point, running `git status` with Flint will become `flint status`
 
 <br>
 
