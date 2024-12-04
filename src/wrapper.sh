@@ -29,7 +29,7 @@ fi
 
 
 
-command git $@
+command git "$@"
 
 
 
