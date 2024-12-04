@@ -49,11 +49,11 @@ fi
 if [[ -f "$PWD/.flint/git.sh" ]]
 
 then
-    echo "\033[1;36mflint - Running wrapped git.\033[0m"
+    printf "\n\033[1;36mflint - Running wrapped git.\033[0m\n\n"
 
     sh "$PWD/.flint/git.sh"
 else
-    echo "\033[1;33mflint - 'git.sh' file not found in '.flint' directory. Running default git.\033[0m"
+    printf "\n\033[1;33mflint - 'git.sh' file not found in '.flint' directory. Running default git.\033[0m\n\n"
 
     command git "$@"
 fi
