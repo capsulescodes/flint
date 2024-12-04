@@ -19,7 +19,7 @@ path="$( cd -P "$( dirname $target )" && pwd )/../dist"
 
 
 
-if [[ -z $1 || $1 == '-h' || $1 == '--help' ]]
+if [[ $1 == '-h' || $1 == '--help' ]]
 
 then
     sh "$path/help.sh"
@@ -30,7 +30,7 @@ fi
 if [[ $1 == '-i' || $1 == '--init' ]]
 
 then
-    sh "$path/init.sh" $@
+    sh "$path/init.sh" "$@"
 
     exit $?
 fi
@@ -38,7 +38,7 @@ fi
 if [[ $1 == '-r' || $1 == '--run' ]]
 
 then
-    sh "$path/run.sh" $@
+    sh "$path/run.sh" "$@"
 
     exit $?
 fi
@@ -49,7 +49,11 @@ fi
 if [[ -f "$PWD/.flint/git.sh" ]]
 
 then
-    sh "$PWD/.flint/git.sh" $@
+    echo "\033[1;36mflint - Running wrapped git.\033[0m"
+
+    sh "$PWD/.flint/git.sh"
 else
+    echo "\033[1;33mflint - 'git.sh' file not found in '.flint' directory. Running default git.\033[0m"
+
     command git "$@"
 fi

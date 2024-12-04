@@ -1,7 +1,7 @@
 if [[ ! -f $config ]]
 
 then
-    echo "\n\033[1;33m[ Flint ] The '$config' file does not exist in the root directory. Running default git.\033[0m\n\n"
+    echo "\n\033[1;33mflint - '$config' file not found in root directory. Running default git.\033[0m\n"
 else
     source "$( cd "$( dirname "${BASH_SOURCE:-$0}" )" && pwd )/functions.sh"
 fi

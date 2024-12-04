@@ -15,7 +15,7 @@ then
     if [[ ! -f "$source/src/wrapper.sh" || ! -d "$source/hooks" ]]
 
     then
-        printf "\n\033[0;31m[ Flint ] Required files not found at '$source'.\033[0m\n"
+        printf "\n\033[0;31mflint - Required files not found at '$source'.\033[0m\n"
 
         exit 1
     fi
@@ -25,7 +25,7 @@ then
 
     mkdir -p $destination
 
-    printf "\n\033[1;32m[ Flint ] Directory '.flint' added to project root.\033[0m\n"
+    printf "\n\033[1;32mflint - Directory '.flint' added to project root.\033[0m\n"
 
 
 
@@ -39,7 +39,7 @@ then
 
         hooks=".flint/hooks"
 
-        printf "\033[1;32m[ Flint ] Hooks directory 'hooks' added to '.flint' directory.\033[0m\n"
+        printf "\033[1;32mflint - Hooks directory 'hooks' added to '.flint' directory.\033[0m\n"
     fi
 
 
@@ -47,11 +47,11 @@ then
 
     wrapper="$( get_relative_path "$INIT_CWD" "$source/src/wrapper.sh" )"
 
-    printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\n\nsource \"$( [[ $wrapper == /* ]] && echo $wrapper || echo "\$PWD/$wrapper" )\"" > "$destination/git.sh"
+    printf "#!/bin/bash\n\nconfig=\"flint.config.json\"\nhooks=\"$hooks\"\nwrapper=\"$( [[ $wrapper == /* ]] && echo $wrapper || echo "\$PWD/$wrapper" )\"\n\n[[ -f \$wrapper ]] && source \$wrapper" > "$destination/git.sh"
 
     chmod +x "$destination/git.sh"
 else
-    printf "\n\033[1;36m[ Flint ] Directory '.flint' already exists in project root. Skipping.\033[0m\n"
+    printf "\n\033[1;36mflint - Directory '.flint' already exists in project root. Skipping.\033[0m\n"
 fi
 
 
@@ -64,9 +64,9 @@ if [ ! -f "$config" ]
 then
     cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" $config
 
-    printf "\033[1;32m[ Flint ] Base config file 'flint.config.json' added to project root.\033[0m\n"
+    printf "\033[1;32mflint - Base config file 'flint.config.json' added to project root.\033[0m\n"
 else
-    printf "\033[1;36m[ Flint ] Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m\n"
+    printf "\033[1;36mflint - Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m\n"
 fi
 
 
@@ -115,15 +115,15 @@ then
         then
             printf "\n\n\n\n# Flint git wrapper\n$command\n\n" >> $profile
 
-            printf "\033[1;32m[ Flint ] Git wrapper function written in '$( basename $profile )' file.\033[0m\n\n"
+            printf "\033[1;32mflint - Git wrapper function written in '$( basename $profile )' file.\033[0m\n\n"
         else
-            printf "\033[1;36m[ Flint ] Git wrapper function already exists in '$( basename $profile )' file. Skipping.\033[0m\n\n"
+            printf "\033[1;36mflint - Git wrapper function already exists in '$( basename $profile )' file. Skipping.\033[0m\n\n"
         fi
     else
-        printf "\033[1;33m[ Flint ] Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually.\033[0m\n\n"
+        printf "\033[1;33mflint - Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually.\033[0m\n\n"
     fi
 else
-    printf "\033[1;30m[ Flint ] Git wrapper function not required. Skipping..\033[0m\n"
+    printf "\033[1;30mflint - Git wrapper function not required. Skipping..\033[0m\n"
 fi
 
 exit 0

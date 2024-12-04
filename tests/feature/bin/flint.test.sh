@@ -121,12 +121,16 @@ it_runs_flint_run_command()
 it_runs_flint_command()
 {
     output=$( flint )
+    echo $output | grep -q "Running wrapped git."
+    assert "Should output message before wrapper"
     echo $output | grep -q "git command run from wrapper"
     assert "Should output git error from wrapper"
 
     mv "$LOCAL/.flint" "$LOCAL/.flint-bak"
 
     output=$( flint )
+    echo $output | grep -q "'git.sh' file not found in '.flint' directory. Running default git."
+    assert "Should output message before binary"
     echo $output | grep -q "git command run from binary"
     assert "Should output git error from binary"
 

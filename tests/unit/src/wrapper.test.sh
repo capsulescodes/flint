@@ -11,7 +11,7 @@ beforeAll()
 
     sed -i '' $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$TEST/.core/wrapper.sh"
 
-    sed -i "" "s|command git \$@|echo \"git\"|" "$TEST/.core/wrapper.sh"
+    sed -i "" "s|command git \"\$@\"|echo \"git\"|" "$TEST/.core/wrapper.sh"
 
 
     cd $TEST > /dev/null || exit 1
@@ -30,7 +30,7 @@ afterAll()
 it_checks_if_config_file_exists()
 {
     output=$( config="foo" source "$TEST/.core/wrapper.sh" commit )
-    echo $output | grep -q "The 'foo' file does not exist"
+    echo $output | grep -q "'foo' file not found"
     assert "Should warn when flint.config.json is missing"
 }
 

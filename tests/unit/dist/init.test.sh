@@ -100,7 +100,7 @@ it_adds_git_wrapper_to_shell_config()
 {
     touch "$TEST/.bashrc"
 
-    local command="git() { \[\[ -f \"\$PWD/.flint/git.sh\" \]\] && sh \"\$PWD/.flint/git.sh\" \$@ || command git \$@ }"
+    local command="git() { \[\[ -f \"\$PWD/.flint/git.sh\" \]\] && sh \"\$PWD/.flint/git.sh\" || command git \"\$@\" }"
 
     SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" > /dev/null
     echo "$( cat "$TEST/.bashrc" )" | grep -q "$command"

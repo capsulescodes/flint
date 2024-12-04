@@ -24,7 +24,7 @@ function eval_for_command
         if [[ -z $binary || -z $command ]]
 
         then
-            printf "\033[1;33mWarning : No binary or '$name' command associated with a linter. Skipping.\033[0m\n"
+            printf "\033[1;33mflint - No binary or '$name' command associated with a linter. Skipping.\033[0m\n"
 
             continue
         fi
@@ -41,7 +41,7 @@ function eval_for_command
             then
                 eval $binary $command "$filtered"
             else
-                printf "\033[1;33mWarning : Binary '$binary' not found. Install it and run 'flint run'. Skipping.\033[0m\n"
+                printf "\033[1;33mflint - Binary '$binary' not found. Install it and run 'flint run'. Skipping.\033[0m\n"
             fi
         fi
     done <<< "$linters"
