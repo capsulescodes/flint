@@ -19,7 +19,7 @@ path="$( cd -P "$( dirname $target )" && pwd )/../dist"
 
 
 
-if [[ $1 == '-h' || $1 == '--help' ]]
+if [[ -z $1 || $1 == '-h' || $1 == '--help' ]]
 
 then
     sh "$path/help.sh"
@@ -51,5 +51,5 @@ if [[ -f "$PWD/.flint/git.sh" ]]
 then
     sh "$PWD/.flint/git.sh" $@
 else
-    command git $@
+    command git "$@"
 fi
