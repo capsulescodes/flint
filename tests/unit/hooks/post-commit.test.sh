@@ -107,12 +107,36 @@ it_handles_no_committed_files()
 }
 
 
+it_evaluates_staged_files()
+{
+    mock
+
+    output=$( FLINT_STAGED_FILES="file.001.foo file.002.foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo"
+    assert "Should run local lint command for committed files"
+
+    unmock
+}
+
+
 it_evaluates_committed_files()
 {
     mock "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-commit" )
     echo $output | grep -q "local_foo file.001.foo file.002.foo"
+    assert "Should run local lint command for committed files"
+
+    unmock
+}
+
+
+it_evaluates_combined_files()
+{
+    mock "file.001.foo file.002.foo"
+
+    output=$( FLINT_STAGED_FILES="file.003.foo file.004.foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo file.004.foo"
     assert "Should run local lint command for committed files"
 
     unmock
@@ -163,12 +187,13 @@ it_sets_and_unsets_environment_variable()
 {
     mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
-    [ -z $FLINT_TEMPORARY_COMMIT ]
+    [[ -z $FLINT_TEMPORARY_COMMIT ]]
     assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
-    source "$TEST/.core/hooks/post-commit" > /dev/null
+    FLINT_STAGED_FILES="bar"
 
-    [ -z $FLINT_TEMPORARY_COMMIT ]
+    source "$TEST/.core/hooks/post-commit" > /dev/null
+    [[ -z $FLINT_TEMPORARY_COMMIT && -z $FLINT_STAGED_FILES ]]
     assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
 
     unmock

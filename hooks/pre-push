@@ -11,7 +11,7 @@ fi
 if [[ -n $staged ]]
 
 then
-    git restore --staged "$staged"
-
     export FLINT_STAGED_FILES=$staged
+
+    git restore --staged "$staged"
 fi

@@ -108,7 +108,6 @@ it_handles_no_unstaged_no_staged_and_no_pulled_files()
     mock
 
     output=$( source "$TEST/.core/hooks/post-pull" )
-    echo "$output"
     [[ -z $output ]]
     assert "Should not perform any actions when no files are pulled"
 
@@ -275,7 +274,7 @@ it_sets_and_unsets_environment_variable()
     FLINT_STAGED_FILES="bar"
 
     source "$TEST/.core/hooks/post-pull" > /dev/null
-    [[ -z $FLINT_TEMPORARY_COMMIT && -z $FLINT_STAGED_FILES && -z $FLINT_STAGED_FILES ]]
+    [[ -z $FLINT_TEMPORARY_COMMIT && -z $FLINT_STAGED_FILES && -z $FLINT_UNSTAGED_FILES ]]
     assert "variables should be unset after running the hook"
 
     unmock

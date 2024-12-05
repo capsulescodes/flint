@@ -67,7 +67,7 @@ it_handles_no_current_staged_files_and_no_previous_staged_files()
     mock
 
     output=$( source "$TEST/.core/hooks/post-push" )
-    [ -z $output ]
+    [[ -z $output ]]
     assert "Should do nothing when no files are staged"
     echo $output | grep -qv "Mock : git add"
     assert "Should not add no previous staged files"

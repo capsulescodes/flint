@@ -94,7 +94,7 @@ it_skips_when_temp_commit()
     export FLINT_TEMPORARY_COMMIT=1
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
-    [ -z $output ]
+    [[ -z $output ]]
     assert "Should skip execution when FLINT_TEMPORARY_COMMIT is set"
 
     unset FLINT_TEMPORARY_COMMIT
@@ -144,7 +144,7 @@ it_handles_no_staged_files()
     mock
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
-    [ -z $output ]
+    [[ -z $output ]]
     assert "Should not perform any actions when no files are staged"
 
     unmock
@@ -200,6 +200,20 @@ it_processes_multiple_files()
     assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should add modified files"
+
+    unmock
+}
+
+
+it_sets_environment_variable_if_staged_files_exist()
+{
+    mock "file.001.foo file.002.foo"
+
+    source "$TEST/.core/hooks/pre-commit" > /dev/null
+    echo $FLINT_STAGED_FILES | grep -q "file.001.foo file.002.foo"
+    assert "Should list staged files"
+    [[ -n $FLINT_STAGED_FILES ]]
+    assert "FLINT_STAGED_FILES should be set after running the hook"
 
     unmock
 }
