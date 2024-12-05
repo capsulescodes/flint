@@ -109,8 +109,8 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
             "extensions" : [ "js" ],
             "binary" : "node_modules/.bin/eslint",
             "commands" : {
-                "local" : "--fix --config eslint.local.config.js",
-                "remote" : "--fix --config eslint.remote.config.js"
+                "local" : "--fix --config eslint.local.config.js --quiet",
+                "remote" : "--fix --config eslint.remote.config.js --quiet"
             }
         }
     ]

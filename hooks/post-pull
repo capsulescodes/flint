@@ -2,7 +2,7 @@ unstaged=$( git diff --name-only )
 
 reset=$( git diff --diff-filter=d --staged --name-only )
 
-pulled=$( git diff --diff-filter=d --name-only @{1} HEAD )
+pulled=$( git diff --diff-filter=d --name-only @{1} HEAD 2>/dev/null )
 
 combined=$( printf "%s\n%s\n%s\n" "$unstaged" "$reset" "$pulled" | sort | uniq )
 
