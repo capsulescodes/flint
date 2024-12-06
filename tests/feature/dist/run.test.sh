@@ -47,7 +47,7 @@ afterEach()
 
     cd - > /dev/null || exit 1
 
-    rm -rf $LOCAL
+    [[ -n "$LOCAL" && -d "$LOCAL" ]] && rm -r $LOCAL
 }
 
 

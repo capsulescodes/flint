@@ -25,7 +25,7 @@ afterEach()
 {
     cd - > /dev/null || exit 1
 
-    rm -rf $TEST
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 
@@ -45,7 +45,7 @@ it_copies_hooks_when_requested()
     [[ -d "$TEST/.flint/hooks" ]]
     assert "Should copy hooks directory when --with-hooks is specified"
 
-    rm -rf "$TEST/.flint"
+    rm -r "$TEST/.flint"
 
     sh "$TEST/.core/dist/init.sh" > /dev/null
     [[ ! -d "$TEST/.flint/hooks" ]]

@@ -23,13 +23,13 @@ beforeAll()
 
 afterAll()
 {
-    cd - > /dev/null || exit 1
-
-    rm -rf $TEST
+    unset FLINT_HOOKS
 
     unset FLINT_CONFIG
 
-    unset FLINT_HOOKS
+    cd - > /dev/null || exit 1
+
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 
@@ -42,21 +42,21 @@ mock()
     COMMIT=$5
     COMMANDS=$6
 
-    count=$( mktemp )
+    first=$( mktemp )
 
     git()
     {
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            if [[ -s $count ]]
+            if [[ -s $first ]]
 
             then
                 printf "%s\n" "${MODIFIED[@]}"
             else
                 printf "%s\n" "${UNSTAGED[@]}"
 
-                echo 1 >> $count
+                echo 1 >> $first
             fi
         fi
 
@@ -97,7 +97,7 @@ unmock()
 {
     unset -f git
 
-    rm $count
+    [[ -f "$first" ]] && rm $first
 }
 
 
@@ -308,5 +308,5 @@ it_uses_correct_git_commands()
 
     unmock
 
-    rm $commands
+    [[ -f "$commands" ]] && rm $commands
 }

@@ -35,7 +35,7 @@ afterAll()
 
     unset FLINT_CONFIG
 
-    rm -rf $TEST
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 
@@ -125,9 +125,9 @@ unmock()
 {
     unset -f git
 
-    rm $first
+    [[ -f "$first" ]] && rm $first
 
-    rm $second
+    [[ -f "$second" ]] && rm $second
 }
 
 
@@ -365,5 +365,5 @@ it_uses_correct_git_commands()
 
     unmock
 
-    rm $commands
+    [[ -f "$commands" ]] && rm $commands
 }

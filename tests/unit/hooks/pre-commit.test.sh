@@ -23,13 +23,13 @@ beforeAll()
 
 afterAll()
 {
-    cd - > /dev/null || exit 1
-
-    rm -rf $TEST
+    unset FLINT_HOOKS
 
     unset FLINT_CONFIG
 
-    unset FLINT_HOOKS
+    cd - > /dev/null || exit 1
+
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 
@@ -239,5 +239,5 @@ it_uses_correct_git_commands()
 
     unmock
 
-    rm $commands
+    [[ -f "$commands" ]] && rm $commands
 }

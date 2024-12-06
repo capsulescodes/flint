@@ -12,7 +12,7 @@ beforeAll()
 
 afterAll()
 {
-    rm -rf "$TEST"
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 

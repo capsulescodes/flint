@@ -15,7 +15,7 @@ afterAll()
 {
     cd - > /dev/null || exit 1
 
-    rm -rf $TEST
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 
@@ -165,5 +165,5 @@ it_uses_correct_git_commands()
 
     unmock
 
-    rm $commands
+    [[ -f "$commands" ]] && rm $commands
 }

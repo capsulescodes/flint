@@ -39,9 +39,9 @@ afterEach()
 
     cd - > /dev/null || exit 1
 
-    rm -rf $REMOTE
+    [[ -n "$REMOTE" && -d "$REMOTE" ]] && rm -r $REMOTE
 
-    rm -rf $LOCAL
+    [[ -n "$LOCAL" && -d "$LOCAL" ]] && rm -r $LOCAL
 }
 
 

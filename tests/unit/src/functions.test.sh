@@ -20,7 +20,7 @@ afterAll()
 {
     cd - > /dev/null || exit 1
 
-    rm -rf $TEST
+    [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
 
 

@@ -43,7 +43,11 @@ function mock
                     files+=( "$file" )
                 fi
 
-                rm "$LOCAL/$file.bak"
+                if [[ -f "$LOCAL/$file.bak" ]]
+
+                then
+                    rm "$LOCAL/$file.bak"
+                fi
             fi
         done
 
@@ -242,13 +246,15 @@ function mock
 
 function unmock
 {
-    unset -f flint
-
-    unset -f wrap
-
-    unset -f eval_for_command
+    LOCAL=$1
 
     unset -f git
 
-    rm -r "$LOCAL/.git"
+    unset -f eval_for_command
+
+    unset -f wrap
+
+    unset -f flint
+
+    [[ -n "$LOCAL" && -d "$LOCAL/.git" ]] && rm -r "$LOCAL/.git"
 }
