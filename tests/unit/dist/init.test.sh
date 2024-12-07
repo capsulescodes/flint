@@ -53,11 +53,11 @@ it_copies_hooks_when_requested()
 }
 
 
-it_creates_git_wrapper()
+it_creates_dispatcher()
 {
     sh "$TEST/.core/dist/init.sh" > /dev/null
     [[ -f "$TEST/.flint/git.sh" ]]
-    assert "Should create git.sh wrapper"
+    assert "Should create git.sh file"
 
     [[ -x "$TEST/.flint/git.sh" ]]
     assert "git.sh should be executable"
@@ -78,12 +78,16 @@ it_handles_missing_source_files()
 }
 
 
-it_creates_valid_wrapper_script()
+it_creates_valid_dispatcher_script()
 {
     sh "$TEST/.core/dist/init.sh" > /dev/null
     grep -q "config=\"flint.config.json\"" "$TEST/.flint/git.sh"
     assert "Generated git.sh should contain config variable"
-    grep -q "source" "$TEST/.flint/git.sh"
+    grep -q "hooks=\".core/hooks\"" "$TEST/.flint/git.sh"
+    assert "Generated git.sh should contain hooks variable"
+    grep -q "wrapper=\"\$PWD/.core/src/wrapper.sh\"" "$TEST/.flint/git.sh"
+    assert "Generated git.sh should contain wrapper variable"
+    grep -q "[[ -f \$wrapper ]] && source \$wrapper || command git \"\$@\"" "$TEST/.flint/git.sh"
     assert "Generated git.sh should source wrapper script"
 }
 
