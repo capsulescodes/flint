@@ -18,7 +18,7 @@ then
 
         eval_for_command "remote" $FLINT_CONFIG "$staged"
 
-        modified=$( git diff --name-only )
+        modified=$( git diff --diff-filter=d --name-only )
 
         files=()
 

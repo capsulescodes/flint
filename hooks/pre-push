@@ -1,4 +1,4 @@
-staged=$( git diff --diff-filter=d --staged --name-only )
+staged=$( git diff --staged --name-only )
 
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
@@ -13,5 +13,5 @@ if [[ -n $staged ]]
 then
     export FLINT_STAGED_FILES=$staged
 
-    git restore --staged "$staged"
+    git restore --staged "$( echo "$staged" | tr "\n" " " )"
 fi

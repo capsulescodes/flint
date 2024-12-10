@@ -49,37 +49,30 @@ mock()
     COMMIT=$6
     COMMANDS=$7
 
-    first=$( mktemp )
-    second=$( mktemp )
-
     git()
     {
         if [[ $1 == "diff" && $2 == "--name-only" ]]
 
         then
-            if [[ -s $first ]]
-
-            then
-                printf "%s\n" "${MODIFIED[@]}"
-            else
-                printf "%s\n" "${UNSTAGED[@]}"
-
-                echo 1 >> $first
-            fi
+            printf "%s\n" "${UNSTAGED[@]}"
         fi
 
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && "$3" == "--staged" && $4 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
 
         then
-            if [[ -s $second ]]
+            printf "%s\n" "${MODIFIED[@]}"
+        fi
 
-            then
-                printf "%s\n" "${RESET[@]}"
-            else
-                printf "%s\n" "${STAGED[@]}"
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
 
-                echo 1 >> $second
-            fi
+        then
+            printf "%s\n" "${STAGED[@]}"
+        fi
+
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${RESET[@]}"
         fi
 
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
@@ -103,7 +96,7 @@ mock()
         if [[ $1 == "restore" && $2 == "--staged" ]]
 
         then
-            echo "Mock : git restore --staged $3"
+            echo "Mock : git restore --staged ${@:3}"
         fi
 
         if [[ $1 == "commit" && $2 == "-m" ]]
@@ -124,10 +117,6 @@ mock()
 unmock()
 {
     unset -f git
-
-    [[ -f "$first" ]] && rm $first
-
-    [[ -f "$second" ]] && rm $second
 }
 
 
@@ -220,6 +209,18 @@ it_evals_all_files()
 it_restores_staged_files_if_staged_files_exist()
 {
     mock "" "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/run.sh" )
+    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
+    assert "Should restore staged files"
+
+    unmock
+}
+
+
+it_restores_transliterated_staged_files()
+{
+    mock "" "file.001.foo\nfile.002.foo"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
@@ -344,7 +345,7 @@ it_uses_correct_git_commands()
     source "$TEST/.core/run.sh" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
     assert "Should use correct diff command"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
     assert "Should use correct diff staged command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" =~  "rev-list HEAD --invert-grep" ]]
     assert "Should use correct rev-list command"
@@ -354,7 +355,7 @@ it_uses_correct_git_commands()
     assert "Should use correct restore command"
     [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff staged command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 8 "$commands" | tail -n 1 )" ==  "add file.006.foo" ]]
     assert "Should use correct add command"

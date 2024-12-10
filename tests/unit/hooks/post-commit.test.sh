@@ -48,7 +48,7 @@ mock()
             printf "%s\n" "${COMMITTED[@]}"
         fi
 
-        if [[ $1 == "diff" && $2 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
 
         then
             printf "%s\n" "${MODIFIED[@]}"
@@ -209,7 +209,7 @@ it_uses_correct_git_commands()
     source "$TEST/.core/hooks/post-commit" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
     assert "Should use correct diff-tree command"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "add file.001.foo file.002.foo" ]]
     assert "Should use correct add command"

@@ -1,4 +1,4 @@
-unstaged=$( git diff --name-only )
+unstaged=$( git diff --diff-filter=d --name-only )
 
 reset=$( git diff --diff-filter=d --staged --name-only )
 
@@ -14,7 +14,7 @@ if [[ -n $combined ]]
 then
     eval_for_command "local" $FLINT_CONFIG "$combined"
 
-    modified=$( git diff --name-only )
+    modified=$( git diff --diff-filter=d --name-only )
 
     while IFS= read -r file
 

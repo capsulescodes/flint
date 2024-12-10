@@ -129,15 +129,15 @@ it_creates_a_file_and_runs_flint()
     assert "commands - Should use correct diff command"
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
 
     # DIRECTORIES
@@ -179,17 +179,17 @@ it_creates_a_file_adds_it_and_runs_flint()
     assert "commands - Should use correct add command"
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.001.foo" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify command"
-    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "commands - Should use correct add command"
@@ -246,8 +246,8 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff staged command"
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m foo" ]]
     assert "commands - Should use correct commit command"
@@ -255,7 +255,7 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     assert "commands - Should use correct diff-tree command"
     [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify locally command"
-    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "commands - Should use correct add command"
@@ -263,15 +263,15 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     assert "commands - Should use correct commit command"
     [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 14 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
-    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff staged command"
+    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command"
@@ -342,8 +342,8 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "commands - Should use correct diff staged command"
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m foo" ]]
     assert "commands - Should use correct commit command"
@@ -351,7 +351,7 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     assert "commands - Should use correct diff-tree command"
     [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify locally command"
-    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "commands - Should use correct add command"
@@ -361,8 +361,8 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     assert "commands - Should use correct add command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 14 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
@@ -370,10 +370,10 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.002.foo" ]]
     assert "commands - Should use correct restore command"
     [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "commands - Should use correct diff-filter command"
+    assert "commands - Should use correct diff staged command"
     [[ "$( head -n 18 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.002.foo" ]]
     assert "commands - Should use correct modify command"
-    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command"

@@ -46,7 +46,7 @@ mock()
 
     git()
     {
-        if [[ $1 == "diff" && $2 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
 
         then
             if [[ -s $first ]]
@@ -291,13 +291,13 @@ it_uses_correct_git_commands()
     FLINT_STAGED_FILES="file.004.foo"
 
     source "$TEST/.core/hooks/post-pull" > /dev/null
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only @{1} HEAD" ]]
     assert "Should use correct diff-filter command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "add file.006.foo" ]]
     assert "Should use correct add command"

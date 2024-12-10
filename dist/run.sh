@@ -31,7 +31,7 @@ source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/functions.sh"
 
 unstaged=$( git diff --name-only )
 
-staged=$( git diff --diff-filter=d --staged --name-only )
+staged=$( git diff --staged --name-only )
 
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
@@ -44,7 +44,7 @@ fi
 if [[ -n $staged ]]
 
 then
-    git restore --staged "$staged"
+    git restore --staged "$( echo "$staged" | tr "\n" " " )"
 fi
 
 
@@ -54,7 +54,7 @@ reset=$( git diff --diff-filter=d --staged --name-only )
 
 eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config
 
-modified=$( git diff --name-only )
+modified=$( git diff --diff-filter=d --name-only )
 
 files=()
 

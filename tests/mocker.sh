@@ -216,16 +216,13 @@ function mock
             sed -i "" "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"
         fi
 
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
+
+
+
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
 
         then
-            ls "$LOCAL/.git/staged"
-        fi
-
-        if [[ $1 == "diff" && $2 == "--name-only" ]]
-
-        then
-            ls "$LOCAL/.git/modified"
+            ls "$REMOTE"
         fi
 
         if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
@@ -234,11 +231,20 @@ function mock
             ls "$LOCAL/.git/committed"
         fi
 
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]] || [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
-            ls "$REMOTE"
+            ls "$LOCAL/.git/staged"
         fi
+
+        if [[ $1 == "diff" && $2 == "--name-only" ]] || [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && -z $4 ]]
+
+        then
+            ls "$LOCAL/.git/modified"
+        fi
+
+
+
 
         echo $@ >> "$LOCAL/.git/commands"
     }

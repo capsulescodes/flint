@@ -106,17 +106,17 @@ it_pulls_two_files_and_creates_two_files_adds_them_commits_them_and_pushes_them(
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main foo" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -124,7 +124,7 @@ it_pulls_two_files_and_creates_two_files_adds_them_commits_them_and_pushes_them(
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo" ]]
     assert "commands - Should use correct add command"
@@ -140,7 +140,7 @@ it_pulls_two_files_and_creates_two_files_adds_them_commits_them_and_pushes_them(
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 18 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
@@ -150,13 +150,13 @@ it_pulls_two_files_and_creates_two_files_adds_them_commits_them_and_pushes_them(
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 23 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify locally command"
-    [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 25 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
     [[ "$( head -n 26 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command"
-    [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
@@ -267,17 +267,17 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main foo" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -285,7 +285,7 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "commands - Should use correct add command"
@@ -295,13 +295,13 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
     assert "commands - Should use correct modify command"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 18 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command"
-    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -309,7 +309,7 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
     assert "commands - Should use correct modify remotely command"
     [[ "$( head -n 22 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main bar" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 23 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 23 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -317,7 +317,7 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 26 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify locally command"
-    [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
@@ -333,7 +333,7 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 34 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 35 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 35 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 36 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
@@ -343,13 +343,13 @@ it_pulls_then_creates_two_files_modifies_them_pulls_again_adds_them_commits_them
     assert "commands - Should use correct commit command"
     [[ "$( head -n 39 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 40 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 40 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 41 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
     [[ "$( head -n 42 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command"
-    [[ "$( head -n 43 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 43 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 44 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
@@ -460,17 +460,17 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main foo" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -478,7 +478,7 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "commands - Should use correct add command"
@@ -488,7 +488,7 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct add command"
     [[ "$( head -n 15 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 16 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 17 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
@@ -496,7 +496,7 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct reset command"
     [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.002.foo file.003.foo" ]]
     assert "commands - Should use correct restore command"
-    [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 21 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -504,7 +504,7 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct modify remotely command"
     [[ "$( head -n 23 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main bar" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 25 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -512,7 +512,7 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify locally command"
-    [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 29 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
@@ -528,7 +528,7 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 35 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 36 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 36 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 37 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
@@ -538,13 +538,13 @@ it_pulls_then_creates_two_file_adds_them_pulls_again_commits_it_and_pushes_it()
     assert "commands - Should use correct commit command"
     [[ "$( head -n 40 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 41 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 41 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 42 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
     [[ "$( head -n 43 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command"
-    [[ "$( head -n 44 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 44 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 45 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
@@ -651,17 +651,17 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
 
     [[ "$( head -n 1 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 2 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 3 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
-    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 4 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 5 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main foo" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -669,7 +669,7 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "commands - Should use correct add command"
@@ -685,7 +685,7 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 18 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 19 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 20 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo" ]]
     assert "commands - Should use correct add command"
@@ -695,7 +695,7 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
     assert "commands - Should use correct commit command"
     [[ "$( head -n 23 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo" ]]
     assert "commands - Should use correct modify remotely command"
-    [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 24 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 25 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo" ]]
     assert "commands - Should use correct add command"
@@ -703,13 +703,13 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
     assert "commands - Should use correct commit command"
     [[ "$( head -n 27 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
     assert "commands - Should use correct diff command"
-    [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 28 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 29 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
     [[ "$( head -n 30 "$LOCAL/.git/commands" | tail -n 1 )" == "reset --soft FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct reset command"
-    [[ "$( head -n 31 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 31 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 32 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -717,7 +717,7 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
     assert "commands - Should use correct modify remotely command"
     [[ "$( head -n 34 "$LOCAL/.git/commands" | tail -n 1 )" == "pull origin main baz" ]]
     assert "commands - Should use correct pull command"
-    [[ "$( head -n 35 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 35 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 36 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
@@ -725,13 +725,13 @@ it_pulls_then_creates_two_files_adds_them_commits_them_then_pulls_again_and_push
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 38 "$LOCAL/.git/commands" | tail -n 1 )" == "modify file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct modify locally command"
-    [[ "$( head -n 39 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --name-only" ]]
+    [[ "$( head -n 39 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "commands - Should use correct diff command"
     [[ "$( head -n 40 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo file.003.foo file.004.foo" ]]
     assert "commands - Should use correct add command"
     [[ "$( head -n 41 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct commit command"
-    [[ "$( head -n 42 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 42 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "commands - Should use correct diff-filter command"
     [[ "$( head -n 43 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"

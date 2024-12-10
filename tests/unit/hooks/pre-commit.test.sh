@@ -60,7 +60,7 @@ mock()
             printf "%s\n" "${STAGED[@]}"
         fi
 
-        if [[ $1 == "diff" && $2 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
 
         then
             printf "%s\n" "${MODIFIED[@]}"
@@ -232,7 +232,7 @@ it_uses_correct_git_commands()
     assert "Should use correct reset command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff-filter command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "Should use correct add command"
