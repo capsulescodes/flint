@@ -33,6 +33,12 @@ unstaged=$( git diff --name-only )
 
 staged=$( git diff --staged --name-only )
 
+if [[ -n $staged ]]
+
+then
+    git restore --staged $( echo "$staged" | tr "\n" " " )
+fi
+
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
 if [[ -n $manual ]]
@@ -41,16 +47,7 @@ then
     git reset --soft $manual --quiet
 fi
 
-if [[ -n $staged ]]
 
-then
-    git restore --staged "$( echo "$staged" | tr "\n" " " )"
-fi
-
-
-
-
-reset=$( git diff --diff-filter=d --staged --name-only )
 
 eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config
 
@@ -62,7 +59,7 @@ files=()
 while IFS= read -r file
 
 do
-    if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
+    if [[ -n $file ]] && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
 
     then
         files+=( $file )
@@ -78,7 +75,9 @@ then
     git add "${files[@]}"
 fi
 
-if [[ -n ${files[0]} || -n $reset ]]
+reset=$( git diff --staged --name-only )
+
+if [[ -n $reset ]]
 
 then
     export FLINT_TEMPORARY_COMMIT=1

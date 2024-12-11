@@ -37,8 +37,9 @@ mock()
 {
     COMMITTED=($1)
     MODIFIED=($2)
-    COMMIT=$3
-    COMMANDS=$4
+    STAGED=($3)
+    COMMIT=$4
+    COMMANDS=$5
 
     git()
     {
@@ -58,6 +59,12 @@ mock()
 
         then
             echo "Mock : git add ${@:2}"
+        fi
+
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${STAGED[@]}"
         fi
 
         if [[ $1 == "commit" && $2 == "-m" ]]
@@ -173,7 +180,7 @@ it_adds_modified_files()
 
 it_creates_commit_with_correct_message()
 {
-    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "foo"
 
     output=$( source "$TEST/.core/hooks/post-commit" )
     echo $output | grep -q "Mock : git commit -m foo"
@@ -185,7 +192,7 @@ it_creates_commit_with_correct_message()
 
 it_sets_and_unsets_environment_variable()
 {
-    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
     [[ -z $FLINT_TEMPORARY_COMMIT ]]
     assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
@@ -204,7 +211,7 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo" "bar" $commands
+    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "bar" $commands
 
     source "$TEST/.core/hooks/post-commit" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
@@ -213,7 +220,9 @@ it_uses_correct_git_commands()
     assert "Should use correct diff command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "add file.001.foo file.002.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" =~ "commit -m" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "Should use correct commit command"
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
 
     unmock

@@ -226,14 +226,14 @@ it_uses_correct_git_commands()
     mock "file.001.foo file.002.foo" "file.001.foo" "bar" $commands
 
     source "$TEST/.core/hooks/pre-commit" > /dev/null
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" =~  "rev-list HEAD --invert-grep" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "Should use correct rev-list command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "reset --soft bar --quiet" ]]
     assert "Should use correct reset command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "Should use correct diff-filter command"
+    assert "Should use correct staged command"
     [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
-    assert "Should use correct diff command"
+    assert "Should use correct modified command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "Should use correct add command"
 

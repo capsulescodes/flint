@@ -43,11 +43,13 @@ mock()
 {
     UNSTAGED=($1)
     STAGED=($2)
-    RESET=($3)
-    MODIFIED=($4)
+    MODIFIED=($3)
+    RESET=($4)
     HEAD=$5
     COMMIT=$6
     COMMANDS=$7
+
+    count=$( mktemp )
 
     git()
     {
@@ -66,13 +68,15 @@ mock()
         if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
 
         then
-            printf "%s\n" "${STAGED[@]}"
-        fi
+            if [[ -s $count ]]
 
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
+            then
+                printf "%s\n" "${RESET[@]}"
+            else
+                printf "%s\n" "${STAGED[@]}"
 
-        then
-            printf "%s\n" "${RESET[@]}"
+                echo 1 >> $count
+            fi
         fi
 
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
@@ -117,6 +121,8 @@ mock()
 unmock()
 {
     unset -f git
+
+    [[ -f "$count" ]] && rm $count
 }
 
 
@@ -244,7 +250,7 @@ it_handles_no_modified_files()
 
 it_adds_modified_files_before()
 {
-    mock "" "" "" "file.001.foo file.002.foo" "" "corge"
+    mock "" "" "file.001.foo file.002.foo" "" "" "corge"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -256,7 +262,7 @@ it_adds_modified_files_before()
 
 it_does_not_add_unstaged_modified_files_before()
 {
-    mock "file.001.foo file.002.foo" "" "" "file.002.foo file.003.foo"
+    mock "file.001.foo file.002.foo" "" "file.002.foo file.003.foo"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git add file.003.foo"
@@ -268,7 +274,7 @@ it_does_not_add_unstaged_modified_files_before()
 
 it_adds_unmodified_previous_staged_files_after()
 {
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.006.foo"
+    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.002.foo file.006.foo" "file.006.foo"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git add file.006.foo"
@@ -282,7 +288,7 @@ it_adds_unmodified_previous_staged_files_after()
 
 it_adds_modified_previous_staged_files_after()
 {
-    mock "file.001.foo file.002.foo file.004.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.004.foo file.006.foo"
+    mock "file.001.foo file.002.foo file.004.foo" "file.003.foo file.004.foo" "file.002.foo file.004.foo file.006.foo" "file.006.foo"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git add file.006.foo"
@@ -296,7 +302,7 @@ it_adds_modified_previous_staged_files_after()
 
 it_adds_staged_files_after_while_no_modified_files()
 {
-    mock "" "file.001.foo file.002.foo" "file.003.foo file.004.foo" "" "" "quux"
+    mock "" "file.001.foo file.002.foo" "" "" "" "quux"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -308,7 +314,7 @@ it_adds_staged_files_after_while_no_modified_files()
 
 it_creates_commit_with_correct_message()
 {
-    mock "" "" "" "file.001.foo file.002.foo" "" "qux"
+    mock "" "" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "" "qux"
 
     output=$( source "$TEST/.core/run.sh" )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -340,26 +346,26 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.006.foo" "grault" "" $commands
+    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.002.foo file.006.foo" "file.006.foo" "grault" "" $commands
 
     source "$TEST/.core/run.sh" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
-    assert "Should use correct diff command"
+    assert "Should use correct unstaged command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
-    assert "Should use correct diff staged command"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" =~  "rev-list HEAD --invert-grep" ]]
-    assert "Should use correct rev-list command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "reset --soft grault --quiet" ]]
-    assert "Should use correct reset command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
+    assert "Should use correct staged command"
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
     assert "Should use correct restore command"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --staged --name-only" ]]
-    assert "Should use correct diff staged command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
-    assert "Should use correct diff command"
-    [[ "$( head -n 8 "$commands" | tail -n 1 )" ==  "add file.006.foo" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
+    assert "Should use correct rev-list command"
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" ==  "reset --soft grault --quiet" ]]
+    assert "Should use correct reset command"
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
+    assert "Should use correct modified command"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "add file.006.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 9 "$commands" | tail -n 1 )" =~  "commit -m" ]]
+    [[ "$( head -n 8 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
+    assert "Should use correct staged command"
+    [[ "$( head -n 9 "$commands" | tail -n 1 )" ==  "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
     [[ "$( head -n 10 "$commands" | tail -n 1 )" ==  "add file.003.foo file.004.foo" ]]
     assert "Should use correct add command"

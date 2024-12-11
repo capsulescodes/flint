@@ -36,34 +36,35 @@ afterAll()
 mock()
 {
     UNSTAGED=($1)
-    RESET=($2)
+    STAGED=($2)
     PULLED=($3)
     MODIFIED=($4)
-    COMMIT=$5
-    COMMANDS=$6
+    RESET=($5)
+    COMMIT=$6
+    COMMANDS=$7
 
-    first=$( mktemp )
+    count=$( mktemp )
 
     git()
     {
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
 
         then
-            if [[ -s $first ]]
+            if [[ -s $count ]]
 
             then
                 printf "%s\n" "${MODIFIED[@]}"
             else
                 printf "%s\n" "${UNSTAGED[@]}"
 
-                echo 1 >> $first
+                echo 1 >> $count
             fi
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
-            printf "%s\n" "${RESET[@]}"
+            printf "%s\n" "${STAGED[@]}"
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
@@ -76,6 +77,12 @@ mock()
 
         then
             echo "Mock : git add ${@:2}"
+        fi
+
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${RESET[@]}"
         fi
 
         if [[ $1 == "commit" && $2 == "-m" ]]
@@ -97,7 +104,7 @@ unmock()
 {
     unset -f git
 
-    [[ -f "$first" ]] && rm $first
+    [[ -f "$count" ]] && rm $count
 }
 
 
@@ -253,7 +260,7 @@ it_adds_modified_previous_staged_files_after()
 
 it_creates_commit_with_correct_message()
 {
-    mock "" "" "file.001.foo file.002.foo" "file.001.foo" "foo"
+    mock "" "" "file.001.foo file.002.foo" "file.001.foo" "file.001.foo" "foo"
 
     output=$( source "$TEST/.core/hooks/post-pull" )
     echo $output | grep -q "Mock : git commit -m foo"
@@ -285,7 +292,7 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.004.foo file.006.foo" "bar" $commands
+    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.004.foo file.006.foo" "file.006.foo" "bar" $commands
 
     FLINT_UNSTAGED_FILES="file.002.foo"
     FLINT_STAGED_FILES="file.004.foo"
@@ -301,9 +308,11 @@ it_uses_correct_git_commands()
     assert "Should use correct diff command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "add file.006.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" =~ "commit -m" ]]
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "Should use correct diff command"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "add file.004.foo" ]]
+    [[ "$( head -n 8 "$commands" | tail -n 1 )" == "add file.004.foo" ]]
     assert "Should use correct add command"
 
     unmock

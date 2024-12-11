@@ -1,4 +1,4 @@
-reset=$( git diff --diff-filter=d --staged --name-only )
+reset=$( git diff --staged --name-only )
 
 if [[ -n $reset ]]
 

@@ -1,6 +1,20 @@
 unstaged=$( git diff --name-only )
 
+if [[ -n $unstaged ]]
+
+then
+    export FLINT_UNSTAGED_FILES=$unstaged
+fi
+
 staged=$( git diff --staged --name-only )
+
+if [[ -n $staged ]]
+
+then
+    export FLINT_STAGED_FILES=$staged
+
+    git restore --staged $( echo "$staged" | tr "\n" " " )
+fi
 
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
@@ -10,19 +24,7 @@ then
     git reset --soft $manual --quiet
 fi
 
-if [[ -n $staged ]]
 
-then
-    export FLINT_STAGED_FILES=$staged
-
-    git restore --staged "$( echo "$staged" | tr "\n" " " )"
-fi
-
-if [[ -n $unstaged ]]
-
-then
-    export FLINT_UNSTAGED_FILES=$unstaged
-fi
 
 
 restore=$( git diff --diff-filter=d --name-only )
@@ -30,7 +32,6 @@ restore=$( git diff --diff-filter=d --name-only )
 reset=$( git diff --diff-filter=d --staged --name-only )
 
 combined=$( printf "%s\n%s\n" "$restore" "$reset" | sort | uniq )
-
 
 if [[ -n $combined ]]
 

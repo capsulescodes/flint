@@ -27,7 +27,7 @@ mock()
 
     git()
     {
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
 
         then
             printf "%s\n" "${RESET[@]}"
@@ -156,12 +156,12 @@ it_uses_correct_git_commands()
     FLINT_STAGED_FILES="file.001.foo file.002.foo"
 
     source "$TEST/.core/hooks/post-push" > /dev/null
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "Should use correct diff command"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" =~ "commit -m" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "Should use correct staged command"
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" == "add file.001.foo file.002.foo" ]]
-    assert "Should use correct commit command"
+    assert "Should use correct add command"
 
     unmock
 

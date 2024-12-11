@@ -149,13 +149,13 @@ it_uses_correct_git_commands()
     mock "file.001.foo" "baz" $commands
 
     source "$TEST/.core/hooks/pre-push" > /dev/null
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" =~ "diff --staged --name-only" ]]
-    assert "Should use correct diff-filter command"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    assert "Should use correct staged command"
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "restore --staged file.001.foo" ]]
+    assert "Should use correct restore command"
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "Should use correct rev-list command"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "reset --soft baz --quiet" ]]
-    assert "Should use correct reset command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "restore --staged file.001.foo" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "reset --soft baz --quiet" ]]
     assert "Should use correct reset command"
 
     unmock

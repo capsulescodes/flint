@@ -29,7 +29,13 @@ then
 
         then
             git add "${files[@]}"
+        fi
 
+        reset=$( git diff --staged --name-only )
+
+        if [[ -n $reset ]]
+
+        then
             export FLINT_TEMPORARY_COMMIT=1
 
             git commit -m "FLINT-TEMPORARY-COMMIT" --quiet

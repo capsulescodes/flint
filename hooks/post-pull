@@ -1,10 +1,10 @@
 unstaged=$( git diff --diff-filter=d --name-only )
 
-reset=$( git diff --diff-filter=d --staged --name-only )
+staged=$( git diff --diff-filter=d --staged --name-only )
 
 pulled=$( git diff --diff-filter=d --name-only @{1} HEAD 2>/dev/null )
 
-combined=$( printf "%s\n%s\n%s\n" "$unstaged" "$reset" "$pulled" | sort | uniq )
+combined=$( printf "%s\n%s\n%s\n" "$unstaged" "$staged" "$pulled" | sort | uniq )
 
 files=()
 
@@ -36,7 +36,9 @@ then
     git add "${files[@]}"
 fi
 
-if [[ -n ${files[0]} || -n $reset ]]
+reset=$( git diff --staged --name-only )
+
+if [[ -n $reset ]]
 
 then
     export FLINT_TEMPORARY_COMMIT=1
@@ -46,16 +48,16 @@ then
     unset FLINT_TEMPORARY_COMMIT
 fi
 
+if [[ -n $FLINT_UNSTAGED_FILES ]]
+
+then
+    unset FLINT_UNSTAGED_FILES
+fi
+
 if [[ -n $FLINT_STAGED_FILES ]]
 
 then
     git add "$FLINT_STAGED_FILES"
 
     unset FLINT_STAGED_FILES
-fi
-
-if [[ -n $FLINT_UNSTAGED_FILES ]]
-
-then
-    unset FLINT_UNSTAGED_FILES
 fi

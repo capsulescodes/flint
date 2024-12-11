@@ -249,19 +249,19 @@ it_uses_correct_git_commands()
 
     source "$TEST/.core/hooks/pre-pull" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
-    assert "Should use correct diff command"
+    assert "Should use correct unstaged command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
-    assert "Should use correct diff-filter command"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" =~ "rev-list HEAD --invert-grep" ]]
+    assert "Should use correct staged command"
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "restore --staged file.002.foo" ]]
+    assert "Should use correct restore command"
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "Should use correct rev-list command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
-    assert "Should use correct reset command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "restore --staged file.002.foo" ]]
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
     assert "Should use correct reset command"
     [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
-    assert "Should use correct diff command"
+    assert "Should use correct modified command"
     [[ "$( head -n 7 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "Should use correct diff-filter command"
+    assert "Should use correct staged command"
 
     unmock
 

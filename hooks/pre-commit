@@ -14,8 +14,6 @@ then
     if [[ -n $staged ]]
 
     then
-        export FLINT_STAGED_FILES=$staged
-
         eval_for_command "remote" $FLINT_CONFIG "$staged"
 
         modified=$( git diff --diff-filter=d --name-only )
@@ -38,5 +36,7 @@ then
         then
             git add "${files[@]}"
         fi
+
+        export FLINT_STAGED_FILES=$staged
     fi
 fi
