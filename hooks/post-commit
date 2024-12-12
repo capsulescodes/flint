@@ -3,12 +3,12 @@ if [[ -z $FLINT_TEMPORARY_COMMIT ]]
 then
     committed=$( git diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD )
 
-    combined=$( printf "%s\n%s\n" "$committed" "$FLINT_STAGED_FILES" | sort | uniq )
+    mixed=$( printf "%s\n%s\n" $committed $FLINT_RESET_FILES | sort | uniq )
 
-    if [[ -n $combined ]]
+    if [[ -n $mixed ]]
 
     then
-        eval_for_command "local" $FLINT_CONFIG "$combined"
+        eval_for_command "local" $FLINT_CONFIG "$mixed"
 
         modified=$( git diff --diff-filter=d --name-only )
 
@@ -22,7 +22,7 @@ then
             then
                 files+=( $file )
             fi
-        done <<< "$combined"
+        done <<< "$mixed"
 
 
         if [[ -n ${files[0]} ]]
@@ -43,10 +43,11 @@ then
             unset FLINT_TEMPORARY_COMMIT
         fi
     fi
-fi
 
-if [[ -n $FLINT_STAGED_FILES ]]
 
-then
-    unset FLINT_STAGED_FILES
+    if [[ -n $FLINT_RESET_FILES ]]
+
+    then
+        unset FLINT_RESET_FILES
+    fi
 fi

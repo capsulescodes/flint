@@ -36,7 +36,7 @@ staged=$( git diff --staged --name-only )
 if [[ -n $staged ]]
 
 then
-    git restore --staged $( echo "$staged" | tr "\n" " " )
+    git restore --staged $staged
 fi
 
 manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
@@ -48,13 +48,11 @@ then
 fi
 
 
-
 eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config
 
 modified=$( git diff --diff-filter=d --name-only )
 
 files=()
-
 
 while IFS= read -r file
 
@@ -65,8 +63,6 @@ do
         files+=( $file )
     fi
 done <<< "$modified"
-
-
 
 
 if [[ -n ${files[0]} ]]
@@ -86,6 +82,7 @@ then
 
     unset FLINT_TEMPORARY_COMMIT
 fi
+
 
 if [[ -n $staged ]]
 

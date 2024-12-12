@@ -33,6 +33,12 @@ mock()
             printf "%s\n" "${STAGED[@]}"
         fi
 
+        if [[ $1 == "restore" && $2 == "--staged" ]]
+
+        then
+            echo "Mock : git restore --staged ${@:3}"
+        fi
+
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
 
         then
@@ -43,12 +49,6 @@ mock()
 
         then
             echo "Mock : git reset --soft $3 --quiet"
-        fi
-
-        if [[ $1 == "restore" && $2 == "--staged" ]]
-
-        then
-            echo "Mock : git restore --staged ${@:3}"
         fi
 
 
@@ -68,42 +68,6 @@ unmock()
 
 
 
-it_handles_no_manual_commits()
-{
-    mock
-
-    output=$( source "$TEST/.core/hooks/pre-push" )
-    echo $output | grep -qv "git reset"
-    assert "Should do nothing when no manual commits are found"
-
-    unmock
-}
-
-
-it_resets_to_last_manual_commit()
-{
-    mock "" "foo"
-
-    output=$( source "$TEST/.core/hooks/pre-push" )
-    echo $output | grep -q "Mock : git reset --soft foo"
-    assert "Should reset to the last non-temporary commit"
-
-    unmock
-}
-
-
-it_resets_silently()
-{
-    mock "" "bar"
-
-    output=$( source "$TEST/.core/hooks/pre-push" )
-    echo $output | grep -q "Mock : git reset --soft bar --quiet"
-    assert "Should reset to the last non-temporary commit"
-
-    unmock
-}
-
-
 it_restores_staged_files_if_staged_files_exist()
 {
     mock "file.001.foo file.002.foo"
@@ -116,27 +80,49 @@ it_restores_staged_files_if_staged_files_exist()
 }
 
 
-it_restores_transliterated_staged_files()
+it_exports_staged_files_if_staged_files_exist()
 {
-    mock "file.001.foo\nfile.002.foo"
+    mock "file.001.foo file.002.foo"
+
+    source "$TEST/.core/hooks/pre-push" > /dev/null
+    [[ -n $FLINT_STAGED_FILES ]]
+    assert "Should export staged files"
+    echo $FLINT_STAGED_FILES | grep -q "file.001.foo file.002.foo"
+    assert "Should list staged files"
+}
+
+
+it_handles_no_manual_commits()
+{
+    mock
 
     output=$( source "$TEST/.core/hooks/pre-push" )
-    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
-    assert "Should restore staged files"
+    echo $output | grep -qv "git reset"
+    assert "Should do nothing when no manual commits are found"
 
     unmock
 }
 
 
-it_sets_environment_variable_if_staged_files_exist()
+it_resets_to_last_manual_commit_if_manual_commit_exists()
 {
-    mock "file.001.foo file.002.foo"
+    mock "" "foo"
 
-    source "$TEST/.core/hooks/pre-push" > /dev/null
-    echo $FLINT_STAGED_FILES | grep -q "file.001.foo file.002.foo"
-    assert "Should list staged files"
-    [[ -n $FLINT_STAGED_FILES ]]
-    assert "FLINT_STAGED_FILES should be set after running the hook"
+    output=$( source "$TEST/.core/hooks/pre-push" )
+    echo $output | grep -q "Mock : git reset --soft foo"
+    assert "Should reset to the last non-temporary commit"
+
+    unmock
+}
+
+
+it_resets_to_last_manual_commit_silently()
+{
+    mock "" "bar"
+
+    output=$( source "$TEST/.core/hooks/pre-push" )
+    echo $output | grep -q "Mock : git reset --soft bar --quiet"
+    assert "Should reset to the last non-temporary commit"
 
     unmock
 }

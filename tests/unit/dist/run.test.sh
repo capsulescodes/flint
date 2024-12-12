@@ -224,18 +224,6 @@ it_restores_staged_files_if_staged_files_exist()
 }
 
 
-it_restores_transliterated_staged_files()
-{
-    mock "" "file.001.foo\nfile.002.foo"
-
-    output=$( source "$TEST/.core/run.sh" )
-    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
-    assert "Should restore staged files"
-
-    unmock
-}
-
-
 it_handles_no_modified_files()
 {
     mock

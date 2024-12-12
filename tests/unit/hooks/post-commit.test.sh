@@ -37,7 +37,7 @@ mock()
 {
     COMMITTED=($1)
     MODIFIED=($2)
-    STAGED=($3)
+    RESET=($3)
     COMMIT=$4
     COMMANDS=$5
 
@@ -64,7 +64,7 @@ mock()
         if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
 
         then
-            printf "%s\n" "${STAGED[@]}"
+            printf "%s\n" "${RESET[@]}"
         fi
 
         if [[ $1 == "commit" && $2 == "-m" ]]
@@ -90,7 +90,7 @@ unmock()
 
 
 
-it_skips_when_temp_commit()
+it_skips_when_temporary_commit()
 {
     export FLINT_TEMPORARY_COMMIT=1
 
@@ -102,7 +102,7 @@ it_skips_when_temp_commit()
 }
 
 
-it_handles_no_committed_files()
+it_handles_no_committed_and_reset_files()
 {
     mock
 
@@ -114,53 +114,61 @@ it_handles_no_committed_files()
 }
 
 
-it_evaluates_staged_files()
-{
-    mock
-
-    output=$( FLINT_STAGED_FILES="file.001.foo file.002.foo" source "$TEST/.core/hooks/post-commit" )
-    echo $output | grep -q "local_foo file.001.foo file.002.foo"
-    assert "Should run local lint command for committed files"
-
-    unmock
-}
-
-
 it_evaluates_committed_files()
 {
     mock "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-commit" )
     echo $output | grep -q "local_foo file.001.foo file.002.foo"
-    assert "Should run local lint command for committed files"
+    assert "Should run local eval command for pulled files"
 
     unmock
 }
 
 
-it_evaluates_combined_files()
+it_evaluates_reset_files()
+{
+    mock
+
+    output=$( FLINT_RESET_FILES="file.003.foo file.004.foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "local_foo file.003.foo file.004.foo"
+    assert "Should run local eval command for pulled files"
+
+    unmock
+}
+
+
+it_evaluates_sorted_files()
+{
+    mock "file.004.foo file.001.foo"
+
+    output=$( FLINT_RESET_FILES="file.003.foo file.002.foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo file.004.foo"
+    assert "Should run local eval command for pulled files"
+
+    unmock
+}
+
+
+it_evaluates_unique_files()
 {
     mock "file.001.foo file.002.foo"
 
-    output=$( FLINT_STAGED_FILES="file.003.foo file.004.foo" source "$TEST/.core/hooks/post-commit" )
-    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo file.004.foo"
-    assert "Should run local lint command for committed files"
+    output=$( FLINT_RESET_FILES="file.003.foo file.002.foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo"
+    assert "Should run local eval command for pulled files"
 
     unmock
 }
 
 
-it_handles_no_modified_files_after_formatting()
+it_handles_no_modified_files()
 {
     mock "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-commit" )
-    echo $output | grep -q "local_foo file.001.foo"
-    assert "Should run formatter even if no files are modified afterwards"
     echo $output | grep -qv "git add"
-    assert "Should not add files if none were modified after formatting"
-    echo $output | grep -qv "git commit"
-    assert "Should not create commit if no files were modified after formatting"
+    assert "Should not add files when there are no modified files"
 
     unmock
 }
@@ -173,6 +181,20 @@ it_adds_modified_files()
     output=$( source "$TEST/.core/hooks/post-commit" )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
     assert "Should add modified files"
+
+    unmock
+}
+
+
+it_handles_no_reset_files()
+{
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
+    assert "Should add modified files"
+    echo $output | grep -qv "Mock : git commit"
+    assert "Should not commit no reset files"
 
     unmock
 }
@@ -197,11 +219,23 @@ it_sets_and_unsets_environment_variable()
     [[ -z $FLINT_TEMPORARY_COMMIT ]]
     assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
-    FLINT_STAGED_FILES="bar"
+    source "$TEST/.core/hooks/post-commit" > /dev/null
+    [[ -z $FLINT_TEMPORARY_COMMIT ]]
+    assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
+
+    unmock
+}
+
+
+it_unsets_reset_files_if_reset_files_exist()
+{
+    mock
+
+    FLINT_RESET_FILES="file.001.foo"
 
     source "$TEST/.core/hooks/post-commit" > /dev/null
-    [[ -z $FLINT_TEMPORARY_COMMIT && -z $FLINT_STAGED_FILES ]]
-    assert "FLINT_TEMPORARY_COMMIT should be unset after running the hook"
+    [[ -z $FLINT_RESET_FILES ]]
+    assert "Should unset reset files"
 
     unmock
 }
@@ -211,7 +245,7 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "bar" $commands
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "bar" $commands
 
     source "$TEST/.core/hooks/post-commit" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]

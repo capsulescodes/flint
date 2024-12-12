@@ -37,10 +37,9 @@ mock()
 {
     UNSTAGED=($1)
     STAGED=($2)
-    RESTORE=($3)
-    RESET=($4)
-    HEAD=$5
-    COMMANDS=$6
+    RESET=($3)
+    HEAD=$4
+    COMMANDS=$5
 
     git()
     {
@@ -48,12 +47,6 @@ mock()
 
         then
             printf "%s\n" "${UNSTAGED[@]}"
-        fi
-
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
-
-        then
-            printf "%s\n" "${RESTORE[@]}"
         fi
 
         if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
@@ -68,6 +61,12 @@ mock()
             printf "%s\n" "${RESET[@]}"
         fi
 
+        if [[ $1 == "restore" && $2 == "--staged" ]]
+
+        then
+            echo "Mock : git restore --staged ${@:3}"
+        fi
+
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
 
         then
@@ -78,12 +77,6 @@ mock()
 
         then
             echo "Mock : git reset --soft $3 --quiet"
-        fi
-
-        if [[ $1 == "restore" && $2 == "--staged" ]]
-
-        then
-            echo "Mock : git restore --staged ${@:3}"
         fi
 
 
@@ -101,41 +94,15 @@ unmock()
 }
 
 
-
-
-it_handles_no_manual_commits()
+it_exports_unstaged_files_if_unstaged_files_exist()
 {
-    mock
+    mock "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -qv "git reset"
-    assert "Should not attempt to reset when no manual commit is found"
-
-    unmock
-}
-
-
-it_resets_to_manual_commit_if_manual_commit_exists()
-{
-    mock "" "" "" "" "foo"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "Mock : git reset --soft foo"
-    assert "Should reset to last manual commit"
-
-    unmock
-}
-
-
-it_resets_silently()
-{
-    mock "" "" "" "" "bar"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "Mock : git reset --soft bar --quiet"
-    assert "Should reset to the last non-temporary commit"
-
-    unmock
+    source "$TEST/.core/hooks/pre-pull" > /dev/null
+    [[ -n $FLINT_UNSTAGED_FILES ]]
+    assert "Should export unstaged files"
+    echo $FLINT_UNSTAGED_FILES | grep -q "file.001.foo file.002.foo"
+    assert "Should list unstaged files"
 }
 
 
@@ -151,93 +118,89 @@ it_restores_staged_files_if_staged_files_exist()
 }
 
 
-it_restores_transliterated_staged_files()
+it_exports_staged_files_if_staged_files_exist()
 {
-    mock "" "file.001.foo\nfile.002.foo"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
-    assert "Should restore staged files"
-
-    unmock
-}
-
-
-it_evaluates_unstaged_files()
-{
-    mock "file.001.foo file.002.foo" "" "file.001.foo file.002.foo"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "remote_foo file.001.foo file.002.foo"
-    assert "Should run remote lint command for unstaged files"
-
-    unmock
-}
-
-
-it_evaluates_staged_files()
-{
-    mock "" "file.001.foo file.002.foo" "" "file.001.foo file.002.foo"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
-    assert "Should run remote lint command for staged files"
-    echo $output | grep -q "remote_foo file.001.foo file.002.foo"
-    assert "Should run remote lint command for staged files"
-
-    unmock
-}
-
-
-it_evaluates_unique_files()
-{
-    mock "" "" "file.001.foo file.002.foo" "file.003.foo file.004.foo"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "remote_foo file.001.foo file.002.foo file.003.foo file.004.foo"
-    assert "Should run formatter even if no files are modified afterwards"
-
-    unmock
-}
-
-
-it_evaluates_sorted_files()
-{
-    mock "" "" "file.003.file file.002.foo file.001.foo" "file.002.foo file.003.foo"
-
-    output=$( source "$TEST/.core/hooks/pre-pull" )
-    echo $output | grep -q "remote_foo file.001.foo file.002.foo file.003.foo"
-    assert "Should run formatter even if no files are modified afterwards"
-
-    unmock
-}
-
-
-it_sets_environment_variable_if_unstaged_files_exist()
-{
-    mock "file.001.foo file.002.foo" ""
+    mock "" "file.001.foo file.002.foo"
 
     source "$TEST/.core/hooks/pre-pull" > /dev/null
-    echo $FLINT_UNSTAGED_FILES | grep -q "file.001.foo file.002.foo"
-    assert "Should list staged files"
-    [[ -n $FLINT_UNSTAGED_FILES ]]
-    assert "FLINT_STAGED_FILES should be set after running the hook"
-
-    unmock
-}
-
-
-it_sets_environment_variable_if_staged_files_exist()
-{
-    mock "" "file.003.foo file.004.foo"
-
-    source "$TEST/.core/hooks/pre-pull" > /dev/null
-    echo $FLINT_STAGED_FILES | grep -q "file.003.foo file.004.foo"
-    assert "Should list staged files"
     [[ -n $FLINT_STAGED_FILES ]]
-    assert "FLINT_STAGED_FILES should be set after running the hook"
+    assert "Should export staged files"
+    echo $FLINT_STAGED_FILES | grep -q "file.001.foo file.002.foo"
+    assert "Should list staged files"
+}
+
+
+it_handles_no_manual_commits()
+{
+    mock
+
+    output=$( source "$TEST/.core/hooks/pre-pull" )
+    echo $output | grep -qv "git reset"
+    assert "Should not attempt to reset when no manual commit is found"
 
     unmock
+}
+
+
+it_resets_to_last_manual_commit_if_manual_commit_exists()
+{
+    mock "" "" "" "foo"
+
+    output=$( source "$TEST/.core/hooks/pre-pull" )
+    echo $output | grep -q "Mock : git reset --soft foo"
+    assert "Should reset to last manual commit"
+
+    unmock
+}
+
+
+it_resets_to_last_manual_commit_silently()
+{
+    mock "" "" "" "bar"
+
+    output=$( source "$TEST/.core/hooks/pre-pull" )
+    echo $output | grep -q "Mock : git reset --soft bar --quiet"
+    assert "Should reset to the last non-temporary commit"
+
+    unmock
+}
+
+
+it_restores_reset_files_if_reset_files_exist()
+{
+    mock "" "" "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/hooks/pre-pull" )
+    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
+    assert "Should restore reset files"
+
+    unmock
+}
+
+
+it_evaluates_reset_files()
+{
+    mock "" "" "file.001.foo file.002.foo"
+
+    output=$( source "$TEST/.core/hooks/pre-pull" )
+    echo $output | grep -q "Mock : git restore --staged file.001.foo file.002.foo"
+    assert "Should run remote eval command for staged files"
+    echo $output | grep -q "remote_foo file.001.foo file.002.foo"
+    assert "Should run remote eval command for staged files"
+
+    unmock
+}
+
+
+it_exports_reset_files_if_reset_files_exist()
+{
+    mock "" "" "file.001.foo file.002.foo"
+
+    source "$TEST/.core/hooks/pre-pull" > /dev/null
+    [[ -n $FLINT_RESET_FILES ]]
+    assert "Should export staged files"
+    echo $FLINT_RESET_FILES | grep -q "file.001.foo file.002.foo"
+    assert "Should list staged files"
 }
 
 
@@ -245,7 +208,7 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo" "file.002.foo" "file.003.foo" "file.004.foo" "bar" $commands
+    mock "file.001.foo" "file.002.foo" "file.003.foo" "bar" $commands
 
     source "$TEST/.core/hooks/pre-pull" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
@@ -258,10 +221,10 @@ it_uses_correct_git_commands()
     assert "Should use correct rev-list command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "reset --soft bar --quiet" ]]
     assert "Should use correct reset command"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
-    assert "Should use correct modified command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct staged command"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "restore --staged file.003.foo" ]]
+    assert "Should use correct restore command"
 
     unmock
 

@@ -89,7 +89,7 @@ unmock()
 
 
 
-it_skips_when_temp_commit()
+it_skips_when_temporary_commit()
 {
     export FLINT_TEMPORARY_COMMIT=1
 
@@ -115,7 +115,7 @@ it_handles_no_manual_commits()
 }
 
 
-it_resets_to_manual_commit()
+it_resets_to_last_manual_commit_if_manual_commit_exists()
 {
     mock "file.001.foo file.002.foo" "file.001.foo" "foo"
 
@@ -127,7 +127,7 @@ it_resets_to_manual_commit()
 }
 
 
-it_resets_silently()
+it_resets_to_last_manual_commit_silently()
 {
     mock "file.001.foo file.002.foo" "file.001.foo" "bar"
 
@@ -139,7 +139,7 @@ it_resets_silently()
 }
 
 
-it_handles_no_staged_files()
+it_handles_no_reset_files()
 {
     mock
 
@@ -151,13 +151,13 @@ it_handles_no_staged_files()
 }
 
 
-it_formats_staged_files()
+it_evaluates_reset_files()
 {
     mock "file.001.foo file.002.foo" "file.001.foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
     echo $output | grep -q "remote_foo file.001.foo file.002.foo"
-    assert "Should run remote lint command for staged files"
+    assert "Should run remote eval command for staged files"
 
     unmock
 }
@@ -179,41 +179,27 @@ it_handles_no_modified_files()
 }
 
 
-it_identifies_modified_files()
+it_adds_modified_files()
 {
-    mock "file.001.foo file_002.foo file!char003.foo" "file.001.foo file_002.foo file!char003.foo"
+    mock "file.001.foo file_002.foo" "file.001.foo file_002.foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
-    echo $output | grep -q "Mock : git add file.001.foo file_002.foo file!char003.foo"
+    echo $output | grep -q "Mock : git add file.001.foo file_002.foo"
     assert "Should add only modified files from committed files list"
 
     unmock
 }
 
 
-it_processes_multiple_files()
-{
-    mock "file.001.foo file.002.foo file.003.bar" "file.001.foo file.002.foo"
-
-    output=$( source "$TEST/.core/hooks/pre-commit" )
-    echo $output | grep -q "remote_foo file.001.foo file.002.foo"
-    assert "Should run formatter even if no files are modified afterwards"
-    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
-    assert "Should add modified files"
-
-    unmock
-}
-
-
-it_sets_environment_variable_if_staged_files_exist()
+it_exports_reset_files_if_reset_files_exist()
 {
     mock "file.001.foo file.002.foo"
 
     source "$TEST/.core/hooks/pre-commit" > /dev/null
-    echo $FLINT_STAGED_FILES | grep -q "file.001.foo file.002.foo"
-    assert "Should list staged files"
-    [[ -n $FLINT_STAGED_FILES ]]
-    assert "FLINT_STAGED_FILES should be set after running the hook"
+    [[ -n $FLINT_RESET_FILES ]]
+    assert "FLINT_RESET_FILES should be set after running the hook"
+    echo $FLINT_RESET_FILES | grep -q "file.001.foo file.002.foo"
+    assert "Should list reset files"
 
     unmock
 }

@@ -35,42 +35,24 @@ afterAll()
 
 mock()
 {
-    UNSTAGED=($1)
-    STAGED=($2)
-    PULLED=($3)
-    MODIFIED=($4)
-    RESET=($5)
-    COMMIT=$6
-    COMMANDS=$7
-
-    count=$( mktemp )
+    PULLED=($1)
+    MODIFIED=($2)
+    RESET=($3)
+    COMMIT=$4
+    COMMANDS=$5
 
     git()
     {
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
-
-        then
-            if [[ -s $count ]]
-
-            then
-                printf "%s\n" "${MODIFIED[@]}"
-            else
-                printf "%s\n" "${UNSTAGED[@]}"
-
-                echo 1 >> $count
-            fi
-        fi
-
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
-
-        then
-            printf "%s\n" "${STAGED[@]}"
-        fi
-
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
 
         then
             printf "%s\n" "${PULLED[@]}"
+        fi
+
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${MODIFIED[@]}"
         fi
 
         if [[ $1 == "add" ]]
@@ -103,14 +85,12 @@ mock()
 unmock()
 {
     unset -f git
-
-    [[ -f "$count" ]] && rm $count
 }
 
 
 
 
-it_handles_no_unstaged_no_staged_and_no_pulled_files()
+it_handles_no_pulled_and_reset_files()
 {
     mock
 
@@ -122,37 +102,25 @@ it_handles_no_unstaged_no_staged_and_no_pulled_files()
 }
 
 
-it_evaluates_unstaged_files()
+it_evaluates_pulled_files()
 {
     mock "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-pull" )
     echo $output | grep -q "local_foo file.001.foo file.002.foo"
-    assert "Should run local lint command for pulled files"
+    assert "Should run local eval command for pulled files"
 
     unmock
 }
 
 
-it_evaluates_staged_files()
+it_evaluates_reset_files()
 {
-    mock "" "file.003.foo file.004.foo"
+    mock
 
-    output=$( source "$TEST/.core/hooks/post-pull" )
+    output=$( FLINT_RESET_FILES="file.003.foo file.004.foo" source "$TEST/.core/hooks/post-pull" )
     echo $output | grep -q "local_foo file.003.foo file.004.foo"
-    assert "Should run local lint command for pulled files"
-
-    unmock
-}
-
-
-it_evaluates_pulled_files()
-{
-    mock "" "" "file.005.foo file.006.foo"
-
-    output=$( source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "local_foo file.005.foo file.006.foo"
-    assert "Should run local lint command for pulled files"
+    assert "Should run local eval command for pulled files"
 
     unmock
 }
@@ -160,11 +128,11 @@ it_evaluates_pulled_files()
 
 it_evaluates_sorted_files()
 {
-    mock "file.005.foo file.001.foo" "file.003.foo file.006.foo" "file.002.foo file.004.foo"
+    mock "file.004.foo file.001.foo"
 
-    output=$( source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo file.004.foo file.005.foo file.006.foo"
-    assert "Should run local lint command for pulled files"
+    output=$( FLINT_RESET_FILES="file.003.foo file.002.foo" source "$TEST/.core/hooks/post-pull" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo file.004.foo"
+    assert "Should run local eval command for pulled files"
 
     unmock
 }
@@ -172,11 +140,11 @@ it_evaluates_sorted_files()
 
 it_evaluates_unique_files()
 {
-    mock "file.001.foo file.002.foo" "file.002.foo file.003.foo" "file.003.foo file.004.foofile.004.foo"
+    mock "file.001.foo file.002.foo"
 
-    output=$( source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo file.004.foo"
-    assert "Should run local lint command for pulled files"
+    output=$( FLINT_RESET_FILES="file.003.foo file.002.foo" source "$TEST/.core/hooks/post-pull" )
+    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo"
+    assert "Should run local eval command for pulled files"
 
     unmock
 }
@@ -184,7 +152,7 @@ it_evaluates_unique_files()
 
 it_handles_no_modified_files()
 {
-    mock "" "" "file.001.foo"
+    mock "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-pull" )
     echo $output | grep -qv "git add"
@@ -194,21 +162,9 @@ it_handles_no_modified_files()
 }
 
 
-it_identifies_modified_files()
+it_adds_modified_files()
 {
-    mock "" "" "file.001.foo file_002.foo file!char003.foo" "file.001.foo file_002.foo file!char003.foo"
-
-    output=$( source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "Mock : git add file!char003.foo file.001.foo file_002.foo"
-    assert "Should add only modified files from committed files list"
-
-    unmock
-}
-
-
-it_adds_modified_files_before()
-{
-    mock "" "" "file.001.foo file.002.foo" "file.001.foo file.002.foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-pull" )
     echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
@@ -218,71 +174,96 @@ it_adds_modified_files_before()
 }
 
 
-it_does_not_add_unstaged_modified_files_before()
+it_handles_no_reset_files()
 {
-    mock "file.001.foo file.002.foo" "" "" "file.001.foo file.002.foo"
-
-    output=$( FLINT_UNSTAGED_FILES=$'file.001.foo\nfile.002.foo' source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -qv "Mock : git add"
-    assert "Should not add already modified files before"
-
-    unmock
-}
-
-
-it_adds_unmodified_previous_staged_files_after()
-{
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.004.foo file.006.foo"
-
-    output=$( FLINT_STAGED_FILES="file.001.foo file.002.foo" source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "Mock : git add file.004.foo file.006.foo"
-    assert "Should add modified staged files after"
-    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
-    assert "Should add modified staged files after"
-
-    unmock
-}
-
-
-it_adds_modified_previous_staged_files_after()
-{
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.004.foo file.006.foo"
-
-    output=$( FLINT_STAGED_FILES=$'file.001.foo\nfile.002.foo' source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "Mock : git add file.004.foo file.006.foo"
-    assert "Should add modified files before"
-    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
-    assert "Should add modified staged files after"
-
-    unmock
-}
-
-
-it_creates_commit_with_correct_message()
-{
-    mock "" "" "file.001.foo file.002.foo" "file.001.foo" "file.001.foo" "foo"
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-pull" )
-    echo $output | grep -q "Mock : git commit -m foo"
-    assert "Should create a temporary commit"
+    echo $output | grep -q "Mock : git add file.001.foo"
+    assert "Should add modified files"
+    echo $output | grep -qv "Mock : git commit"
+    assert "Should not commit no reset files"
 
     unmock
 }
 
 
-it_sets_and_unsets_environment_variable()
+it_commits_with_correct_message_if_reset_files_exist()
 {
-    mock "" "" "file.002.foo file.003.foo" "file.002.foo"
+    mock "file.001.foo" "file.001.foo" "file.001.foo" "qux"
+
+    output=$( source "$TEST/.core/hooks/post-pull" )
+    echo $output | grep -q "Mock : git commit -m qux"
+    assert "Should create commit with correct temporary commit message"
+
+    unmock
+}
+
+
+it_exports_and_unsets_temporary_commit()
+{
+    mock "file.001.foo" "quux"
 
     [[ -z $FLINT_TEMPORARY_COMMIT ]]
     assert "FLINT_TEMPORARY_COMMIT should not be set before running the hook"
 
-    FLINT_UNSTAGED_FILES="foo"
-    FLINT_STAGED_FILES="bar"
+    source "$TEST/.core/hooks/post-pull" > /dev/null
+    [[ -z $FLINT_TEMPORARY_COMMIT ]]
+    assert "variables should be unset after running the hook"
+
+    unmock
+}
+
+
+it_unsets_reset_files_if_reset_files_exist()
+{
+    mock
+
+    FLINT_RESET_FILES="file.001.foo"
 
     source "$TEST/.core/hooks/post-pull" > /dev/null
-    [[ -z $FLINT_TEMPORARY_COMMIT && -z $FLINT_STAGED_FILES && -z $FLINT_UNSTAGED_FILES ]]
-    assert "variables should be unset after running the hook"
+    [[ -z $FLINT_RESET_FILES ]]
+    assert "Should unset reset files"
+
+    unmock
+}
+
+
+it_adds_staged_files()
+{
+    mock
+
+    output=$( FLINT_STAGED_FILES="file.001.foo file.002.foo" source "$TEST/.core/hooks/post-pull" )
+    echo $output | grep -q "Mock : git add file.001.foo file.002.foo"
+    assert "Should add modified staged files after"
+
+    unmock
+}
+
+
+it_unsets_staged_files_if_staged_files_exist()
+{
+    mock
+
+    FLINT_STAGED_FILES="file.001.foo"
+
+    source "$TEST/.core/hooks/post-pull" > /dev/null
+    [[ -z $FLINT_STAGED_FILES ]]
+    assert "Should unset staged files"
+
+    unmock
+}
+
+
+it_unsets_unstaged_files_if_unstaged_files_exist()
+{
+    mock
+
+    FLINT_UNSTAGED_FILES="file.001.foo"
+
+    source "$TEST/.core/hooks/post-pull" > /dev/null
+    [[ -z $FLINT_UNSTAGED_FILES ]]
+    assert "Should unset staged files"
 
     unmock
 }
@@ -292,27 +273,24 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.005.foo file.006.foo" "file.002.foo file.004.foo file.006.foo" "file.006.foo" "bar" $commands
+    mock "file.001.foo file.002.foo" "file.001.foo file.003.foo" "file.001.foo" "bar" $commands
 
     FLINT_UNSTAGED_FILES="file.002.foo"
     FLINT_STAGED_FILES="file.004.foo"
+    FLINT_RESET_FILES="file.003.foo"
 
     source "$TEST/.core/hooks/post-pull" > /dev/null
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
-    assert "Should use correct diff command"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
-    assert "Should use correct diff command"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only @{1} HEAD" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only @{1} HEAD" ]]
     assert "Should use correct diff-filter command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --diff-filter=d --name-only" ]]
     assert "Should use correct diff command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "add file.006.foo" ]]
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "add file.001.foo file.003.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "Should use correct diff command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
-    [[ "$( head -n 8 "$commands" | tail -n 1 )" == "add file.004.foo" ]]
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "add file.004.foo" ]]
     assert "Should use correct add command"
 
     unmock

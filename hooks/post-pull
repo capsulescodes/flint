@@ -1,20 +1,15 @@
-unstaged=$( git diff --diff-filter=d --name-only )
-
-staged=$( git diff --diff-filter=d --staged --name-only )
-
 pulled=$( git diff --diff-filter=d --name-only @{1} HEAD 2>/dev/null )
 
-combined=$( printf "%s\n%s\n%s\n" "$unstaged" "$staged" "$pulled" | sort | uniq )
+mixed=$( printf "%s\n%s\n" $pulled $FLINT_RESET_FILES | sort | uniq )
 
-files=()
-
-
-if [[ -n $combined ]]
+if [[ -n $mixed ]]
 
 then
-    eval_for_command "local" $FLINT_CONFIG "$combined"
+    eval_for_command "local" $FLINT_CONFIG "$mixed"
 
     modified=$( git diff --diff-filter=d --name-only )
+
+    files=()
 
     while IFS= read -r file
 
@@ -24,34 +19,33 @@ then
         then
             files+=( $file )
         fi
-    done <<< "$combined"
+    done <<< "$mixed"
+
+
+    if [[ -n ${files[0]} ]]
+
+    then
+        git add "${files[@]}"
+    fi
+
+    reset=$( git diff --staged --name-only )
+
+    if [[ -n $reset ]]
+
+    then
+        export FLINT_TEMPORARY_COMMIT=1
+
+        git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
+
+        unset FLINT_TEMPORARY_COMMIT
+    fi
 fi
 
 
-
-
-if [[ -n ${files[0]} ]]
+if [[ -n $FLINT_RESET_FILES ]]
 
 then
-    git add "${files[@]}"
-fi
-
-reset=$( git diff --staged --name-only )
-
-if [[ -n $reset ]]
-
-then
-    export FLINT_TEMPORARY_COMMIT=1
-
-    git commit -m "FLINT-TEMPORARY-COMMIT" --quiet
-
-    unset FLINT_TEMPORARY_COMMIT
-fi
-
-if [[ -n $FLINT_UNSTAGED_FILES ]]
-
-then
-    unset FLINT_UNSTAGED_FILES
+    unset FLINT_RESET_FILES
 fi
 
 if [[ -n $FLINT_STAGED_FILES ]]
@@ -60,4 +54,10 @@ then
     git add "$FLINT_STAGED_FILES"
 
     unset FLINT_STAGED_FILES
+fi
+
+if [[ -n $FLINT_UNSTAGED_FILES ]]
+
+then
+    unset FLINT_UNSTAGED_FILES
 fi

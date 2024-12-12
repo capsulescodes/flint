@@ -9,12 +9,12 @@ then
         git reset --soft $manual --quiet
     fi
 
-    staged=$( git diff --diff-filter=d --staged --name-only )
+    reset=$( git diff --diff-filter=d --staged --name-only )
 
-    if [[ -n $staged ]]
+    if [[ -n $reset ]]
 
     then
-        eval_for_command "remote" $FLINT_CONFIG "$staged"
+        eval_for_command "remote" $FLINT_CONFIG "$reset"
 
         modified=$( git diff --diff-filter=d --name-only )
 
@@ -28,7 +28,7 @@ then
             then
                 files+=( $file )
             fi
-        done <<< "$staged"
+        done <<< "$reset"
 
 
         if [[ -n ${files[0]} ]]
@@ -37,6 +37,6 @@ then
             git add "${files[@]}"
         fi
 
-        export FLINT_STAGED_FILES=$staged
+        export FLINT_RESET_FILES=$reset
     fi
 fi
