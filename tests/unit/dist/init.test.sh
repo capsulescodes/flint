@@ -87,7 +87,7 @@ it_creates_valid_dispatcher_script()
     assert "Generated git.sh should contain hooks variable"
     grep -q "wrapper=\"\$PWD/.core/src/wrapper.sh\"" "$TEST/.flint/git.sh"
     assert "Generated git.sh should contain wrapper variable"
-    grep -q "[[ -f \$wrapper ]] && source \$wrapper || command git \"\$@\"" "$TEST/.flint/git.sh"
+    grep -q "[[ -f \$wrapper ]] && source \$wrapper || command git \"\$@\" || true" "$TEST/.flint/git.sh"
     assert "Generated git.sh should source wrapper script"
 }
 
