@@ -123,6 +123,18 @@ it_creates_a_configuration_file()
 }
 
 
+it_skips_configuration_creation_if_mentionned()
+{
+    touch .zshrc
+
+    output=$( SHELL="zsh" HOME=$LOCAL flint --init --no-config )
+    [[ ! -f "$LOCAL/flint.config.json" ]]
+    assert "Should not create configuration file"
+
+    rm .zshrc
+}
+
+
 it_skips_configuration_file_creation_if_it_already_exists()
 {
     touch "$LOCAL/flint.config.json"

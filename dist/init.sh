@@ -57,17 +57,23 @@ fi
 
 
 
-config="${INIT_CWD:-.}/flint.config.json"
-
-if [ ! -f "$config" ]
+if [[ ! $@ =~ "--no-config" ]]
 
 then
-    cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" $config
+    config="${INIT_CWD:-.}/flint.config.json"
 
-    printf "\033[1;32mflint - Base config file 'flint.config.json' added to project root.\033[0m\n"
-else
-    printf "\033[1;36mflint - Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m\n"
+    if [ ! -f "$config" ]
+
+    then
+        cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" $config
+
+        printf "\033[1;32mflint - Base config file 'flint.config.json' added to project root.\033[0m\n"
+    else
+        printf "\033[1;36mflint - Base config file 'flint.config.json' already exists in project root. Skipping.\033[0m\n"
+    fi
 fi
+
+
 
 
 if [[ ! $@ =~ "--no-wrap" ]]

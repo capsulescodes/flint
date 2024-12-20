@@ -36,6 +36,7 @@ it_lists_options()
     -i, --init         Initializes the configuration.
         --with-hooks   Initializes the configuration with modifiable hooks included.
         --no-wrap      Initializes the configuration without the Git wrapper function.
+        --no-config    Initializes the configuration without the Git configuration template.
 
     -r, --run          Execute the process.
                        Defaults to 'local' mode if no parameters are specified.

@@ -3,16 +3,16 @@
 
 <br>
 
-Write code your way while ensuring team consistency.
+Write code your way while ensuring remote consistency.
 
 <br>
 
-Flint empowers developers to use their personal style and formatting preferences locally, while maintaining a consistent remote codebase. By integrating with Git, Flint automatically formats code during pull and push operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
+Flint empowers developers to use their personal style and formatting preferences locally, while maintaining a consistent remote codebase. By integrating with Git, Flint automatically formats code during `pull` and `push` operations. This approach prevents commits from being cluttered with formatting changes, making code reviews cleaner and collaboration smoother.
 
 <br>
 
 > [!NOTE]
-> This package is currently under development. Contributions are warmly welcomed.
+> Flint is currently under development. Contributions are warmly welcomed.
 
 <br>
 
@@ -21,10 +21,10 @@ Flint empowers developers to use their personal style and formatting preferences
 **1. Install Flint using your package manager**
 
 ```bash
-# NPM
+# Using NPM
 npm install --save-dev @capsulescodes/flint
 
-# Composer
+# Using Composer
 composer require-dev capsulescodes/flint
 ```
 
@@ -43,35 +43,35 @@ vendor/bin/flint --init
 
 <br>
 
-This will :
+This process will :
 
 - Create a `.flint` directory in your project's root [ if not already present ].
-- Create the `flint.config.json` file in your project's root [ if not already present ].
-- Add the Flint git wrapper function to your shell's RC file [ if not already present ].
+- Create a `flint.config.json` file in your project's root [ if not already present ].
+- Add a git wrapper function to your shell's RC file [ if not already present ].
 
 <br>
 
 ## Usage
 
-Once installed and initialized, Flint seamlessly integrates into your Git workflow.
+Once initialized, Flint integrates with your Git workflow to streamline coding practices.
 
-- **Local Development** : Write and format your code according to your personal preferences.
-- **Pulling Code** : When you pull code from the repository, Flint formats it to match your local style, making it easier for you to read and work with.
-- **Committing and Pushing Code** : Before code is committed and pushed to the repository, Flint reformats it to adhere to the team's style guidelines based on remote config, ensuring consistency across the codebase.
+- **Local Development** : Format your code according to personal preferences.
+- **Pulling Code** : Flint adapts remote code to your local style for easier readability.
+- **Committing and Pushing Code** : Flint reformats your code to align with remote style guidelines.
 
 <br>
 
 This esnures :
 
-- **Maintaining Code Consistency** : The remote repository always reflects the team's agreed-upon code style.
-- **Improving Readability** : Developers can work in an environment tailored to their preferences without affecting others.
-- **Cleaner Commits** : By separating formatting changes from actual code changes, commits become more meaningful and easier to review.
+- **Maintaining Code Consistency** :Ensures the repository always adheres to agreed-upon styles.
+- **Improving Readability** : Local preferences don’t impact others' workflows.
+- **Cleaner Commits** : Keeps formatting changes separate from logic changes.
 
 <br>
 
 ## Caveats
 
-Flint creates a hidden temporary commit during some `git` operations, which may sometimes cause the following message to appear when running `git status` :
+Flint creates a hidden temporary commit during certain `git` operations, which may result in the following message to appear when running `git status` :
 
 ```diff
 On branch main
@@ -93,11 +93,11 @@ git branch --unset-upstream <branch-name>
 
 ## Configuration
 
-Flint uses the `flint.config.json` file for configuration. Specify your local and team formatting rules here.
+Flint uses a `flint.config.json` file to manage formatting commands. Specify your local and remote formatting commands here.
 
 <br>
 
-Here is a basic config file formatting Javascript and Typescript files with ESLint with `eslint.remote.config.js` file remotely and `eslint.local.config.js` locally.
+Below is an example configuration file formatting Javascript files with ESLint. It formats locally based on `eslint.local.config.js` file and remotely based on `eslint.remote.config.js` :
 
 <br>
 
@@ -119,7 +119,7 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
 
 <br>
 
-## Supported Package Managers
+## Currently supported Package Managers
 
 - [x] Flint is available on NPM.
 - [x] Flint is available on Composer.
@@ -130,9 +130,11 @@ Here is a basic config file formatting Javascript and Typescript files with ESLi
 
 <br>
 
-**- Initialize flint hooks in your project**
+## Options
 
-If you want to access your own flint hooks, use the `--init` or `-i` command with the `--with-hooks` flag.
+**- Include Flint hooks during initialization**
+
+If you want to access Flint hooks, use the `--init` or `-i` command with the `--with-hooks` flag.
 
 ```bash
 # NPM
@@ -144,7 +146,7 @@ vendor/bin/flint -i --with-hooks
 
 <br>
 
-**- Initialize Flint without the git wrapper function**
+**- Exclude the Git wrapper function from initialization**
 
 If you don't want to add a git wrapper function to your shell profile file, use the `--init` or `-i` command with the `--no-wrap` flag.
 
@@ -158,23 +160,23 @@ vendor/bin/flint -i --no-wrap
 
 <br>
 
-**- Run Flint manually**
+**- Skip adding a configuration file during initialization**
 
-If you want to run your Flint configuration manually, use the `--run` or `-r` command.
+If you don't want to add a template configuration file to your project, use the `--init` or `-i` command with the `--no-config` flag.
 
 ```bash
 # NPM
-node_modules/.bin/flint --run
+node_modules/.bin/flint -i --no-config
 
 # Composer
-vendor/bin/flint --run
+vendor/bin/flint -i --no-config
 ```
-
-- At this point, running `git status` with Flint will become `flint status`
 
 <br>
 
-if you want to run a specific command from configuration file like `local` or `remote`, use your command after the `--run` or `-r` command.
+**- Run Flint command manually**
+
+If you want to run a specific command from configuration file, use your command after the `--run` or `-r` command. Default is `local`.
 
 ```bash
 # NPM
@@ -185,6 +187,21 @@ vendor/bin/flint -r remote
 ```
 
 <br>
+
+**- Use Flint as a Git alternative**
+
+Flint can act as a Git wrapper, allowing you to seamlessly use Git commands while benefiting from Flint's formatting hooks. To enable this, simply replace `git` with `flint` in your commands.
+
+```bash
+# NPM
+node_modules/.bin/flint status
+
+# Composer
+vendor/bin/flint status
+```
+
+<br>
+
 
 ## Contributing
 
