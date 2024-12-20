@@ -1,0 +1,25 @@
+unstaged=$( git diff --name-only )
+
+if [[ -n $unstaged ]]
+
+then
+    export FLINT_UNSTAGED_FILES=$unstaged
+fi
+
+staged=$( git diff --staged --name-only )
+
+if [[ -n $staged ]]
+
+then
+    git restore --staged $staged
+
+    export FLINT_STAGED_FILES=$staged
+fi
+
+state=$( git ls-tree -r HEAD --long )
+
+if [[ -n $state ]]
+
+then
+    export FLINT_STATE=$state
+fi

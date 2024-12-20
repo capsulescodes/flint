@@ -87,7 +87,7 @@ it_creates_valid_dispatcher_script()
     assert "Generated git.sh should contain hooks variable"
     grep -q "wrapper=\"\$PWD/.core/src/wrapper.sh\"" "$TEST/.flint/git.sh"
     assert "Generated git.sh should contain wrapper variable"
-    grep -q "[[ -f \$wrapper ]] && source \$wrapper || command git \"\$@\" || true" "$TEST/.flint/git.sh"
+    grep -q "if \[\[ -f \$wrapper \]\]; then source \$wrapper; else command git \"\$@\"; fi;" "$TEST/.flint/git.sh"
     assert "Generated git.sh should source wrapper script"
 }
 
@@ -104,7 +104,7 @@ it_adds_git_wrapper_to_shell_config()
 {
     touch "$TEST/.bashrc"
 
-    local command="git() { \[\[ -f \"\$PWD/.flint/git.sh\" \]\] && sh \"\$PWD/.flint/git.sh\" \"\$@\" || command git \"\$@\" }"
+    local command="git() { if \[\[ -f \"\$PWD/.flint/git.sh\" \]\]; then sh \"\$PWD/.flint/git.sh\" \"\$@\"; else command git \"\$@\"; fi; }"
 
     SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" > /dev/null
     echo "$( cat "$TEST/.bashrc" )" | grep -q "$command"

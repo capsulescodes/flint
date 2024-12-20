@@ -174,6 +174,18 @@ it_adds_modified_files()
 }
 
 
+it_adds_modified_files_excluding_previous_unstaged_and_staged_files()
+{
+    mock "file.001.foo file.002.foo file.003.foo" "file.001.foo file.002.foo file.003.foo"
+
+    output=$( FLINT_UNSTAGED_FILES="file.002.foo" FLINT_STAGED_FILES="file.003.foo" source "$TEST/.core/hooks/post-pull" )
+    echo $output | grep -q "Mock : git add file.001.foo"
+    assert "Should add newly modified files before"
+
+    unmock
+}
+
+
 it_handles_no_reset_files()
 {
     mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"

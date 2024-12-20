@@ -19,13 +19,13 @@ beforeEach()
 
     sed -i "" "s|sh \"\$path/run|source \"\$path/run|" "$LOCAL/.core/bin/flint"
 
-    sed -i "" "s|command git|echo \"git command run from binary \"|" "$LOCAL/.core/bin/flint"
+    sed -i "" "s|command git \"\$@\"|echo \"git command run from binary \"|" "$LOCAL/.core/bin/flint"
 
     sed -i "" "s|source \"\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/../src/functions.sh\"||" "$LOCAL/.core/dist/run.sh"
 
     sed -i '' $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$LOCAL/.core/src/wrapper.sh"
 
-    sed -i "" "s|command git|echo \"git command run from wrapper \"|" "$LOCAL/.core/src/wrapper.sh"
+    sed -i "" "s|command git \"\$@\"|echo \"git command run from wrapper \"|" "$LOCAL/.core/src/wrapper.sh"
 
     sed -i "" "s|eval_for_command|mock_for_command|" "$LOCAL/.core/src/functions.sh"
 

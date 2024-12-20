@@ -15,12 +15,12 @@ function mock
 
     function flint
     {
-        source "$LOCAL/.core/bin/flint" $@
+        source "$LOCAL/.core/bin/flint" "$@"
     }
 
     function wrap
     {
-        [[ -f "$LOCAL/.flint/git.sh" ]] && source "$LOCAL/.flint/git.sh" $@ || git $@
+        if [[ -f "$LOCAL/.flint/git.sh" ]]; then source "$LOCAL/.flint/git.sh" "$@"; else git "$@"; fi
     }
 
     function eval_for_command
@@ -197,6 +197,12 @@ function mock
             echo $4 >> "$LOCAL/.git/commits"
         fi
 
+        if [[ $1 == "checkout" ]]
+
+        then
+            mv  "$2"/* "$LOCAL"
+        fi
+
 
 
 
@@ -210,10 +216,20 @@ function mock
             fi
         fi
 
-        if [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
+        if [[ $1 == "reset" && $2 == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && $4 == "--quiet" ]]
 
         then
             sed -i "" "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"
+        fi
+
+        if [[ $1 == "ls-tree" && $2 == "-r" && $3 == "HEAD" && $4 == "--long" ]]
+
+        then
+            for file in $( ls "$LOCAL" )
+
+            do
+                echo "100644 $(wc "$file" | tr -s " " | sed "s/^ //" )"
+            done
         fi
 
 

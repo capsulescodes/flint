@@ -31,9 +31,9 @@ beforeAll()
 
 afterAll()
 {
-    cd - > /dev/null || exit 1
-
     unset FLINT_CONFIG
+
+    cd - > /dev/null || exit 1
 
     [[ -n "$TEST" && -d "$TEST" ]] && rm -r $TEST
 }
