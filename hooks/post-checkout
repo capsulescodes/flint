@@ -2,10 +2,12 @@ state=$( git ls-tree -r HEAD --long )
 
 paths=()
 
-while IFS=' ' read -r mode type hash size path
+while IFS=' ' read -r line
 
 do
-    if [[ -n $path ]] && ! echo "$FLINT_STATE" | grep -Fqx "$mode $type $hash $size $path"
+    path=$( echo "$line" | tr -s '[:space:]' ' ' | cut -d ' ' -f 5- )
+
+    if [[ -n $path ]] && ! echo "$FLINT_STATE" | grep -Fqx "$line"
 
     then
         paths+=( $path )
