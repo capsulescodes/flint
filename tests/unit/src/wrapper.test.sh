@@ -7,7 +7,7 @@ beforeAll()
 
     cp "$PWD/src/wrapper.sh" "$TEST/.core/wrapper.sh"
 
-    cp "$PWD/template.config.json" "$TEST/flint.config.json"
+    cp "$PWD/stubs/config.json" "$TEST/flint.config.json"
 
     sed -i '' $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$TEST/.core/wrapper.sh"
 

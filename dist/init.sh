@@ -65,7 +65,7 @@ then
     if [ ! -f "$config" ]
 
     then
-        cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../template.config.json" $config
+        cp "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../stubs/config.json" $config
 
         printf "\033[1;32mflint - Base config file 'flint.config.json' added to project root.\033[0m\n"
     else

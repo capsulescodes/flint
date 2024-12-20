@@ -11,7 +11,7 @@ beforeEach()
 
     cp -r "$PWD/hooks" "$TEST/.core/hooks"
 
-    cp "$PWD/template.config.json" "$TEST/.core/template.config.json"
+    cp -r "$PWD/stubs" "$TEST/.core/stubs"
 
     sed -i "" "s|\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/..|$TEST/.core|" "$TEST/.core/dist/init.sh"
 

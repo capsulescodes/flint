@@ -36,9 +36,9 @@
         "dist",
         "hooks",
         "src",
+        "stubs",
         "LICENSE.md",
-        "README.md",
-        "template.config.json"
+        "README.md"
     ],
     "scripts" : {
         "test" : "sh tests/runner.sh"

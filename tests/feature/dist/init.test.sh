@@ -13,7 +13,7 @@ beforeEach()
 
     cp -r "$PWD/src/" "$LOCAL/.core/src"
 
-    cp -r "$PWD/template.config.json" "$LOCAL/.core/template.config.json"
+    cp -r "$PWD/stubs" "$LOCAL/.core/stubs"
 
     sed -i "" "s|\$( cd -P \"\$( dirname \$target )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/bin/flint"
 
