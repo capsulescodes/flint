@@ -16,8 +16,3 @@ jobs :
       # - run : npm publish
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM }}
-      - uses : shivammathur/setup-php@v2
-        with :
-          php-version : '8.3'
-          tools : composer:v2
-      - run : composer test
