@@ -26,6 +26,7 @@ npm install --save-dev @capsulescodes/flint
 ```
 
 <br>
+<br>
 
 **2. Initialize Flint**
 
@@ -34,28 +35,35 @@ npm install --save-dev @capsulescodes/flint
 node_modules/.bin/flint --init
 ```
 
-<br>
-
-This command will :
-
-- Create a `.flint` directory in your project's root [ unless already present ].
-- Create a `flint.config.json` file in your project's root [ unless already present ].
+- The command creates a `.flint` directory in your project's root [ unless already present ].
+- The command creates a `flint.config.json` file in your project's root [ unless already present ].
 
 <br>
+<br>
 
-**3. Optional - Integrate a Git wrapper inside your local shell configuration file**
+**3. Optional - Copy the Flint git wrapper inside your local shell configuration file**
 
-```
+```bash
 # Flint git wrapper
-git() { if [[ -f "$PWD/.flint/git.sh" ]]; then sh "$PWD/.flint/git.sh" "$@"; else command git "$@"; fi; }
+
+git() {
+    if [[ -f "$PWD/.flint/git.sh" ]]; then
+        sh "$PWD/.flint/git.sh" "$@"
+    else
+        command git "$@"
+    fi
+}
 ```
 
-This wrapper will :
+- The function calls **flint** around **git** if a `.flint/git.sh` file is present inside the current working directory. If not, it will call **git** as usual.
 
-- Call Flint around Git if a `.flint` directory is present inside the current location. If not, it will call Git as usual.
+<br>
 
 > [!NOTE]
 > Running ```flint --init --wrap``` integrates the wrapper during setup.
+>
+> You can also use `flint` as a `git` alternative.
+>
 > More options below.
 
 <br>
