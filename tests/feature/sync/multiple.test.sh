@@ -9,7 +9,7 @@ beforeEach()
 
     cp -r "$PWD/src" "$LOCAL/.core/src"
 
-    INIT_CWD="$LOCAL" sh "$PWD/dist/init.sh" --with-hooks > /dev/null
+    INIT_CWD="$LOCAL" sh "$PWD/dist/init.sh" --hooks > /dev/null
 
     sed -i "" "s|${PWD}|${LOCAL}/.core|" "$LOCAL/.flint/git.sh"
 

@@ -32,7 +32,7 @@ then
 
     hooks="$( get_relative_path "$INIT_CWD" "$source" )/hooks"
 
-    if [[ $@ =~ "--with-hooks" ]]
+    if [[ $@ =~ "--hooks" ]]
 
     then
         cp -r "$source/hooks" "$destination/hooks"
@@ -76,7 +76,7 @@ fi
 
 
 
-if [[ ! $@ =~ "--no-wrap" ]]
+if [[ $@ =~ "--wrap" ]]
 
 then
     shell=$( basename $SHELL )
@@ -129,8 +129,6 @@ then
     else
         printf "\033[1;33mflint - Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually.\033[0m\n\n"
     fi
-else
-    printf "\033[1;30mflint - Git wrapper function not required. Skipping..\033[0m\n"
 fi
 
 exit 0

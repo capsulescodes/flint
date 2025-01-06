@@ -41,15 +41,15 @@ it_creates_flint_directory()
 
 it_copies_hooks_when_requested()
 {
-    sh "$TEST/.core/dist/init.sh" --with-hooks > /dev/null
+    sh "$TEST/.core/dist/init.sh" --hooks > /dev/null
     [[ -d "$TEST/.flint/hooks" ]]
-    assert "Should copy hooks directory when --with-hooks is specified"
+    assert "Should copy hooks directory when --hooks is specified"
 
     rm -r "$TEST/.flint"
 
     sh "$TEST/.core/dist/init.sh" > /dev/null
     [[ ! -d "$TEST/.flint/hooks" ]]
-    assert "Should not copy hooks directory without --with-hooks flag"
+    assert "Should not copy hooks directory without --hooks flag"
 }
 
 
@@ -106,11 +106,11 @@ it_adds_git_wrapper_to_shell_config()
 
     local command="git() { if \[\[ -f \"\$PWD/.flint/git.sh\" \]\]; then sh \"\$PWD/.flint/git.sh\" \"\$@\"; else command git \"\$@\"; fi; }"
 
-    SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" > /dev/null
+    SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" --wrap > /dev/null
     echo "$( cat "$TEST/.bashrc" )" | grep -q "$command"
     assert "Should add git wrapper function to bashrc file"
 
-    SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" > /dev/null
+    SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" --wrap > /dev/null
     [[ $( grep -c "git()" "$TEST/.bashrc" ) -eq 1 ]]
     assert "Should not add git wrapper function multiple times"
 

@@ -103,7 +103,7 @@ it_skips_flint_directory_creation_if_it_already_exists()
 
 it_creates_hooks_directory_inside_flint_directory_if_mentionned()
 {
-    output=$( flint --init --with-hooks )
+    output=$( flint --init --hooks )
     [[ -d "$LOCAL/.flint/hooks" ]]
     assert "Should create hooks directory"
     echo "$( cat "$LOCAL/.flint/git.sh" )" | grep -q "hooks=\".flint/hooks\""
@@ -145,11 +145,23 @@ it_skips_configuration_file_creation_if_it_already_exists()
 }
 
 
-it_adds_a_git_wrapper_function_in_bash_profile_file()
+it_skips_git_wrapper_function_integration_if_not_mentionned()
 {
     touch .bash_profile
 
     output=$( SHELL="bash" HOME=$LOCAL flint --init )
+    [[ ! -s "$LOCAL/.zshrc" ]]
+    assert "Should be empty"
+
+    rm .bash_profile
+}
+
+
+it_adds_a_git_wrapper_function_in_bash_profile_file()
+{
+    touch .bash_profile
+
+    output=$( SHELL="bash" HOME=$LOCAL flint --init --wrap )
     echo "$( cat "$LOCAL/.bash_profile" )" | grep -q "git()"
     assert "Should add wrapper function inside bash profile file"
 
@@ -157,7 +169,7 @@ it_adds_a_git_wrapper_function_in_bash_profile_file()
 
     touch .bashrc
 
-    output=$( SHELL="bash" HOME=$LOCAL flint --init )
+    output=$( SHELL="bash" HOME=$LOCAL flint --init --wrap )
     [[ ! -f "$LOCAL/.bash_profile" ]]
     assert "Should not have bash profile file"
     echo "$( cat "$LOCAL/.bashrc" )" | grep -q "git()"
@@ -171,11 +183,11 @@ it_skips_git_wrapper_function_addition_if_it_already_exists_in_bash_profile_file
 {
     touch .bashrc
 
-    output=$( SHELL="bash" HOME=$LOCAL flint --init )
+    output=$( SHELL="bash" HOME=$LOCAL flint --init --wrap )
     echo "$( cat "$LOCAL/.bashrc" )" | grep -q "git()"
     assert "Should add wrapper function inside bash profile file"
 
-    output=$( SHELL="bash" HOME=$LOCAL flint --init )
+    output=$( SHELL="bash" HOME=$LOCAL flint --init --wrap )
     echo $output | grep -q "Git wrapper function already exists in '.bashrc' file"
     assert "Should add wrapper function inside bash profile file"
 
@@ -185,7 +197,7 @@ it_skips_git_wrapper_function_addition_if_it_already_exists_in_bash_profile_file
 
 it_warns_if_no_bash_profile_file_is_found()
 {
-    output=$( SHELL="bash" HOME=$LOCAL flint --init )
+    output=$( SHELL="bash" HOME=$LOCAL flint --init --wrap )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
     assert "Should output message"
 }
@@ -195,7 +207,7 @@ it_adds_a_git_wrapper_function_in_zsh_profile_file()
 {
     touch .zshrc
 
-    output=$( SHELL="zsh" HOME=$LOCAL flint --init )
+    output=$( SHELL="zsh" HOME=$LOCAL flint --init --wrap )
     echo "$( cat "$LOCAL/.zshrc" )" | grep -q "git()"
     assert "Should add wrapper function inside bash profile file"
 
@@ -207,11 +219,11 @@ it_skips_git_wrapper_function_addition_if_it_already_exists_in_zsh_profile_file(
 {
     touch .zshrc
 
-    output=$( SHELL="zsh" HOME=$LOCAL flint --init )
+    output=$( SHELL="zsh" HOME=$LOCAL flint --init --wrap )
     echo "$( cat "$LOCAL/.zshrc" )" | grep -q "git()"
     assert "Should add wrapper function inside bash profile file"
 
-    output=$( SHELL="zsh" HOME=$LOCAL flint --init )
+    output=$( SHELL="zsh" HOME=$LOCAL flint --init --wrap )
     echo $output | grep -q "Git wrapper function already exists in '.zshrc' file"
     assert "Should add wrapper function inside bash profile file"
 
@@ -221,7 +233,7 @@ it_skips_git_wrapper_function_addition_if_it_already_exists_in_zsh_profile_file(
 
 it_warns_if_no_zsh_profile_file_is_found()
 {
-    output=$( SHELL="zsh" HOME=$LOCAL flint --init )
+    output=$( SHELL="zsh" HOME=$LOCAL flint --init --wrap )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
     assert "Should output message"
 }
@@ -233,7 +245,7 @@ it_adds_a_git_wrapper_function_in_fish_profile_file()
 
     touch .config/fish/config.fish
 
-    output=$( SHELL="fish" HOME=$LOCAL flint --init )
+    output=$( SHELL="fish" HOME=$LOCAL flint --init --wrap )
     echo "$( cat "$LOCAL/.config/fish/config.fish" )" | grep -q "git()"
     assert "Should add wrapper function inside bash profile file"
 
@@ -247,11 +259,11 @@ it_skips_git_wrapper_function_addition_if_it_already_exists_in_fish_profile_file
 
     touch .config/fish/config.fish
 
-    output=$( SHELL="fish" HOME=$LOCAL flint --init )
+    output=$( SHELL="fish" HOME=$LOCAL flint --init --wrap )
     echo "$( cat "$LOCAL/.config/fish/config.fish" )" | grep -q "git()"
     assert "Should add wrapper function inside bash profile file"
 
-    output=$( SHELL="fish" HOME=$LOCAL flint --init )
+    output=$( SHELL="fish" HOME=$LOCAL flint --init --wrap )
     echo $output | grep -q "Git wrapper function already exists in 'config.fish' file"
     assert "Should add wrapper function inside bash profile file"
 
@@ -261,7 +273,7 @@ it_skips_git_wrapper_function_addition_if_it_already_exists_in_fish_profile_file
 
 it_warns_if_no_fish_profile_file_is_found()
 {
-    output=$( SHELL="fish" HOME=$LOCAL flint --init )
+    output=$( SHELL="fish" HOME=$LOCAL flint --init --wrap )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
     assert "Should output message"
 }
@@ -269,21 +281,7 @@ it_warns_if_no_fish_profile_file_is_found()
 
 it_warns_if_no_shell_is_found()
 {
-    output=$( SHELL="foo" flint --init )
+    output=$( SHELL="foo" flint --init --wrap )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
     assert "Should output message"
-}
-
-
-it_skips_git_wrapper_function_addition_if_mentionned()
-{
-    touch .zshrc
-
-    output=$( SHELL="zsh" HOME=$LOCAL flint --init --no-wrap )
-    [[ ! -s "$LOCAL/.zshrc" ]]
-    assert "Should be empty"
-    echo $output | grep -q "Git wrapper function not required. Skipping."
-    assert "Should output message"
-
-    rm .zshrc
 }

@@ -21,33 +21,42 @@ Flint empowers developers to use their personal style and formatting preferences
 **1. Install Flint using your package manager**
 
 ```bash
-# Using NPM
+# npm
 npm install --save-dev @capsulescodes/flint
-
-# Using Composer
-composer require-dev capsulescodes/flint
 ```
 
 <br>
-
 
 **2. Initialize Flint**
 
 ```bash
-# NPM
+# npm
 node_modules/.bin/flint --init
-
-# Composer
-vendor/bin/flint --init
 ```
 
 <br>
 
-This process will :
+This command will :
 
-- Create a `.flint` directory in your project's root [ if not already present ].
-- Create a `flint.config.json` file in your project's root [ if not already present ].
-- Add a git wrapper function to your shell's RC file [ if not already present ].
+- Create a `.flint` directory in your project's root [ unless already present ].
+- Create a `flint.config.json` file in your project's root [ unless already present ].
+
+<br>
+
+**3. Optional - Integrate a Git wrapper inside your local shell configuration file**
+
+```
+# Flint git wrapper
+git() { if [[ -f "$PWD/.flint/git.sh" ]]; then sh "$PWD/.flint/git.sh" "$@"; else command git "$@"; fi; }
+```
+
+This wrapper will :
+
+- Call Flint around Git if a `.flint` directory is present inside the current location. If not, it will call Git as usual.
+
+> [!NOTE]
+> Running ```flint --init --wrap``` integrates the wrapper during setup.
+> More options below.
 
 <br>
 
@@ -97,7 +106,7 @@ Flint uses a `flint.config.json` file to manage formatting commands. Specify you
 
 <br>
 
-Below is an example configuration file formatting Javascript files with ESLint. It formats locally based on `eslint.local.config.js` file and remotely based on `eslint.remote.config.js` :
+Below is an example configuration file formatting Javascript files with [ESLint](https://eslint.org/). It formats locally based on `eslint.local.config.js` file and remotely based on `eslint.remote.config.js` :
 
 <br>
 
@@ -121,12 +130,7 @@ Below is an example configuration file formatting Javascript files with ESLint. 
 
 ## Currently supported Package Managers
 
-- [x] Flint is available on NPM.
-- [x] Flint is available on Composer.
-
-<br>
-
-## Options
+- [x] Flint is available on [npm](https://www.npmjs.com/).
 
 <br>
 
@@ -134,56 +138,44 @@ Below is an example configuration file formatting Javascript files with ESLint. 
 
 **- Include Flint hooks during initialization**
 
-If you want to access Flint hooks, use the `--init` or `-i` command with the `--with-hooks` flag.
+If you want to access Flint hooks, use the `--init` or `-i` option with the `--hooks` flag.
 
 ```bash
-# NPM
-node_modules/.bin/flint -i --with-hooks
-
-# Composer
-vendor/bin/flint -i --with-hooks
+# npm
+node_modules/.bin/flint -i --hooks
 ```
 
 <br>
 
-**- Exclude the Git wrapper function from initialization**
+**- Include Git wrapper function during initialization**
 
-If you don't want to add a git wrapper function to your shell profile file, use the `--init` or `-i` command with the `--no-wrap` flag.
+If you want to run Flint while using Git, use the `--init` or `-i` option with the `--wrap` flag.
 
 ```bash
-# NPM
-node_modules/.bin/flint -i --no-wrap
-
-# Composer
-vendor/bin/flint -i --no-wrap
+# npm
+node_modules/.bin/flint -i --wrap
 ```
 
 <br>
 
-**- Skip adding a configuration file during initialization**
+**- Skip adding default configuration file during initialization**
 
-If you don't want to add a template configuration file to your project, use the `--init` or `-i` command with the `--no-config` flag.
+If you don't want to add a configuration file template to your project, use the `--init` or `-i` option with the `--no-config` flag.
 
 ```bash
-# NPM
+# npm
 node_modules/.bin/flint -i --no-config
-
-# Composer
-vendor/bin/flint -i --no-config
 ```
 
 <br>
 
 **- Run Flint command manually**
 
-If you want to run a specific command from configuration file, use your command after the `--run` or `-r` command. Default is `local`.
+If you want to run a specific **command** from configuration file property ***commands***, use your command after the `--run` or `-r` option. Default is `local`.
 
 ```bash
-# NPM
+# npm
 node_modules/.bin/flint -r remote
-
-# Composer
-vendor/bin/flint -r remote
 ```
 
 <br>
@@ -193,19 +185,15 @@ vendor/bin/flint -r remote
 Flint can act as a Git wrapper, allowing you to seamlessly use Git commands while benefiting from Flint's formatting hooks. To enable this, simply replace `git` with `flint` in your commands.
 
 ```bash
-# NPM
+# npm
 node_modules/.bin/flint status
-
-# Composer
-vendor/bin/flint status
 ```
 
 <br>
 
-
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are warmly welcomed. For major changes, please open an issue first to discuss what you would like to change.
 Please make sure to update tests as appropriate.
 
 <br>
@@ -213,13 +201,10 @@ Please make sure to update tests as appropriate.
 ## Testing
 
 ```bash
-# NPM
+# npm
 npm run test
 
-# Composer
-composer test
-
-# Bash
+# bash
 sh tests/runner.sh
 ```
 
