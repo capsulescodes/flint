@@ -19,12 +19,20 @@ function eval_for_command
 
         local binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
-        local command=$( echo "$linter" | tr -d '\n\r' | sed -n "s/.*\"$name\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" )
-
-        if [[ -z $binary || -z $command ]]
+        if [[ -z $binary ]]
 
         then
-            printf "\033[1;33mflint - No binary or '$name' command associated with a linter. Skipping.\033[0m\n"
+            printf "\033[1;33mflint - No binary associated with linter. Skipping.\033[0m\n"
+
+            continue
+        fi
+
+        local command=$( echo "$linter" | tr -d '\n\r' | sed -n "s/.*\"$name\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" )
+
+        if [[ -z $command ]]
+
+        then
+            printf "\033[1;33mflint - No '$name' command associated with linter. Skipping.\033[0m\n"
 
             continue
         fi

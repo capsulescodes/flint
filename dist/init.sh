@@ -1,13 +1,11 @@
 #!/bin/bash
 
-source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/helpers.sh"
-
 
 
 
 destination="${INIT_CWD:+$INIT_CWD/}.flint"
 
-if [ ! -d $destination ]
+if [[ ! -d $destination ]]
 
 then
     source="$( cd "$(dirname $0 )/.." && pwd )"
@@ -21,6 +19,7 @@ then
     fi
 
 
+    source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../src/helpers.sh"
 
 
     mkdir -p $destination

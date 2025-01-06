@@ -30,6 +30,20 @@ fi
 if [[ $1 == '-i' || $1 == '--init' ]]
 
 then
+    options=( --wrap --hooks --no-config )
+
+    for arg in "${@:2}"
+
+    do
+        if [[ ! "${options[@]}" =~ "$arg" ]]
+
+        then
+            printf "\n\033[1;33mflint - '$arg' is not a valid option. Type 'flint --help' to display help section.\n"
+
+            exit 1
+        fi
+    done
+
     sh "$path/init.sh" "$@"
 
     exit $?

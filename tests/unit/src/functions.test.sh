@@ -29,24 +29,16 @@ afterAll()
 it_handles_missing_binary()
 {
     output=$( eval_for_command "local" "config.002.json" "file.foo" 2>&1 )
-    echo $output | grep -q "No binary or 'local' command associated with a linter. Skipping."
+    echo $output | grep -q "No binary associated with linter. Skipping."
     assert "Should warn when binary is missing from the configuration"
 }
 
 
-it_handles_missing_local_command()
+it_handles_missing_command()
 {
-    output=$( eval_for_command "local" "config.002.json" "file.foo" 2>&1 )
-    echo $output | grep -q "No binary or 'local' command associated with a linter. Skipping."
+    output=$( eval_for_command "foo" "config.003.json" "file.foo" 2>&1 )
+    echo $output | grep -q "No 'foo' command associated with linter. Skipping."
     assert "Should warn when local command is missing"
-}
-
-
-it_handles_missing_remote_command()
-{
-    output=$( eval_for_command "remote" "config.002.json" "file.foo" 2>&1 )
-    echo $output | grep -q "No binary or 'remote' command associated with a linter. Skipping."
-    assert "Should warn when remote command is missing"
 }
 
 

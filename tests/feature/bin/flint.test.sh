@@ -55,9 +55,6 @@ afterEach()
 
 
 
-
-
-
 it_runs_flint_h_command()
 {
     output=$( flint -h )
@@ -86,6 +83,14 @@ it_runs_flint_init_command()
 {
     output=$( flint --init )
     [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
+    assert "Should create flint files and directories"
+}
+
+
+it_runs_flint_init_foo_command()
+{
+    output=$( flint --init --foo )
+    echo $output | grep -q "'--foo' is not a valid option. Type 'flint --help' to display help section."
     assert "Should create flint files and directories"
 }
 

@@ -76,7 +76,7 @@ it_returns_a_warning_if_configuration_file_does_not_exist()
 it_returns_a_warning_if_command_does_not_exist()
 {
     output=$( flint --run foo )
-    echo $output | grep -q "No binary or 'foo' command associated with a linter. Skipping."
+    echo $output | grep -q "No 'foo' command associated with linter. Skipping."
     assert "Should output error message"
 }
 
