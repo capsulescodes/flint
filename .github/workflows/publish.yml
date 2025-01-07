@@ -11,8 +11,4 @@ jobs :
       - uses : actions/setup-node@v4
         with :
           node-version : '22.x'
-          # registry-url : 'https://registry.npmjs.org'
       - run : npm run test
-      # - run : npm publish
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM }}

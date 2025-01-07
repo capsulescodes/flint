@@ -12,7 +12,21 @@ Flint empowers developers to use their personal style and formatting preferences
 <br>
 
 > [!NOTE]
-> Flint is currently under development. Contributions are warmly welcomed.
+> Flint is currently in beta. Contributions are warmly welcomed.
+
+<br>
+
+## Table of Contents
+
+1. [Installation](#installation)
+1. [Usage](#usage)
+1. [Caveats](#caveats)
+1. [Configuration](#configuration)
+1. [Options](#options)
+1. [Package Managers](#currently-supported-package-managers)
+1. [Testing](#testing)
+1. [Credits](#credits)
+1. [License](#license)
 
 <br>
 
@@ -20,7 +34,7 @@ Flint empowers developers to use their personal style and formatting preferences
 
 **1. Install Flint using your package manager**
 
-```bash
+```shell
 # npm
 npm install --save-dev @capsulescodes/flint
 ```
@@ -30,7 +44,7 @@ npm install --save-dev @capsulescodes/flint
 
 **2. Initialize Flint**
 
-```bash
+```shell
 # npm
 node_modules/.bin/flint --init
 ```
@@ -43,7 +57,7 @@ node_modules/.bin/flint --init
 
 **3. Optional - Copy the Flint git wrapper inside your local shell configuration file**
 
-```bash
+```shell
 # Flint git wrapper
 
 git() {
@@ -78,7 +92,7 @@ Once initialized, Flint integrates with your Git workflow to streamline coding p
 
 <br>
 
-This esnures :
+This ensures :
 
 - **Maintaining Code Consistency** :Ensures the repository always adheres to agreed-upon styles.
 - **Improving Readability** : Local preferences don’t impact others' workflows.
@@ -100,7 +114,7 @@ nothing to commit, working tree clean
 
 <br>
 
-This message indicates that your local branch is configured to track the remote branch, and Flint's hidden temporary commit makes your local branch appear ahead by one commit. To ignore this message, you can unset the upstream tracking for your branch by running :
+This message indicates that your local branch is configured to track the remote branch, and Flint's hidden temporary commit makes your local branch appear ahead by one commit. If it bothers you, you can unset the upstream tracking for your branch by running :
 
 ```git
 git branch --unset-upstream <branch-name>
@@ -136,66 +150,77 @@ Below is an example configuration file formatting Javascript files with [ESLint]
 
 <br>
 
-## Currently supported Package Managers
-
-- [x] Flint is available on [npm](https://www.npmjs.com/).
-
-<br>
-
 ## Options
 
 **- Include Flint hooks during initialization**
 
 If you want to access Flint hooks, use the `--init` or `-i` option with the `--hooks` flag.
 
-```bash
+```shell
 # npm
 node_modules/.bin/flint -i --hooks
 ```
 
+<br>
 <br>
 
 **- Include Git wrapper function during initialization**
 
 If you want to run Flint while using Git, use the `--init` or `-i` option with the `--wrap` flag.
 
-```bash
+```shell
 # npm
 node_modules/.bin/flint -i --wrap
 ```
 
+<br>
 <br>
 
 **- Skip adding default configuration file during initialization**
 
 If you don't want to add a configuration file template to your project, use the `--init` or `-i` option with the `--no-config` flag.
 
-```bash
+```shell
 # npm
 node_modules/.bin/flint -i --no-config
 ```
 
+<br>
 <br>
 
 **- Run Flint command manually**
 
 If you want to run a specific **command** from configuration file property ***commands***, use your command after the `--run` or `-r` option. Default is `local`.
 
-```bash
+```shell
 # npm
 node_modules/.bin/flint -r remote
 ```
 
+<br>
 <br>
 
 **- Use Flint as a Git alternative**
 
 Flint can act as a Git wrapper, allowing you to seamlessly use Git commands while benefiting from Flint's formatting hooks. To enable this, simply replace `git` with `flint` in your commands.
 
-```bash
+```shell
 # npm
 node_modules/.bin/flint status
 ```
+
+<br>
+
+## Currently supported Package Managers
+
+- [x] Flint is available on [npm](https://www.npmjs.com/).
+
+<br>
+
+> [!NOTE]
+> Flint is fully written in Bash, making it highly adaptable.
+>
+> Adding support for new package managers mainly involves creating the appropriate configuration files.
 
 <br>
 
@@ -208,7 +233,7 @@ Please make sure to update tests as appropriate.
 
 ## Testing
 
-```bash
+```shell
 # npm
 npm run test
 
