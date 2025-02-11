@@ -2,15 +2,16 @@ import { defineConfig } from 'vitepress';
 
 
 export default defineConfig( {
+  base : '/docs/',
   title : "Flint",
   titleTemplate : false,
   description : "Write code your way while ensuring remote consistency.",
   head : [
-    [ 'link', { rel : "shortcut icon", href : "/assets/favicon.ico" } ],
+    [ 'link', { rel : "shortcut icon", href : "/favicon.ico" } ],
   ],
   cleanUrls : true,
   themeConfig : {
-    logo : '/assets/capsules-flint-logotype.png',
+    logo : '/assets/flint-logotype.png',
     nav : [
       { text : 'Documentation', link : '/markdown-examples' },
       { text : 'Flintable', link : 'https://flintable.com' }
