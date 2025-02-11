@@ -1,5 +1,5 @@
 
-<p align="center"><img src="art/capsules-flint-image.png" height="265px" alt="Flint Image" /></p>
+<p align="center"><img src="docs/assets/capsules-flint-readme.png" height="265px" alt="Flint Image" /></p>
 
 <br>
 

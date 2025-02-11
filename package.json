@@ -1,7 +1,7 @@
 {
 	"name" : "@capsulescodes/flint",
 	"description" : "Auto-format utility for local and remote ease of development",
-	"version" : "0.1.0",
+	"version" : "1.0.0",
 	"keywords" : [
         "format",
         "lint",
@@ -41,10 +41,15 @@
         "README.md"
     ],
     "scripts" : {
-        "test" : "sh tests/runner.sh"
+        "test" : "sh tests/runner.sh",
+        "docs:dev" : "vitepress dev docs",
+        "docs:build" : "vitepress build docs"
     },
     "bin" : {
         "flint" : "bin/flint"
     },
+    "devDependencies" : {
+		"vitepress" : "^1.6.3"
+	},
     "type" : "module"
 }
