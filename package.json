@@ -3,53 +3,52 @@
 	"description" : "Auto-format utility for local and remote ease of development",
 	"version" : "1.0.0",
 	"keywords" : [
-        "format",
-        "lint",
-        "fix",
-        "local",
-        "remote",
-        "git",
-        "hooks",
-        "pre-checkout",
-        "post-checkout",
-        "pre-commit",
-        "post-commit",
-        "pre-pull",
-        "post-pull",
-        "pre-push",
-        "post-push"
-    ],
-    "homepage" : "https://github.com/capsulescodes/flint",
+		"format",
+		"lint",
+		"fix",
+		"local",
+		"remote",
+		"git",
+		"hooks",
+		"pre-checkout",
+		"post-checkout",
+		"pre-commit",
+		"post-commit",
+		"pre-pull",
+		"post-pull",
+		"pre-push",
+		"post-push"
+	],
+	"homepage" : "https://github.com/capsulescodes/flint",
 	"repository" : {
-        "type" : "git",
-        "url" : "git+https://github.com/capsulescodes/flint.git"
+		"type" : "git",
+		"url" : "git+https://github.com/capsulescodes/flint.git"
 	},
 	"license" : "MIT",
-    "author" : {
-        "name" : "Yannick Decat",
-        "email" : "yannick@capsules.codes",
-        "url" : "https://capsules.codes/"
-    },
-    "files" : [
-        "!*",
-        "bin",
-        "dist",
-        "hooks",
-        "src",
-        "stubs",
-        "LICENSE.md",
-        "README.md"
-    ],
-    "scripts" : {
-        "test" : "sh tests/runner.sh",
-        "docs:dev" : "vitepress dev docs",
-        "docs:build" : "vitepress build docs"
-    },
-    "bin" : {
-        "flint" : "bin/flint"
-    },
-    "devDependencies" : {
+	"author" : {
+		"name" : "Yannick Decat",
+		"email" : "yannick@capsules.codes",
+		"url" : "https://capsules.codes/"
+	},
+	"files" : [
+		"!*",
+		"bin",
+		"dist",
+		"hooks",
+		"src",
+		"stubs",
+		"LICENSE.md",
+		"README.md"
+	],
+	"scripts" : {
+		"test" : "sh tests/runner.sh",
+		"docs" : "vitepress dev docs"
+	},
+	"bin" : {
+		"flint" : "bin/flint"
+	},
+	"devDependencies" : {
 		"vitepress" : "^1.6.3"
 	},
-    "type" : "module"
+	"type" : "module"
 }
