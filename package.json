@@ -41,14 +41,10 @@
 		"README.md"
 	],
 	"scripts" : {
-		"test" : "sh tests/runner.sh",
-		"docs" : "vitepress dev docs"
+		"test" : "sh tests/runner.sh"
 	},
 	"bin" : {
 		"flint" : "bin/flint"
-	},
-	"devDependencies" : {
-		"vitepress" : "^1.6.3"
 	},
 	"type" : "module"
 }

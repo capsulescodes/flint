@@ -12,7 +12,7 @@ Flint empowers developers to use their personal style and formatting preferences
 <br>
 
 > [!NOTE]
-> Flint is currently in beta. Contributions are warmly welcomed.
+> Flint is currently in alpha. Contributions are warmly welcomed.
 
 <br>
 
@@ -46,7 +46,7 @@ npm install --save-dev @capsulescodes/flint
 
 ```shell
 # npm
-node_modules/.bin/flint --init
+node_modules/.bin/flint init
 ```
 
 - The command creates a `.flint` directory in your project's root [ unless already present ].
@@ -59,13 +59,12 @@ node_modules/.bin/flint --init
 
 ```shell
 # Flint git wrapper
-
 git() {
-    if [[ -f "$PWD/.flint/git.sh" ]]; then
-        sh "$PWD/.flint/git.sh" "$@"
-    else
-        command git "$@"
-    fi
+  if [[ -f "$PWD/.flint/git.sh" ]]; then
+    sh "$PWD/.flint/git.sh" "$@";
+  else
+    command git "$@";
+  fi
 }
 ```
 
@@ -74,7 +73,7 @@ git() {
 <br>
 
 > [!NOTE]
-> Running ```flint --init --wrap``` integrates the wrapper during setup.
+> Running ```flint init --wrap``` integrates the wrapper during setup.
 >
 > You can also use `flint` as a `git` alternative.
 >
@@ -154,11 +153,11 @@ Below is an example configuration file formatting Javascript files with [ESLint]
 
 **- Include Flint hooks during initialization**
 
-If you want to access Flint hooks, use the `--init` or `-i` option with the `--hooks` flag.
+If you want to access Flint hooks, use the `init` argument with the `--hooks` option.
 
 ```shell
 # npm
-node_modules/.bin/flint -i --hooks
+node_modules/.bin/flint init --hooks
 ```
 
 <br>
@@ -166,11 +165,11 @@ node_modules/.bin/flint -i --hooks
 
 **- Include Git wrapper function during initialization**
 
-If you want to run Flint while using Git, use the `--init` or `-i` option with the `--wrap` flag.
+If you want to run Flint while using Git, use the `init` argument with the `--wrap` option.
 
 ```shell
 # npm
-node_modules/.bin/flint -i --wrap
+node_modules/.bin/flint init --wrap
 ```
 
 <br>
@@ -178,11 +177,11 @@ node_modules/.bin/flint -i --wrap
 
 **- Skip adding default configuration file during initialization**
 
-If you don't want to add a configuration file template to your project, use the `--init` or `-i` option with the `--no-config` flag.
+If you don't want to add a configuration file template to your project, use the `init` argument with the `--no-config` option.
 
 ```shell
 # npm
-node_modules/.bin/flint -i --no-config
+node_modules/.bin/flint init --no-config
 ```
 
 <br>
@@ -190,11 +189,11 @@ node_modules/.bin/flint -i --no-config
 
 **- Run Flint command manually**
 
-If you want to run a specific **command** from configuration file property ***commands***, use your command after the `--run` or `-r` option. Default is `local`.
+If you want to run a specific **command** from configuration file property ***commands***, use your command after the `run` argument. Default is `local`.
 
 ```shell
 # npm
-node_modules/.bin/flint -r remote
+node_modules/.bin/flint run remote
 ```
 
 <br>

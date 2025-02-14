@@ -57,7 +57,7 @@ it_returns_a_warning_if_flint_directory_does_not_exist()
 {
     INIT_CWD="foo"
 
-    output=$( flint --run )
+    output=$( flint run )
     echo $output | grep -q "Flint must be configured first. Run 'flint init' to proceed."
     assert "Should output error message"
 }
@@ -67,7 +67,7 @@ it_returns_a_warning_if_configuration_file_does_not_exist()
 {
     rm "$LOCAL/flint.config.json"
 
-    output=$( flint --run )
+    output=$( flint run )
     echo $output | grep -q "The 'flint.config.json' file does not exist in the root directory."
     assert "Should output error message"
 }
@@ -75,7 +75,7 @@ it_returns_a_warning_if_configuration_file_does_not_exist()
 
 it_returns_a_warning_if_command_does_not_exist()
 {
-    output=$( flint --run foo )
+    output=$( flint run foo )
     echo $output | grep -q "No 'foo' command associated with linter. Skipping."
     assert "Should output error message"
 }
@@ -87,7 +87,7 @@ it_returns_a_warning_if_binary_file_does_not_exist()
 
     echo "remote" > file.001.foo
 
-    output=$( flint --run )
+    output=$( flint run )
     echo $output | grep -q "Binary '.core/replace' not found. Install it and run 'flint run'. Skipping."
     assert "Should output error message"
 
@@ -99,7 +99,7 @@ it_runs_flint_with_given_command()
 {
     echo "foo" > file.001.foo
 
-    output=$( flint --run bar )
+    output=$( flint run bar )
     [[ -f "$LOCAL/file.001.foo" ]]
     assert "flint - Should pull file"
     [[ "$( cat "$LOCAL/file.001.foo" )" == "bar" ]]
@@ -119,7 +119,7 @@ it_creates_a_file_and_runs_flint()
     [[ "$(cat "$LOCAL/.git/modified/.file.001.foo.001")" == "remote" && -f "$LOCAL/.git/modified/file.001.foo" ]]
     assert "add - Should create file"
 
-    output=$( flint --run )
+    output=$( flint run )
     [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.002" )" == "local" && -f "$LOCAL/.git/modified/file.001.foo" ]]
     assert "flint - Should modify file locally"
 
@@ -165,7 +165,7 @@ it_creates_a_file_adds_it_and_runs_flint()
     [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "remote"  && -f "$LOCAL/.git/staged/file.001.foo" ]]
     assert "add - Should add file"
 
-    output=$( flint --run )
+    output=$( flint run )
     [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.001" )" == "remote" ]]
     assert "flint - Should reset file"
     [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.002" )" == "local" ]]
@@ -231,7 +231,7 @@ it_creates_a_file_adds_it_commits_it_and_runs_flint()
     [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.002" )" == "local" && -f "$LOCAL/.git/committed/file.001.foo" ]]
     assert "commit - Should commit file"
 
-    output=$( flint --run )
+    output=$( flint run )
     [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.003" )" == "local" ]]
     assert "flint - Should reset temporary commit"
     [[ "$( head -n 2 "$LOCAL/.git/commits" | tail -n 1 )" == "DELETED-TEMPORARY-COMMIT" && "$( head -n 3 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
@@ -323,7 +323,7 @@ it_creates_a_file_adds_it_commits_it_creates_another_file_adds_it_and_runs_flint
     [[ "$( cat "$LOCAL/.git/staged/.file.002.foo.001" )" == "remote" && -f "$LOCAL/.git/staged/file.002.foo" ]]
     assert "second add - Should add file"
 
-    output=$( flint --run )
+    output=$( flint run )
     [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.003" )" == "local" ]]
     assert "flint - Should reset file"
     [[ "$( cat "$LOCAL/.git/modified/.file.002.foo.001" )" == "remote" ]]

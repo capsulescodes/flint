@@ -55,33 +55,17 @@ afterEach()
 
 
 
-it_runs_flint_h_command()
-{
-    output=$( flint -h )
-    echo $output | grep -q "Usage: flint"
-    assert "Should output help section"
-}
-
-
 it_runs_flint_help_command()
 {
-    output=$( flint --help )
+    output=$( flint help )
     echo $output | grep -q "Usage: flint"
     assert "Should output help section"
-}
-
-
-it_runs_flint_i_command()
-{
-    output=$( flint -i )
-    [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
-    assert "Should create flint files and directories"
 }
 
 
 it_runs_flint_init_command()
 {
-    output=$( flint --init )
+    output=$( flint init )
     [[ -d "$LOCAL/.flint" && -f "$LOCAL/flint.config.json" ]]
     assert "Should create flint files and directories"
 }
@@ -89,23 +73,9 @@ it_runs_flint_init_command()
 
 it_runs_flint_init_foo_command()
 {
-    output=$( flint --init --foo )
-    echo $output | grep -q "'--foo' is not a valid option. Type 'flint --help' to display help section."
+    output=$( flint init --foo )
+    echo $output | grep -q "'--foo' is not a valid option. Type 'flint help' to display help section."
     assert "Should create flint files and directories"
-}
-
-
-it_runs_flint_r_command()
-{
-    echo "remote" > file.001.foo
-
-    output=$( flint -r )
-    [[ -f "$LOCAL/file.001.foo" ]]
-    assert "flint - Should pull file"
-    [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
-    assert "flint - Should modify file locally"
-
-    rm file.001.foo
 }
 
 
@@ -113,7 +83,7 @@ it_runs_flint_run_command()
 {
     echo "remote" > file.001.foo
 
-    output=$( flint --run )
+    output=$( flint run )
     [[ -f "$LOCAL/file.001.foo" ]]
     assert "flint - Should pull file"
     [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
