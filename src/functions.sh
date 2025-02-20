@@ -6,7 +6,7 @@ function eval_for_command
 
     local files=${@:3}
 
-    local linters=$( echo "$( tr -d '\n' < $config )" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p'| sed 's/^\[[[:space:]]*{/{/; s/}[[:space:]]*\]$/}/' | sed 's/},[[:space:]]*{/}{/g' | sed 's/}{/}\n{/g' )
+    local linters=$( tr -d '\n' < "$config" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p' | sed 's/},[[:space:]]*{/}{/g' | awk '{gsub(/}{/, "}\n{")}1' )
 
     while IFS= read -r linter
 
