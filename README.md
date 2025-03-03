@@ -217,9 +217,11 @@ node_modules/.bin/flint status
 <br>
 
 > [!NOTE]
-> Flint is fully written in Bash, making it highly adaptable.
+> Flint is written entirely in Bash, making it highly adaptable.
 >
-> Adding support for new package managers mainly involves creating the appropriate configuration files.
+> Adding support for new package managers primarily involves creating the appropriate configuration files.
+>
+> Additional package managers are expected to be supported in future updates.
 
 <br>
 
