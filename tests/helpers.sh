@@ -51,7 +51,11 @@ summarize()
 
     then
         printf "\nTests: \033[1;32m $1 passed\n\n"
+
+        exit 0;
     else
         printf "\nTests: \033[1;31m $(( $1 - $2 )) failed\n\n"
+
+        exit 1;
     fi
 }

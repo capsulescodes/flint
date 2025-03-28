@@ -13,7 +13,7 @@ beforeEach()
 
     cp -r "$PWD/stubs" "$TEST/.core/stubs"
 
-    sed -i "" "s|\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/..|$TEST/.core|" "$TEST/.core/dist/init.sh"
+    sed -i.bak -e "s|\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/..|$TEST/.core|" "$TEST/.core/dist/init.sh"
 
 
     cd $TEST > /dev/null || exit 1
@@ -33,7 +33,7 @@ afterEach()
 
 it_creates_flint_directory()
 {
-    sh "$TEST/.core/dist/init.sh" > /dev/null
+    bash "$TEST/.core/dist/init.sh" > /dev/null
     [[ -d "$TEST/.flint" ]]
     assert "Should create '.flint' directory"
 }
@@ -41,13 +41,13 @@ it_creates_flint_directory()
 
 it_copies_hooks_when_requested()
 {
-    sh "$TEST/.core/dist/init.sh" --hooks > /dev/null
+    bash "$TEST/.core/dist/init.sh" --hooks > /dev/null
     [[ -d "$TEST/.flint/hooks" ]]
     assert "Should copy hooks directory when --hooks is specified"
 
     rm -r "$TEST/.flint"
 
-    sh "$TEST/.core/dist/init.sh" > /dev/null
+    bash "$TEST/.core/dist/init.sh" > /dev/null
     [[ ! -d "$TEST/.flint/hooks" ]]
     assert "Should not copy hooks directory without --hooks flag"
 }
@@ -55,7 +55,7 @@ it_copies_hooks_when_requested()
 
 it_creates_dispatcher()
 {
-    sh "$TEST/.core/dist/init.sh" > /dev/null
+    bash "$TEST/.core/dist/init.sh" > /dev/null
     [[ -f "$TEST/.flint/git.sh" ]]
     assert "Should create git.sh file"
 
@@ -69,7 +69,7 @@ it_handles_missing_source_files()
     mv "$TEST/.core/hooks" "$TEST/.core/hooks-bak"
     mv "$TEST/.core/src/wrapper.sh" "$TEST/.core/src/wrapper.sh.bak"
 
-    output=$( sh "$TEST/.core/dist/init.sh" )
+    output=$( bash "$TEST/.core/dist/init.sh" )
     echo $output | grep -q "Required files not found"
     assert "Should error when required files are missing"
 
@@ -80,7 +80,7 @@ it_handles_missing_source_files()
 
 it_creates_valid_dispatcher_script()
 {
-    sh "$TEST/.core/dist/init.sh" > /dev/null
+    bash "$TEST/.core/dist/init.sh" > /dev/null
     grep -q "config=\"flint.config.json\"" "$TEST/.flint/git.sh"
     assert "Generated git.sh should contain config variable"
     grep -q "hooks=\".core/hooks\"" "$TEST/.flint/git.sh"
@@ -94,7 +94,7 @@ it_creates_valid_dispatcher_script()
 
 it_creates_flint_config_json()
 {
-    sh "$TEST/.core/dist/init.sh" > /dev/null
+    bash "$TEST/.core/dist/init.sh" > /dev/null
     [[ -f "$TEST/flint.config.json" ]]
     assert "Should create flint.config.json at project root"
 }
@@ -104,13 +104,13 @@ it_adds_git_wrapper_to_shell_config()
 {
     touch "$TEST/.bashrc"
 
-    local command="git() { if \[\[ -f \"\$PWD/.flint/git.sh\" \]\]; then sh \"\$PWD/.flint/git.sh\" \"\$@\"; else command git \"\$@\"; fi; }"
+    local command="git() { if \[\[ -f \"\$PWD/.flint/git.sh\" \]\]; then bash \"\$PWD/.flint/git.sh\" \"\$@\"; else command git \"\$@\"; fi; }"
 
-    SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" --wrap > /dev/null
+    SHELL="/bin/bash" HOME=$TEST bash "$TEST/.core/dist/init.sh" --wrap > /dev/null
     echo "$( cat "$TEST/.bashrc" )" | grep -q "$command"
     assert "Should add git wrapper function to bashrc file"
 
-    SHELL="/bin/bash" HOME=$TEST sh "$TEST/.core/dist/init.sh" --wrap > /dev/null
+    SHELL="/bin/bash" HOME=$TEST bash "$TEST/.core/dist/init.sh" --wrap > /dev/null
     [[ $( grep -c "git()" "$TEST/.bashrc" ) -eq 1 ]]
     assert "Should not add git wrapper function multiple times"
 
@@ -120,7 +120,7 @@ it_adds_git_wrapper_to_shell_config()
 
 it_handles_nonexistent_profile()
 {
-    SHELL="/bin/bash" HOME="$TEST/home" sh "$TEST/.core/dist/init.sh" > /dev/null
+    SHELL="/bin/bash" HOME="$TEST/home" bash "$TEST/.core/dist/init.sh" > /dev/null
     [[ ! -f "$TEST/home/.bashrc" ]]
     assert "Should not fail if profile does not exist"
 }

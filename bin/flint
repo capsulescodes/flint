@@ -22,7 +22,7 @@ path="$( cd -P "$( dirname $target )" && pwd )/../dist"
 if [[ $1 == 'help' ]]
 
 then
-    sh "$path/help.sh"
+    bash "$path/help.sh"
 
     exit 0
 fi
@@ -44,7 +44,7 @@ then
         fi
     done
 
-    sh "$path/init.sh" "$@"
+    bash "$path/init.sh" "$@"
 
     exit $?
 fi
@@ -52,7 +52,7 @@ fi
 if [[ $1 == 'run' ]]
 
 then
-    sh "$path/run.sh" "$@"
+    bash "$path/run.sh" "$@"
 
     exit $?
 fi
@@ -65,7 +65,7 @@ if [[ -f "$PWD/.flint/git.sh" ]]
 then
     printf "\n\033[1;36mflint - Running wrapped git.\033[0m\n\n"
 
-    sh "$PWD/.flint/git.sh" "$@"
+    bash "$PWD/.flint/git.sh" "$@"
 else
     printf "\n\033[1;33mflint - 'git.sh' file not found in '.flint' directory. Running default git.\033[0m\n\n"
 

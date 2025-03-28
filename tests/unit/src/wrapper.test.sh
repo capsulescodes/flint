@@ -3,15 +3,15 @@ beforeAll()
     TEST=$( mktemp -d )
 
 
-    mkdir "$TEST/.core"
+    mkdir -p "$TEST/.core"
 
     cp "$PWD/src/wrapper.sh" "$TEST/.core/wrapper.sh"
 
     cp "$PWD/stubs/config.json" "$TEST/flint.config.json"
 
-    sed -i '' $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$TEST/.core/wrapper.sh"
+    sed -i.bak -e $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$TEST/.core/wrapper.sh"
 
-    sed -i "" "s|command git \"\$@\"|echo \"git\"|" "$TEST/.core/wrapper.sh"
+    sed -i.bak -e "s|command git \"\$@\"|echo \"git\"|" "$TEST/.core/wrapper.sh"
 
 
     cd $TEST > /dev/null || exit 1

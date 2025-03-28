@@ -1,7 +1,7 @@
 {
 	"name" : "@capsulescodes/flint",
 	"description" : "Auto-format utility for local and remote ease of development",
-	"version" : "1.0.0",
+	"version" : "0.1.0",
 	"keywords" : [
 		"format",
 		"lint",
@@ -41,7 +41,7 @@
 		"README.md"
 	],
 	"scripts" : {
-		"test" : "sh tests/runner.sh"
+		"test" : "bash tests/runner.sh"
 	},
 	"bin" : {
 		"flint" : "bin/flint"

@@ -38,7 +38,7 @@ flint init --wrap
 ::: details .bashrc
 ```bash
 # Flint git wrapper
-git() { if [[ -f "$PWD/.flint/git.sh" ]]; then sh "$PWD/.flint/git.sh" "$@"; else command git "$@"; fi; }
+git() { if [[ -f "$PWD/.flint/git.sh" ]]; then bash "$PWD/.flint/git.sh" "$@"; else command git "$@"; fi; }
 ```
 :::
 
@@ -51,7 +51,7 @@ Add the following function to your shell configuration file ( e.g., `.bashrc`, `
 ```bash
 git() {
   if [[ -f "$PWD/.flint/git.sh" ]]; then
-    sh "$PWD/.flint/git.sh" "$@";
+    bash "$PWD/.flint/git.sh" "$@";
   else
     command git "$@";
   fi

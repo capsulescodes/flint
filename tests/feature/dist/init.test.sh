@@ -3,7 +3,7 @@ beforeEach()
     LOCAL=$( mktemp -d )
 
 
-    mkdir "$LOCAL/.core"
+    mkdir -p "$LOCAL/.core"
 
     cp -r "$PWD/bin/" "$LOCAL/.core/bin"
 
@@ -15,9 +15,9 @@ beforeEach()
 
     cp -r "$PWD/stubs" "$LOCAL/.core/stubs"
 
-    sed -i "" "s|\$( cd -P \"\$( dirname \$target )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|\$( cd -P \"\$( dirname \$target )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/bin/flint"
 
-    sed -i "" "s|\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/dist/init.sh"
+    sed -i.bak -e "s|\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/dist/init.sh"
 
 
     cd $LOCAL > /dev/null || exit 1
@@ -93,7 +93,7 @@ it_creates_flint_directory()
 
 it_skips_flint_directory_creation_if_it_already_exists()
 {
-    mkdir "$LOCAL/.flint"
+    mkdir -p "$LOCAL/.flint"
 
     output=$( flint init )
     echo $output | grep -q "Directory '.flint' already exists in project root. Skipping."
