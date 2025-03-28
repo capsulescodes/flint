@@ -3,11 +3,11 @@ function mock
     LOCAL=$1
     REMOTE=$2
 
-    mkdir "$LOCAL/.git"
+    mkdir -p "$LOCAL/.git"
 
-    mkdir "$LOCAL/.git/modified"
-    mkdir "$LOCAL/.git/staged"
-    mkdir "$LOCAL/.git/committed"
+    mkdir -p "$LOCAL/.git/modified"
+    mkdir -p "$LOCAL/.git/staged"
+    mkdir -p "$LOCAL/.git/committed"
 
     touch "$LOCAL/.git/commits"
     touch "$LOCAL/.git/commands"
@@ -219,7 +219,7 @@ function mock
         if [[ $1 == "reset" && $2 == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && $4 == "--quiet" ]]
 
         then
-            sed -i "" "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"
+            sed -i.bak -e "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"
         fi
 
         if [[ $1 == "ls-tree" && $2 == "-r" && $3 == "HEAD" && $4 == "--long" ]]

@@ -3,7 +3,7 @@ beforeEach()
     LOCAL=$( mktemp -d )
 
 
-    mkdir "$LOCAL/.core"
+    mkdir -p "$LOCAL/.core"
 
     cp -r "$PWD/bin/" "$LOCAL/.core/bin"
 
@@ -11,21 +11,21 @@ beforeEach()
 
     cp -r "$PWD/src/" "$LOCAL/.core/src"
 
-    INIT_CWD=$LOCAL sh "$PWD/dist/init.sh" --hooks > /dev/null
+    INIT_CWD=$LOCAL bash "$PWD/dist/init.sh" --hooks > /dev/null
 
-    sed -i "" "s|${PWD}|${LOCAL}/.core|" "$LOCAL/.flint/git.sh"
+    sed -i.bak -e "s|${PWD}|${LOCAL}/.core|" "$LOCAL/.flint/git.sh"
 
-    sed -i "" "s|path=\"\$( cd -P \"\$( dirname \$target )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|path=\"\$( cd -P \"\$( dirname \$target )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
 
-    sed -i "" "s|sh \"|source \"|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|bash \"|source \"|" "$LOCAL/.core/bin/flint"
 
-    sed -i "" "s|source \"\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/../src/functions.sh\"||" "$LOCAL/.core/dist/run.sh"
+    sed -i.bak -e "s|source \"\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/../src/functions.sh\"||" "$LOCAL/.core/dist/run.sh"
 
-    sed -i '' $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$LOCAL/.core/src/wrapper.sh"
+    sed -i.bak -e $'/^else$/ { N; N; s|else\\n[[:space:]]*source.*\\nfi|fi|; }' "$LOCAL/.core/src/wrapper.sh"
 
-    sed -i "" "s|command git|git|" "$LOCAL/.core/src/wrapper.sh"
+    sed -i.bak -e "s|command git|git|" "$LOCAL/.core/src/wrapper.sh"
 
-    sed -i "" "s|eval_for_command|mock_for_command|" "$LOCAL/.core/src/functions.sh"
+    sed -i.bak -e "s|eval_for_command|mock_for_command|" "$LOCAL/.core/src/functions.sh"
 
     cp "$PWD/tests/fixtures/config.007.json" "$LOCAL/flint.config.json"
 

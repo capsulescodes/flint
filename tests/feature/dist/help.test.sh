@@ -3,13 +3,13 @@ beforeEach()
     LOCAL=$( mktemp -d )
 
 
-    mkdir "$LOCAL/.core"
+    mkdir -p "$LOCAL/.core"
 
     cp -r "$PWD/bin/" "$LOCAL/.core/bin"
 
     cp -r "$PWD/dist/" "$LOCAL/.core/dist"
 
-    sed -i "" "s|path=\"\$( cd -P \"\$( dirname \$target )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|path=\"\$( cd -P \"\$( dirname \$target )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
 
 
     cd $LOCAL > /dev/null || exit 1

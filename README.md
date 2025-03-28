@@ -61,7 +61,7 @@ node_modules/.bin/flint init
 # Flint git wrapper
 git() {
   if [[ -f "$PWD/.flint/git.sh" ]]; then
-    sh "$PWD/.flint/git.sh" "$@";
+    bash "$PWD/.flint/git.sh" "$@";
   else
     command git "$@";
   fi
@@ -239,7 +239,7 @@ Please make sure to update tests as appropriate.
 npm run test
 
 # bash
-sh tests/runner.sh
+bash tests/runner.sh
 ```
 
 <br>

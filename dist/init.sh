@@ -113,7 +113,7 @@ then
     if [ -f "$profile" ]
 
     then
-        command='git() { if [[ -f "$PWD/.flint/git.sh" ]]; then sh "$PWD/.flint/git.sh" "$@"; else command git "$@"; fi; }'
+        command='git() { if [[ -f "$PWD/.flint/git.sh" ]]; then bash "$PWD/.flint/git.sh" "$@"; else command git "$@"; fi; }'
 
 
         if [[ ! "$( cat $profile | tr -d '[:space:]' )" == *"$( echo $command | tr -d '[:space:]' )"* ]]

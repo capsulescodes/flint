@@ -13,7 +13,7 @@ beforeAll()
 
     cp "$PWD/tests/fixtures/config.003.json" "$TEST/flint.config.json"
 
-    sed -i "" "s|source \"\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/../src/functions.sh\"||" "$TEST/.core/run.sh"
+    sed -i.bak -e "s|source \"\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/../src/functions.sh\"||" "$TEST/.core/run.sh"
 
     mkdir -p "$TEST/.flint"
 
@@ -132,7 +132,7 @@ it_exits_if_destination_does_not_exist()
 {
     mv "$TEST/.flint" "$TEST/bak"
 
-    output=$( sh "$TEST/.core/run.sh" )
+    output=$( bash "$TEST/.core/run.sh" )
     echo $output | grep -q "Flint must be configured first"
     assert "Should output message when .flint directory does not exist"
 
@@ -144,7 +144,7 @@ it_exits_if_git_file_does_not_exist()
 {
     mv "$TEST/.flint/git.sh" "$TEST/.flint/git.sh.bak"
 
-    output=$( sh "$TEST/.core/run.sh" )
+    output=$( bash "$TEST/.core/run.sh" )
     echo $output | grep -q "Flint must be configured first"
     assert "Should output message when .flint directory does not exist"
 
@@ -156,7 +156,7 @@ it_exits_if_config_file_does_not_exist()
 {
     echo 'config="foo"' > "$TEST/.flint/git.sh"
 
-    output=$( sh "$TEST/.core/run.sh" )
+    output=$( bash "$TEST/.core/run.sh" )
     echo $output | grep -q "The 'foo' file does not exist in the root directory."
     assert "Should output message when config file does not exist"
 

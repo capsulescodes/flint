@@ -41,7 +41,7 @@
 		"README.md"
 	],
 	"scripts" : {
-		"test" : "sh tests/runner.sh"
+		"test" : "bash tests/runner.sh"
 	},
 	"bin" : {
 		"flint" : "bin/flint"

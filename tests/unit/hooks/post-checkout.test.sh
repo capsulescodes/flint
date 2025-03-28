@@ -94,7 +94,7 @@ it_evals_new_or_updated_files()
 {
     mock "1 foo foo 1 file.001.foo\n2 bar bar 2 file.002.foo\n2 bar bar 2 file.003.foo"
 
-    output=$( FLINT_STATE="1 foo foo 1 file.001.foo\n1 foo foo 1 file.002.foo" source "$TEST/.core/hooks/post-checkout" )
+    output=$( FLINT_STATE=$( printf "1 foo foo 1 file.001.foo\n1 foo foo 1 file.002.foo" ) source "$TEST/.core/hooks/post-checkout" )
     echo $output | grep -q "local_foo file.002.foo file.003.foo"
     assert "Should eval new and updated files"
 
