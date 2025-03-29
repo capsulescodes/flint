@@ -11,3 +11,16 @@ jobs :
 
       - name : Run Bash Tests
         run : bash tests/runner.sh
+
+      - name : Setup Node
+        uses : actions/setup-node@v4
+        with :
+          node-version : '22.x'
+          registry-url : 'https://registry.npmjs.org'
+
+      - name : Publish on npm
+        run : |
+          npm run test
+          npm publish --access public
+        env :
+          NODE_AUTH_TOKEN : ${{ secrets.NPM }}

@@ -212,7 +212,7 @@ node_modules/.bin/flint status
 
 ## Currently supported Package Managers
 
-- [x] Flint is available on [npm](https://www.npmjs.com/).
+- [x] Flint is available on [npm](https://www.npmjs.com/package/@capsulescodes/flint).
 
 <br>
 
