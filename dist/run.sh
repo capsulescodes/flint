@@ -33,6 +33,30 @@ unstaged=$( git diff --name-only )
 
 staged=$( git diff --staged --name-only )
 
+
+stashed=()
+
+while IFS= read -r file
+
+do
+    if [[ -n $file ]] && echo "$unstaged" | grep -Fqx "$file"
+
+    then
+        stashed+=( $file )
+    fi
+
+done <<< "$staged"
+
+
+if [[ -n ${stashed[0]} ]]
+
+then
+    FLINT_STASH=$( git stash create --keep-index -- "${stashed[@]}" )
+
+    git stash store --quiet "$FLINT_STASH"
+fi
+
+
 if [[ -n $staged ]]
 
 then
@@ -71,7 +95,7 @@ then
     git add "${files[@]}"
 fi
 
-reset=$( git diff --staged --name-only )
+reset=$( git diff --diff-filter=d --staged --name-only )
 
 if [[ -n $reset ]]
 
@@ -88,4 +112,15 @@ if [[ -n $staged ]]
 
 then
     git add "$staged"
+fi
+
+
+if [[ -n $FLINT_STASH ]]
+
+then
+    git stash apply --quiet "$FLINT_STASH"
+
+    git stash drop --quiet "$FLINT_STASH"
+
+    eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config "$stashed"
 fi

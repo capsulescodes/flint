@@ -61,7 +61,7 @@ mock()
             echo "Mock : git add ${@:2}"
         fi
 
-        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
             printf "%s\n" "${RESET[@]}"
@@ -71,6 +71,18 @@ mock()
 
         then
             echo "Mock : git commit -m $COMMIT"
+        fi
+
+        if [[ $1 == "stash" && $2 == "apply" && $3 == "--quiet" ]]
+
+        then
+            echo "Mock : git stash apply ${@:4} --quiet"
+        fi
+
+        if [[ $1 == "stash" && $2 == "drop" && $3 == "--quiet" ]]
+
+        then
+            echo "Mock : git stash drop ${@:4} --quiet"
         fi
 
 
@@ -241,11 +253,55 @@ it_unsets_reset_files_if_reset_files_exist()
 }
 
 
+it_unstashes_files_if_stash_exists()
+{
+    mock
+
+    output=$( FLINT_STASH="foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "Mock : git stash apply foo"
+    assert "Should apply stash"
+    echo $output | grep -q "Mock : git stash drop foo"
+    assert "Should drop stash"
+
+    unmock
+}
+
+
+it_unstashes_files_quietly()
+{
+    mock
+
+    output=$( FLINT_STASH="foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "Mock : git stash apply foo --quiet"
+    assert "Should apply stash quietly"
+    echo $output | grep -q "Mock : git stash drop foo --quiet"
+    assert "Should drop stash quietly"
+
+    unmock
+}
+
+
+it_unsets_stash_if_stash_exists()
+{
+    mock
+
+    FLINT_STASH="foo"
+
+    source "$TEST/.core/hooks/post-commit" > /dev/null
+    [[ -z $FLINT_STASH ]]
+    assert "Should unset stash"
+
+    unmock
+}
+
+
 it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "bar" $commands
+    FLINT_STASH="bar"
+
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "baz" $commands
 
     source "$TEST/.core/hooks/post-commit" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD" ]]
@@ -254,9 +310,13 @@ it_uses_correct_git_commands()
     assert "Should use correct diff command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "add file.001.foo file.002.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct commit command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
+    assert "Should use correct commit command"
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "stash apply --quiet bar" ]]
+    assert "Should use correct commit command"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "stash drop --quiet bar" ]]
     assert "Should use correct commit command"
 
     unmock

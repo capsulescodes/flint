@@ -114,7 +114,7 @@ it_checks_out_multiple_modified_file()
     assert "commands - Should use correct ls-tree command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.001.foo file.002.foo" ]]
     assert "commands - Should use correct ls-tree command"
-    [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct ls-tree command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct ls-tree command"
@@ -194,7 +194,7 @@ it_creates_a_file_adds_it_then_creates_another_file_and_checks_out_a_modified_fi
     assert "commands - Should use correct ls-tree command"
     [[ "$( head -n 11 "$LOCAL/.git/commands" | tail -n 1 )" == "add file.003.foo" ]]
     assert "commands - Should use correct ls-tree command"
-    [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    [[ "$( head -n 12 "$LOCAL/.git/commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "commands - Should use correct ls-tree command"
     [[ "$( head -n 13 "$LOCAL/.git/commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "commands - Should use correct ls-tree command"

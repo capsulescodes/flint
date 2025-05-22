@@ -31,7 +31,7 @@ then
             git add "${files[@]}"
         fi
 
-        reset=$( git diff --staged --name-only )
+        reset=$( git diff --diff-filter=d --staged --name-only )
 
         if [[ -n $reset ]]
 
@@ -49,5 +49,15 @@ then
 
     then
         unset FLINT_RESET_FILES
+    fi
+
+    if [[ -n $FLINT_STASH ]]
+
+    then
+        git stash apply --quiet "$FLINT_STASH"
+
+        git stash drop --quiet "$FLINT_STASH"
+
+        unset FLINT_STASH
     fi
 fi

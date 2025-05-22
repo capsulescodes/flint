@@ -36,12 +36,38 @@ afterAll()
 mock()
 {
     STAGED=($1)
-    MODIFIED=($2)
-    HEAD=$3
-    COMMANDS=$4
+    UNSTAGED=($2)
+    MODIFIED=($3)
+    STASH=$4
+    HEAD=$5
+    COMMANDS=$6
 
     git()
     {
+        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${STAGED[@]}"
+        fi
+
+        if [[ $1 == "diff" && $2 == "--name-only" ]]
+
+        then
+            printf "%s\n" "${UNSTAGED[@]}"
+        fi
+
+        if [[ $1 == 'stash' && $2 == 'create' && $3 == '--keep-index' ]]
+
+        then
+            echo $STASH
+        fi
+
+        if [[ $1 == 'stash' && $2 == 'store' && $3 == '--quiet' && -n $4 ]]
+
+        then
+            echo "Mock : git stash store ${@:4} --quiet"
+        fi
+
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
 
         then
@@ -103,7 +129,7 @@ it_skips_when_temporary_commit()
 
 it_handles_no_manual_commits()
 {
-    mock "file.001.foo" "file.001.foo"
+    mock "file.001.foo" "" "file.001.foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
     echo $output | grep -q "Mock : git add file.001.foo"
@@ -117,7 +143,7 @@ it_handles_no_manual_commits()
 
 it_resets_to_last_manual_commit_if_manual_commit_exists()
 {
-    mock "file.001.foo file.002.foo" "file.001.foo" "foo"
+    mock "file.001.foo file.002.foo" "" "file.001.foo" "" "foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
     echo $output | grep -q "Mock : git reset --soft foo"
@@ -129,7 +155,7 @@ it_resets_to_last_manual_commit_if_manual_commit_exists()
 
 it_resets_to_last_manual_commit_silently()
 {
-    mock "file.001.foo file.002.foo" "file.001.foo" "bar"
+    mock "file.001.foo file.002.foo" "" "file.001.foo" "" "bar"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
     echo $output | grep -q "Mock : git reset --soft bar --quiet"
@@ -153,7 +179,7 @@ it_handles_no_reset_files()
 
 it_evaluates_reset_files()
 {
-    mock "file.001.foo file.002.foo" "file.001.foo"
+    mock "file.001.foo file.002.foo" "" "file.001.foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
     echo $output | grep -q "remote_foo file.001.foo file.002.foo"
@@ -181,7 +207,7 @@ it_handles_no_modified_files()
 
 it_adds_modified_files()
 {
-    mock "file.001.foo file_002.foo" "file.001.foo file_002.foo"
+    mock "file.001.foo file_002.foo" "" "file.001.foo file_002.foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
     echo $output | grep -q "Mock : git add file.001.foo file_002.foo"
@@ -201,6 +227,60 @@ it_exports_reset_files_if_reset_files_exist()
     echo $FLINT_RESET_FILES | grep -q "file.001.foo file.002.foo"
     assert "Should list reset files"
 
+    unset FLINT_RESET_FILES
+
+    unmock
+}
+
+
+it_stashes_files_when_matching_modified_and_staged_files()
+{
+    mock "file.001.foo file.002.foo file.003.foo" "file.001.foo file.OO3.foo" "" "foo"
+
+    output=$( source "$TEST/.core/hooks/pre-commit" )
+    echo $output | grep -q "Mock : git stash store foo --quiet"
+    assert "Should store stash quietly"
+
+    unmock
+}
+
+
+it_exports_stash_if_stashed_files()
+{
+    mock "file.001.foo" "file.001.foo" "" "foo"
+
+    source "$TEST/.core/hooks/pre-commit" > /dev/null
+    [[ -n $FLINT_STASH ]]
+    assert "FLINT_STASH should be set after running the hook"
+    echo $FLINT_STASH | grep -q "foo"
+    assert "Should list reset files"
+
+    unset FLINT_STASH
+
+    unmock
+}
+
+
+it_stashes_files_quietly()
+{
+    mock "file.001.foo" "file.001.foo" "" "foo"
+
+    output=$( source "$TEST/.core/hooks/pre-commit" )
+    echo $output | grep -q "Mock : git stash store foo --quiet"
+    assert "Should store stash quietly"
+
+    unmock
+}
+
+
+it_does_not_stash_when_no_matching_modified_and_staged_files()
+{
+    mock "file.001.foo" "file.002.foo"
+
+    source "$TEST/.core/hooks/pre-commit" > /dev/null
+    [[ -z $FLINT_STASH ]]
+    assert "FLINT_STASH should not be set after running the hook"
+
     unmock
 }
 
@@ -209,18 +289,26 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.001.foo" "bar" $commands
+    mock "file.001.foo file.002.foo file.003.foo file.004.foo" "file.002.foo file.004.foo" "file.001.foo" "foo" "bar" $commands
 
     source "$TEST/.core/hooks/pre-commit" > /dev/null
-    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
-    assert "Should use correct rev-list command"
-    [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "reset --soft bar --quiet" ]]
-    assert "Should use correct reset command"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 1 "$commands" | tail -n 1 )" == "diff --name-only" ]]
+    assert "Should use correct unstaged command"
+    [[ "$( head -n 2 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
     assert "Should use correct staged command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" == "stash create --keep-index -- file.002.foo file.004.foo" ]]
+    assert "Should use correct stash create command"
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "stash store --quiet foo" ]]
+    assert "Should use correct stash store command"
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
+    assert "Should use correct rev-list command"
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "reset --soft bar --quiet" ]]
+    assert "Should use correct reset command"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
+    assert "Should use correct staged command"
+    [[ "$( head -n 8 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
     assert "Should use correct modified command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "add file.001.foo" ]]
+    [[ "$( head -n 9 "$commands" | tail -n 1 )" == "add file.001.foo" ]]
     assert "Should use correct add command"
 
     unmock

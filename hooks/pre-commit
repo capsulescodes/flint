@@ -1,6 +1,39 @@
+
 if [[ -z $FLINT_TEMPORARY_COMMIT ]]
 
 then
+    unstaged=$( git diff --name-only )
+
+    staged=$( git diff --staged --name-only )
+
+
+    stashed=()
+
+    while IFS= read -r file
+
+    do
+        if [[ -n $file ]] && echo "$unstaged" | grep -Fqx "$file"
+
+        then
+            stashed+=( $file )
+        fi
+
+    done <<< "$staged"
+
+
+    if [[ -n ${stashed[0]} ]]
+
+    then
+        FLINT_STASH=$( git stash create --keep-index -- "${stashed[@]}" )
+
+        git stash store --quiet "$FLINT_STASH"
+
+        export FLINT_STASH
+    fi
+
+
+
+
     manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
     if [[ -n $manual ]]
@@ -8,6 +41,9 @@ then
     then
         git reset --soft $manual --quiet
     fi
+
+
+
 
     reset=$( git diff --diff-filter=d --staged --name-only )
 

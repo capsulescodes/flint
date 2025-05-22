@@ -61,7 +61,7 @@ mock()
             echo "Mock : git add ${@:2}"
         fi
 
-        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
         then
             printf "%s\n" "${RESET[@]}"
@@ -298,7 +298,7 @@ it_uses_correct_git_commands()
     assert "Should use correct diff command"
     [[ "$( head -n 3 "$commands" | tail -n 1 )" == "add file.001.foo file.003.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --staged --name-only" ]]
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct diff command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"

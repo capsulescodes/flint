@@ -1,10 +1,20 @@
+todo()
+{
+   code=2
+   message="${1:-TODO}"
+}
+
+
 assert()
 {
     if [ $? -ne 0 ]
 
     then
-        code=$1
+        code=1
+        message=$1
         line="${BASH_LINENO[0]}"
+    else
+        code=0
     fi
 }
 
@@ -12,19 +22,30 @@ assert()
 test()
 {
     code=""
+    message=""
 
     $1
 
-    if [[ -z $code ]]
+    if [[ $code == 2 ]]
+
+    then
+        printf "\033[1;33m\xE2\x96\xB2\033[1;33m $1 \033[0m-\033[1;33m $message \033[0m\n"
+    fi
+
+    if [[ $code == 1 ]]
+
+    then
+        printf "\033[1;31m\xE2\x9C\x96\033[1;30m $1 \033[0m-\033[1;31m $message : at line $line \033[0m\n"
+
+        return 1
+    fi
+
+    if [[ $code == 0 ]]
 
     then
         printf "\033[1;32m\xE2\x9C\x94\033[1;30m $1 \033[0m\n"
 
         return 0
-    else
-        printf "\033[1;31m\xE2\x9C\x96\033[1;30m $1 \033[0m-\033[1;31m $code : at line $line \033[0m\n"
-
-        return 1
     fi
 }
 

@@ -8,6 +8,7 @@ function mock
     mkdir -p "$LOCAL/.git/modified"
     mkdir -p "$LOCAL/.git/staged"
     mkdir -p "$LOCAL/.git/committed"
+    mkdir -p "$LOCAL/.git/stashed"
 
     touch "$LOCAL/.git/commits"
     touch "$LOCAL/.git/commands"
@@ -71,9 +72,11 @@ function mock
                 if [[ -n $file ]]
 
                 then
-                    if [[ -f "$LOCAL/.git/staged/$file" ]]
+                    if [[ $1 == "restore" && $2 == "--staged" && -f "$LOCAL/.git/staged/$file" ]]
 
                     then
+                        cp "$LOCAL/.git/staged/$file" "$LOCAL/$file"
+
                         rm "$LOCAL/.git/staged/$file"
                     fi
 
@@ -200,7 +203,93 @@ function mock
         if [[ $1 == "checkout" ]]
 
         then
-            mv  "$2"/* "$LOCAL"
+            mv "$2"/* "$LOCAL"
+        fi
+
+        if [[ $1 == "stash" ]]
+
+        then
+            if [[ $2 == "create" && $3 == "--keep-index" ]]
+
+            then
+                dir=$( mktemp -d )
+
+                files=$( echo "${@:5}" )
+
+                for file in $files
+
+                do
+                    if [[ -n $file ]]
+
+                    then
+                        if [[ -f "$LOCAL/.git/modified/$file" ]]
+
+                        then
+                            mv "$LOCAL/.git/modified/$file" "$dir/$file"
+                        fi
+                    fi
+                done
+
+                echo "$dir"
+            fi
+
+            if [[ $2 == "store" && $3 == "--quiet" && -n "$4" ]]
+
+            then
+                files=$( ls "$4" )
+
+                for file in $files
+
+                do
+                    cp "$4/$file" "$LOCAL/.git/stashed/$file"
+
+                    local suffix=1
+
+                    local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/stashed" "$file" "$suffix" )
+
+                    while [[ -f $cache ]]
+
+                    do
+                        (( suffix++ ))
+
+                        cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/stashed" "$file" "$suffix" )
+                    done
+
+                    cp "$LOCAL/.git/stashed/$file" "$cache"
+                done
+            fi
+
+            if [[ $2 == "apply" && $3 == "--quiet" && -n "$4" ]]
+
+            then
+                mv "$LOCAL/.git/stashed"/* "$4"
+
+                files=$( ls "$4" )
+
+                for file in $files
+
+                do
+                    if [[ -n $file ]]
+
+                    then
+                        if [[ -f "$4/$file" ]]
+
+                        then
+                            cp "$4/$file" "$LOCAL/$file"
+
+                            cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
+
+                            rm "$4/$file"
+                        fi
+                    fi
+                done
+            fi
+
+            if [[ $2 == "drop" && $3 == "--quiet" && -n "$4" ]]
+
+            then
+                rm -r "$4"
+            fi
         fi
 
 
