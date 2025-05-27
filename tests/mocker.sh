@@ -3,12 +3,12 @@ function mock
     LOCAL=$1
     REMOTE=$2
 
-    mkdir -p "$LOCAL/.git"
+    mkdir "$LOCAL/.git"
 
-    mkdir -p "$LOCAL/.git/modified"
-    mkdir -p "$LOCAL/.git/staged"
-    mkdir -p "$LOCAL/.git/committed"
-    mkdir -p "$LOCAL/.git/stashed"
+    mkdir "$LOCAL/.git/modified"
+    mkdir "$LOCAL/.git/staged"
+    mkdir "$LOCAL/.git/committed"
+    mkdir "$LOCAL/.git/patched"
 
     touch "$LOCAL/.git/commits"
     touch "$LOCAL/.git/commands"
@@ -31,7 +31,7 @@ function mock
         for file in $( [[ -z "${@:3}" ]] && ls -1 "$LOCAL" || echo "${@:3}" )
 
         do
-            if [[ -n $file ]]
+            if [[ -n "$file" ]]
 
             then
                 cp "$file" "$file.bak"
@@ -61,6 +61,44 @@ function mock
 
     function git
     {
+        if [[ $1 == "add" ]] || [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
+
+        then
+            files=$( [[ $1 == "add" ]] && echo "${@:2}" || echo "$( ls "$LOCAL/.git/committed/$3" )" )
+
+            directory=$( [[ $1 == "add" ]] && echo "modified" || echo "committed/$3" )
+
+            for file in $files
+
+            do
+                if [[ -n "$file" ]]
+
+                then
+                    if [[ -f "$LOCAL/.git/$directory/$file" ]]
+
+                    then
+                        mv "$LOCAL/.git/$directory/$file" "$LOCAL/.git/staged/$file"
+                    else
+                        cp "$LOCAL/$file" "$LOCAL/.git/staged/$file"
+                    fi
+
+                    local suffix=1
+
+                    local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
+
+                    while [[ -f $cache ]]
+
+                    do
+                        (( suffix++ ))
+
+                        cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
+                    done
+
+                    cp "$LOCAL/.git/staged/$file" "$cache"
+                fi
+            done
+        fi
+
         if [[ $1 == "modify" ]] || [[ $1 == "restore" && $2 == "--staged" ]]
 
         then
@@ -69,21 +107,13 @@ function mock
             for file in $files
 
             do
-                if [[ -n $file ]]
+                if [[ -n "$file" ]]
 
                 then
-                    if [[ $1 == "restore" && $2 == "--staged" && -f "$LOCAL/.git/staged/$file" ]]
+                    if [[ $1 == "restore" && -f "$LOCAL/.git/staged/$file" ]]
 
                     then
-                        cp "$LOCAL/.git/staged/$file" "$LOCAL/$file"
-
-                        rm "$LOCAL/.git/staged/$file"
-                    fi
-
-                    if [[ -f "$LOCAL/.git/committed/$file" ]]
-
-                    then
-                        rm "$LOCAL/.git/committed/$file"
+                        mv "$LOCAL/.git/staged/$file" "$LOCAL/$file"
                     fi
 
                     cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
@@ -105,59 +135,22 @@ function mock
             done
         fi
 
-
-        if [[ $1 == "add" ]] || [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
-
-        then
-            files=$( [[ $1 == "add" ]] && echo "${@:2}" || echo "$( ls "$LOCAL/.git/committed/" )" )
-
-            directory=$( [[ $1 == "add" ]] && echo "modified" || echo "committed" )
-
-            for file in $files
-
-            do
-                if [[ -n $file ]]
-
-                then
-                    if [[ -f "$LOCAL/.git/$directory/$file" ]]
-
-                    then
-                        rm "$LOCAL/.git/$directory/$file"
-                    fi
-
-                    cp "$LOCAL/$file" "$LOCAL/.git/staged/$file"
-
-                    local suffix=1
-
-                    local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
-
-                    while [[ -f $cache ]]
-
-                    do
-                        (( suffix++ ))
-
-                        cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/staged" "$file" "$suffix" )
-                    done
-
-                    cp "$LOCAL/.git/staged/$file" "$cache"
-                fi
-            done
-        fi
-
-        if [[ $1 == "commit" && $2 == "-m" ]]
+        if [[ $1 == "commit" && $2 == "-m" && -n $3 ]]
 
         then
+            mkdir -p "$LOCAL/.git/committed/$3"
+
             for file in $( ls "$LOCAL/.git/staged" )
 
             do
                 if [[ -f "$LOCAL/.git/staged/$file" ]]
 
                 then
-                    mv "$LOCAL/.git/staged/$file" "$LOCAL/.git/committed/$file"
+                    mv "$LOCAL/.git/staged/$file" "$LOCAL/.git/committed/$3/$file"
                 fi
             done
 
-            for file in $( ls "$LOCAL/.git/committed" )
+            for file in $( ls "$LOCAL/.git/committed/$3" )
 
             do
                 local suffix=1
@@ -172,7 +165,7 @@ function mock
                     cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/committed" "$file" "$suffix" )
                 done
 
-                cp "$LOCAL/.git/committed/$file" "$cache"
+                cp "$LOCAL/.git/committed/$3/$file" "$cache"
             done
 
             echo $3 >> "$LOCAL/.git/commits"
@@ -181,10 +174,14 @@ function mock
         if [[ $1 == "push" ]]
 
         then
-            for file in $( ls -A "$LOCAL/.git/committed" )
+            for directory in $( ls -d "$LOCAL/.git/committed"/* )
 
             do
-                cp "$LOCAL/.git/committed/$file" "$REMOTE/$file"
+                for file in $( ls "$directory" )
+
+                do
+                    cp "$directory/$file" "$REMOTE/$file"
+                done
             done
         fi
 
@@ -206,90 +203,82 @@ function mock
             mv "$2"/* "$LOCAL"
         fi
 
-        if [[ $1 == "stash" ]]
+        if [[ $1 == "hash-object" && $2 == '-w' && $3 == '--stdin' ]]
 
         then
-            if [[ $2 == "create" && $3 == "--keep-index" ]]
+            files=();
 
-            then
-                dir=$( mktemp -d )
+            while IFS= read -r line; do files+=( "$line" ); done
 
-                files=$( echo "${@:5}" )
+            for file in $files
 
-                for file in $files
+            do
+                mv "$LOCAL/.git/modified/$file" "$LOCAL/.git/patched/$file"
 
-                do
-                    if [[ -n $file ]]
+                if [[ -f "$REMOTE/$file" ]]
 
-                    then
-                        if [[ -f "$LOCAL/.git/modified/$file" ]]
+                then
+                    cp "$REMOTE/$file" "$LOCAL/$file"
+                fi
 
-                        then
-                            mv "$LOCAL/.git/modified/$file" "$dir/$file"
-                        fi
-                    fi
-                done
+                if [[ -f "$LOCAL/.git/staged/$file" ]]
 
-                echo "$dir"
-            fi
+                then
+                    cp "$LOCAL/.git/staged/$file" "$LOCAL/$file"
+                fi
 
-            if [[ $2 == "store" && $3 == "--quiet" && -n "$4" ]]
+                local suffix=1
 
-            then
-                files=$( ls "$4" )
+                local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/patched" "$file" "$suffix" )
 
-                for file in $files
+                while [[ -f $cache ]]
 
                 do
-                    cp "$4/$file" "$LOCAL/.git/stashed/$file"
+                    (( suffix++ ))
 
-                    local suffix=1
-
-                    local cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/stashed" "$file" "$suffix" )
-
-                    while [[ -f $cache ]]
-
-                    do
-                        (( suffix++ ))
-
-                        cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/stashed" "$file" "$suffix" )
-                    done
-
-                    cp "$LOCAL/.git/stashed/$file" "$cache"
+                    cache=$( printf "%s/.%s.%03d" "$LOCAL/.git/patched" "$file" "$suffix" )
                 done
-            fi
 
-            if [[ $2 == "apply" && $3 == "--quiet" && -n "$4" ]]
+                cp "$LOCAL/.git/patched/$file" "$cache"
+            done
+
+            echo "patched"
+        fi
+
+        if [[ $1 == 'stash' ]]
+
+        then
+            if [[ -f "$LOCAL/.git/modified/$file" ]]
 
             then
-                mv "$LOCAL/.git/stashed"/* "$4"
-
-                files=$( ls "$4" )
-
-                for file in $files
-
-                do
-                    if [[ -n $file ]]
-
-                    then
-                        if [[ -f "$4/$file" ]]
-
-                        then
-                            cp "$4/$file" "$LOCAL/$file"
-
-                            cp "$LOCAL/$file" "$LOCAL/.git/modified/$file"
-
-                            rm "$4/$file"
-                        fi
-                    fi
-                done
+                rm "$LOCAL/.git/modified/$file"
             fi
+        fi
 
-            if [[ $2 == "drop" && $3 == "--quiet" && -n "$4" ]]
+        if [[ $1 == "cat-file" && $2 == "-p" && -n $3 ]]
 
-            then
-                rm -r "$4"
-            fi
+        then
+            ls "$LOCAL/.git/$3"
+        fi
+
+        if [[ $1 == "apply" ]]
+
+        then
+            files=();
+
+            while IFS= read -r line; do files+=( "$line" ); done
+
+            for file in "${files[@]}"
+
+            do
+                if [[ -f "$LOCAL/.git/patched/$file" ]]
+
+                then
+                    cp "$LOCAL/.git/patched/$file" "$LOCAL/.git/modified/$file"
+
+                    mv "$LOCAL/.git/patched/$file" "$LOCAL/$file"
+                fi
+            done
         fi
 
 
@@ -323,29 +312,46 @@ function mock
 
 
 
-
-        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
-
-        then
-            ls "$REMOTE"
-        fi
-
         if [[ $1 == "diff-tree" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "--no-commit-id" && $5 == "-r" && $6 == "HEAD" ]]
 
         then
-            ls "$LOCAL/.git/committed"
+            directory="$( ls -R "$LOCAL/.git/committed" )"
+
+            current=""
+
+            while IFS= read -r line
+
+            do
+                if [[ "$line" == *: ]]
+
+                then
+                    current="${line%:}"
+                fi
+
+                if [[ "$line" != *: && -n "$line" && -f "$current/$line" ]]
+
+                then
+                    echo "$line"
+                fi
+            done <<< "$directory"
         fi
 
-        if [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]] || [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
+        if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && $4 == "@{1}" && $5 == "HEAD" ]]
 
-        then
-            ls "$LOCAL/.git/staged"
-        fi
+        then ls "$REMOTE"
 
-        if [[ $1 == "diff" && $2 == "--name-only" ]] || [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && -z $4 ]]
+        elif [[ $1 == "diff" && $2 == "--staged" && $3 == "--name-only" ]] || [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--staged" && $4 == "--name-only" ]]
 
-        then
-            ls "$LOCAL/.git/modified"
+        then ls "$LOCAL/.git/staged"
+
+        elif [[ $1 == "diff" && $2 == "--name-only" ]] || [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" && -z $4 ]]
+
+        then ls "$LOCAL/.git/modified"
+
+        elif [[ $1 == "diff" && -n "$2" ]]
+
+        then echo "${@:2}"
+
         fi
 
 

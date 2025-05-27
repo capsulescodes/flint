@@ -34,7 +34,7 @@ unstaged=$( git diff --name-only )
 staged=$( git diff --staged --name-only )
 
 
-stashed=()
+patched=()
 
 while IFS= read -r file
 
@@ -42,18 +42,18 @@ do
     if [[ -n $file ]] && echo "$unstaged" | grep -Fqx "$file"
 
     then
-        stashed+=( $file )
+        patched+=( "$file" )
     fi
 
 done <<< "$staged"
 
 
-if [[ -n ${stashed[0]} ]]
+if [[ -n ${patched[0]} ]]
 
 then
-    FLINT_STASH=$( git stash create --keep-index -- "${stashed[@]}" )
+    patch=$( git diff "${patched[@]}" | git hash-object -w --stdin )
 
-    git stash store --quiet "$FLINT_STASH"
+    git stash push -- "${patched[@]}"
 fi
 
 
@@ -84,7 +84,7 @@ do
     if [[ -n $file ]] && ! echo "$unstaged" | grep -Fqx "$file" && ! echo "$staged" | grep -Fqx "$file"
 
     then
-        files+=( $file )
+        files+=( "$file" )
     fi
 done <<< "$modified"
 
@@ -115,12 +115,10 @@ then
 fi
 
 
-if [[ -n $FLINT_STASH ]]
+if [[ -n $patch ]]
 
 then
-    git stash apply --quiet "$FLINT_STASH"
+    git cat-file -p "$patch" | git apply
 
-    git stash drop --quiet "$FLINT_STASH"
-
-    eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config "$stashed"
+    eval_for_command "$( [[ -n $2 ]] && echo "$2" || echo "local" )" $config "$patched"
 fi

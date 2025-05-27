@@ -3,7 +3,7 @@ beforeAll()
     TEST=$( mktemp -d )
 
 
-    mkdir -p "$TEST/.core"
+    mkdir "$TEST/.core"
 
     cp "$PWD/src/helpers.sh" "$TEST/.core/helpers.sh"
 
@@ -28,7 +28,7 @@ it_handles_file_paths()
 
 it_handles_directory_paths()
 {
-    mkdir -p "$TEST/foo"
+    mkdir "$TEST/foo"
 
     output=$( get_absolute_path "$TEST/foo" )
     [[ $output = "$TEST/foo" ]]
@@ -105,7 +105,7 @@ it_handles_current_directory()
 
 it_preserves_trailing_slashes_in_absolute_path()
 {
-    mkdir -p "$TEST/foo"
+    mkdir "$TEST/foo"
 
     output=$( get_absolute_path "$TEST/foo/" )
     [[ $output = "$TEST/foo" ]]

@@ -6,8 +6,7 @@ then
 
     staged=$( git diff --staged --name-only )
 
-
-    stashed=()
+    patched=()
 
     while IFS= read -r file
 
@@ -15,20 +14,20 @@ then
         if [[ -n $file ]] && echo "$unstaged" | grep -Fqx "$file"
 
         then
-            stashed+=( $file )
+            patched+=( "$file" )
         fi
 
     done <<< "$staged"
 
 
-    if [[ -n ${stashed[0]} ]]
+    if [[ -n ${patched[0]} ]]
 
     then
-        FLINT_STASH=$( git stash create --keep-index -- "${stashed[@]}" )
+        FLINT_PATCH=$( git diff "${patched[@]}" | git hash-object -w --stdin )
 
-        git stash store --quiet "$FLINT_STASH"
+        git stash push -- "${patched[@]}"
 
-        export FLINT_STASH
+        export FLINT_PATCH
     fi
 
 
@@ -62,7 +61,7 @@ then
             if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file"
 
             then
-                files+=( $file )
+                files+=( "$file" )
             fi
         done <<< "$reset"
 

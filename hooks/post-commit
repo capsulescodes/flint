@@ -20,7 +20,7 @@ then
             if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file"
 
             then
-                files+=( $file )
+                files+=( "$file" )
             fi
         done <<< "$mixed"
 
@@ -51,13 +51,11 @@ then
         unset FLINT_RESET_FILES
     fi
 
-    if [[ -n $FLINT_STASH ]]
+    if [[ -n $FLINT_PATCH ]]
 
     then
-        git stash apply --quiet "$FLINT_STASH"
+        git cat-file -p "$FLINT_PATCH" | git apply
 
-        git stash drop --quiet "$FLINT_STASH"
-
-        unset FLINT_STASH
+        unset FLINT_PATCH
     fi
 fi

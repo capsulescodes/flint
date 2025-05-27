@@ -45,7 +45,7 @@ mock()
     STAGED=($2)
     MODIFIED=($3)
     RESET=($4)
-    STASH=$5
+    PATCH=$5
     HEAD=$6
     COMMIT=$7
     COMMANDS=$8
@@ -64,16 +64,16 @@ mock()
             printf "%s\n" "${STAGED[@]}"
         fi
 
-        if [[ $1 == 'stash' && $2 == 'create' && $3 == '--keep-index' ]]
+        if [[ $1 == 'hash-object' && $2 == '-w' && $3 == '--stdin' ]]
 
         then
-            echo $STASH
+            echo $PATCH
         fi
 
-        if [[ $1 == 'stash' && $2 == 'store' && $3 == '--quiet' && -n $4 ]]
+        if [[ $1 == 'stash' && $2 == 'push' && $3 == '--' && -n $4 ]]
 
         then
-            echo "Mock : git stash store ${@:4} --quiet"
+            echo "Mock : git stash push -- ${@:4}"
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
@@ -118,16 +118,10 @@ mock()
             echo "Mock : git commit -m $COMMIT"
         fi
 
-        if [[ $1 == "stash" && $2 == "apply" && $3 == "--quiet" && -n $4 ]]
+        if [[ $1 == "apply" ]]
 
         then
-            echo "Mock : git stash apply ${@:4} --quiet"
-        fi
-
-        if [[ $1 == "stash" && $2 == "drop" && $3 == "--quiet" && -n $4 ]]
-
-        then
-            echo "Mock : git stash drop ${@:4} --quiet"
+            echo "Mock : git apply"
         fi
 
 
@@ -183,13 +177,13 @@ it_exits_if_config_file_does_not_exist()
 }
 
 
-it_stashes_files_when_matching_modified_and_staged_files()
+it_patches_files_when_matching_modified_and_staged_files()
 {
-    mock "file.001.foo" "file.001.foo" "" "" "foo"
+    mock "file.001.foo file.003.foo" "file.001.foo file.002.foo file.003.foo" "" "foo"
 
     output=$( source "$TEST/.core/run.sh" )
-    echo $output | grep -q "Mock : git stash store foo --quiet"
-    assert "Should stash modified files"
+    echo $output | grep -q "Mock : git stash push -- file.001.foo file.003.foo"
+    assert "Should restore files"
 
     unmock
 }
@@ -361,17 +355,15 @@ it_sets_and_unsets_state_variables()
 }
 
 
-it_unstashes_stashed_files()
+it_applies_patch_and_eval_if_patched_files()
 {
     mock "file.001.foo file.002.foo" "file.002.foo file.003.foo" "" "" "foo"
 
     output=$( source "$TEST/.core/run.sh" )
-    echo $output | grep -q "Mock : git stash apply foo --quiet"
-    assert "Should stash apply files"
-    echo $output | grep -q "Mock : git stash drop foo --quiet"
-    assert "Should stash drop files"
+    echo $output | grep -q "Mock : git apply"
+    assert "Should apply patch"
     echo $output | grep -q "local_foo file.002.foo"
-    assert "Should eval unstashed files"
+    assert "Should eval unpatched files"
 
     unmock
 }
@@ -381,29 +373,39 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    mock "file.001.foo file.002.foo" "file.003.foo file.004.foo" "file.002.foo file.006.foo" "file.006.foo" "" "grault" "" $commands
+    mock "file.001.foo file.002.foo file.003.foo" "file.003.foo file.004.foo" "file.002.foo file.006.foo" "file.006.foo" "grault" "garply" "" $commands
 
     source "$TEST/.core/run.sh" > /dev/null
     [[ "$( head -n 1 "$commands" | tail -n 1 )" ==  "diff --name-only" ]]
     assert "Should use correct unstaged command"
     [[ "$( head -n 2 "$commands" | tail -n 1 )" ==  "diff --staged --name-only" ]]
     assert "Should use correct staged command"
-    [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
+    [[ "$( head -n 3 "$commands" | tail -n 1 )" ==  "diff file.003.foo" ]]
+    assert "Should use correct diff command"
+    [[ "$( head -n 4 "$commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
+    assert "Should use correct hash-object command"
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "stash push -- file.003.foo" ]]
+    assert "Should use correct stash command"
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
     assert "Should use correct restore command"
-    [[ "$( head -n 4 "$commands" | tail -n 1 )" ==  "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "Should use correct rev-list command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" ==  "reset --soft grault --quiet" ]]
+    [[ "$( head -n 8 "$commands" | tail -n 1 )" ==  "reset --soft garply --quiet" ]]
     assert "Should use correct reset command"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
+    [[ "$( head -n 9 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --name-only" ]]
     assert "Should use correct modified command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" ==  "add file.006.foo" ]]
+    [[ "$( head -n 10 "$commands" | tail -n 1 )" ==  "add file.006.foo" ]]
     assert "Should use correct add command"
-    [[ "$( head -n 8 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --staged --name-only" ]]
+    [[ "$( head -n 11 "$commands" | tail -n 1 )" ==  "diff --diff-filter=d --staged --name-only" ]]
     assert "Should use correct staged command"
-    [[ "$( head -n 9 "$commands" | tail -n 1 )" ==  "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
+    [[ "$( head -n 12 "$commands" | tail -n 1 )" ==  "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
-    [[ "$( head -n 10 "$commands" | tail -n 1 )" ==  "add file.003.foo file.004.foo" ]]
+    [[ "$( head -n 13 "$commands" | tail -n 1 )" ==  "add file.003.foo file.004.foo" ]]
     assert "Should use correct add command"
+    [[ "$( head -n 14 "$commands" | tail -n 1 )" == "cat-file -p grault" ]]
+    assert "Should use correct cat-file command"
+    [[ "$( head -n 15 "$commands" | tail -n 1 )" == "apply" ]]
+    assert "Should use correct apply command"
 
     unmock
 

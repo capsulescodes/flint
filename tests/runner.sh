@@ -33,7 +33,7 @@ do
         if [[ $function == it_* ]] || [[ $function == test_* ]]
 
         then
-            tests+=( $function )
+            tests+=( "$function" )
 
             total=$(( total + 1 ))
         fi

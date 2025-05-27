@@ -3,7 +3,7 @@ beforeEach()
     LOCAL=$( mktemp -d )
 
 
-    mkdir -p "$LOCAL/.core"
+    mkdir "$LOCAL/.core"
 
     cp -r "$PWD/src" "$LOCAL/.core/src"
 
@@ -94,7 +94,15 @@ it_checks_out_multiple_modified_file()
 
     output=$( wrap checkout $BRANCH )
     [[ -f "$LOCAL/file.001.foo" && -f "$LOCAL/file.002.foo" ]]
-    assert "checkout - Should check out file"
+    assert "checkout - Should check out files"
+    [[ "$( cat "$LOCAL/.git/modified/.file.001.foo.001" )" == "local" && "$( cat "$LOCAL/.git/modified/.file.002.foo.001" )" == "local" ]]
+    assert "modify - Should modify files locally"
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "local" && "$( cat "$LOCAL/.git/staged/.file.002.foo.001" )" == "local" ]]
+    assert "modify - Should add files"
+    [[ "$( head -n 1 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
+    assert "pull - Should commit temporary"
+    [[ "$( cat "$LOCAL/.git/committed/.file.001.foo.001" )" == "local" && "$( cat "$LOCAL/.git/committed/FLINT-TEMPORARY-COMMIT/file.001.foo" )" == "local" && "$( cat "$LOCAL/.git/committed/.file.002.foo.001" )" == "local" && "$( cat "$LOCAL/.git/committed/FLINT-TEMPORARY-COMMIT/file.002.foo" )" == "local" ]]
+    assert "pull - Should commit files"
 
     # COMMANDS
 
@@ -127,7 +135,9 @@ it_checks_out_multiple_modified_file()
     assert "files - Modified files should be present"
     [[ "$( ls -A "$LOCAL/.git/staged" )" == "$( echo ".file.001.foo.001|.file.002.foo.001" | tr "|" "\n" )" ]]
     assert "files - Staged files should be present"
-    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo ".file.001.foo.001|.file.002.foo.001|file.001.foo|file.002.foo" | tr "|" "\n" )" ]]
+    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo ".file.001.foo.001|.file.002.foo.001|FLINT-TEMPORARY-COMMIT" | tr "|" "\n" )" ]]
+    assert "files - Committed files should be present"
+    [[ "$( ls -A "$LOCAL/.git/committed/FLINT-TEMPORARY-COMMIT" )" == "$( echo "file.001.foo|file.002.foo|" | tr "|" "\n" )" ]]
     assert "files - Committed files should be present"
 
     rm -r $BRANCH
@@ -141,13 +151,13 @@ it_creates_a_file_adds_it_then_creates_another_file_and_checks_out_a_modified_fi
     echo "local" > "$LOCAL/file.001.foo"
 
     output=$( wrap add file.001.foo )
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "local" && -f "$LOCAL/.git/staged/file.001.foo" ]]
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.001" )" == "local" && "$( cat "$LOCAL/.git/staged/file.001.foo" )" == "local" ]]
     assert "add - Should add file"
 
     echo "local" > "$LOCAL/file.002.foo"
 
     output=$( git modify file.002.foo )
-    [[ "$( cat "$LOCAL/.git/modified/.file.002.foo.001" )" == "local" && -f "$LOCAL/.git/modified/file.002.foo" ]]
+    [[ "$( cat "$LOCAL/.git/modified/.file.002.foo.001" )" == "local" && "$( cat "$LOCAL/.git/modified/file.002.foo" )" == "local" ]]
     assert "modify - Should modify files"
 
     BRANCH=$( mktemp -d )
@@ -165,9 +175,9 @@ it_creates_a_file_adds_it_then_creates_another_file_and_checks_out_a_modified_fi
     assert "modify - Should add file"
     [[ "$( head -n 1 "$LOCAL/.git/commits" | tail -n 1 )" == "FLINT-TEMPORARY-COMMIT" ]]
     assert "pull - Should commit temporary"
-    [[ "$( cat "$LOCAL/.git/committed/.file.003.foo.001" )" == "local" && -f "$LOCAL/.git/committed/file.003.foo" ]]
+    [[ "$( cat "$LOCAL/.git/committed/.file.003.foo.001" )" == "local" && "$( cat "$LOCAL/.git/committed/FLINT-TEMPORARY-COMMIT/file.003.foo" )" == "local" ]]
     assert "pull - Should commit file"
-    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.002" )" == "local" && -f "$LOCAL/.git/staged/file.001.foo" ]]
+    [[ "$( cat "$LOCAL/.git/staged/.file.001.foo.002" )" == "local" && "$( cat "$LOCAL/.git/staged/file.001.foo" )" == "local" ]]
     assert "pull - Should add staged file"
 
     # COMMANDS
@@ -209,8 +219,10 @@ it_creates_a_file_adds_it_then_creates_another_file_and_checks_out_a_modified_fi
     assert "files - Modified files should be present"
     [[ "$( ls -A "$LOCAL/.git/staged" )" == "$( echo ".file.001.foo.001|.file.001.foo.002|.file.003.foo.001|file.001.foo" | tr "|" "\n" )" ]]
     assert "files - Staged files should be present"
-    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo ".file.003.foo.001|file.003.foo" | tr "|" "\n" )" ]]
+    [[ "$( ls -A "$LOCAL/.git/committed" )" == "$( echo ".file.003.foo.001|FLINT-TEMPORARY-COMMIT" | tr "|" "\n" )" ]]
     assert "files - Committed files should be present"
+    [[ "$( ls -A "$LOCAL/.git/committed/FLINT-TEMPORARY-COMMIT" )" == "$( echo "file.003.foo" | tr "|" "\n" )" ]]
+    assert "files - Committed FLINT-TEMPORARY-COMMIT files should be present"
 
     rm -r $BRANCH
 }

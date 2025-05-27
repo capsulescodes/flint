@@ -31,7 +31,7 @@ then
         if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$FLINT_UNSTAGED_FILES" | grep -Fqx "$file" && ! echo "$FLINT_STAGED_FILES" | grep -Fqx "$file"
 
         then
-            files+=( $file )
+            files+=( "$file" )
         fi
     done <<< "$mixed"
 

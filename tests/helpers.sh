@@ -13,8 +13,6 @@ assert()
         code=1
         message=$1
         line="${BASH_LINENO[0]}"
-    else
-        code=0
     fi
 }
 
@@ -40,7 +38,7 @@ test()
         return 1
     fi
 
-    if [[ $code == 0 ]]
+    if [[ -z $code ]]
 
     then
         printf "\033[1;32m\xE2\x9C\x94\033[1;30m $1 \033[0m\n"

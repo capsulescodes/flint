@@ -73,16 +73,16 @@ mock()
             echo "Mock : git commit -m $COMMIT"
         fi
 
-        if [[ $1 == "stash" && $2 == "apply" && $3 == "--quiet" ]]
+        if [[ $1 == "cat-file" && $2 == "-p" && -n $3 ]]
 
         then
-            echo "Mock : git stash apply ${@:4} --quiet"
+            echo "Mock : git cat-file -p ${@:3}"
         fi
 
-        if [[ $1 == "stash" && $2 == "drop" && $3 == "--quiet" ]]
+        if [[ $1 == "apply" ]]
 
         then
-            echo "Mock : git stash drop ${@:4} --quiet"
+            echo "Mock : git apply"
         fi
 
 
@@ -179,7 +179,7 @@ it_handles_no_modified_files()
     mock "file.001.foo file.002.foo"
 
     output=$( source "$TEST/.core/hooks/post-commit" )
-    echo $output | grep -qv "git add"
+    echo $output | grep -qv "Mock : git add"
     assert "Should not add files when there are no modified files"
 
     unmock
@@ -253,43 +253,27 @@ it_unsets_reset_files_if_reset_files_exist()
 }
 
 
-it_unstashes_files_if_stash_exists()
+it_applies_patch_if_patch_exists()
 {
     mock
 
-    output=$( FLINT_STASH="foo" source "$TEST/.core/hooks/post-commit" )
-    echo $output | grep -q "Mock : git stash apply foo"
-    assert "Should apply stash"
-    echo $output | grep -q "Mock : git stash drop foo"
-    assert "Should drop stash"
+    output=$( FLINT_PATCH="foo" source "$TEST/.core/hooks/post-commit" )
+    echo $output | grep -q "Mock : git apply"
+    assert "Should apply patch"
 
     unmock
 }
 
 
-it_unstashes_files_quietly()
+it_unsets_patch_if_patch_exists()
 {
     mock
 
-    output=$( FLINT_STASH="foo" source "$TEST/.core/hooks/post-commit" )
-    echo $output | grep -q "Mock : git stash apply foo --quiet"
-    assert "Should apply stash quietly"
-    echo $output | grep -q "Mock : git stash drop foo --quiet"
-    assert "Should drop stash quietly"
-
-    unmock
-}
-
-
-it_unsets_stash_if_stash_exists()
-{
-    mock
-
-    FLINT_STASH="foo"
+    FLINT_PATCH="foo"
 
     source "$TEST/.core/hooks/post-commit" > /dev/null
-    [[ -z $FLINT_STASH ]]
-    assert "Should unset stash"
+    [[ -z $FLINT_PATCH ]]
+    assert "Should unset patch"
 
     unmock
 }
@@ -299,7 +283,7 @@ it_uses_correct_git_commands()
 {
     commands=$( mktemp )
 
-    FLINT_STASH="bar"
+    FLINT_PATCH="bar"
 
     mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "file.001.foo file.002.foo" "baz" $commands
 
@@ -314,10 +298,10 @@ it_uses_correct_git_commands()
     assert "Should use correct commit command"
     [[ "$( head -n 5 "$commands" | tail -n 1 )" == "commit -m FLINT-TEMPORARY-COMMIT --quiet" ]]
     assert "Should use correct commit command"
-    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "stash apply --quiet bar" ]]
-    assert "Should use correct commit command"
-    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "stash drop --quiet bar" ]]
-    assert "Should use correct commit command"
+    [[ "$( head -n 6 "$commands" | tail -n 1 )" == "cat-file -p bar" ]]
+    assert "Should use correct cat-file command"
+    [[ "$( head -n 7 "$commands" | tail -n 1 )" == "apply" ]]
+    assert "Should use correct apply command"
 
     unmock
 

@@ -3,7 +3,7 @@ beforeEach()
     LOCAL=$( mktemp -d )
 
 
-    mkdir -p "$LOCAL/.core"
+    mkdir "$LOCAL/.core"
 
     cp -r "$PWD/bin/" "$LOCAL/.core/bin"
 
@@ -84,8 +84,6 @@ it_runs_flint_run_command()
     echo "remote" > file.001.foo
 
     output=$( flint run )
-    [[ -f "$LOCAL/file.001.foo" ]]
-    assert "flint - Should pull file"
     [[ "$( cat "$LOCAL/file.001.foo" )" == "local" ]]
     assert "flint - Should modify file locally"
 

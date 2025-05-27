@@ -3,7 +3,7 @@ beforeAll()
     TEST=$( mktemp -d )
 
 
-    mkdir -p "$TEST/.core"
+    mkdir "$TEST/.core"
 
     cp "$PWD/src/wrapper.sh" "$TEST/.core/wrapper.sh"
 
