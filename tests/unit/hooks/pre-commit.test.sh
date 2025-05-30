@@ -62,10 +62,10 @@ mock()
             echo $PATCH
         fi
 
-        if [[ $1 == 'stash' && $2 == 'push' && $3 == '--' && -n $4 ]]
+        if [[ $1 == 'stash' && $2 == 'push' && $3 == '--keep-index' && $4 == '--quiet' && $5 == '--' && -n $6 ]]
 
         then
-            echo "Mock : git stash push -- ${@:4}"
+            echo "Mock : git stash push --keep-index --quiet -- ${@:6}"
         fi
 
         if [[ $1 == "rev-list" && $2 == "HEAD" && $3 == "--invert-grep" ]]
@@ -233,12 +233,24 @@ it_exports_reset_files_if_reset_files_exist()
 }
 
 
-it_patches_files_when_matching_modified_and_staged_files()
+it_stashes_files_when_matching_modified_and_staged_files()
+{
+    mock "file.001.foo" "file.001.foo" "" "foo"
+
+    output=$( source "$TEST/.core/hooks/pre-commit" )
+    echo $output | grep -q "Mock : git stash push --keep-index"
+    assert "Should restore files"
+
+    unmock
+}
+
+
+it_stashes_files_when_matching_modified_and_staged_files_quietly()
 {
     mock "file.001.foo file.003.foo" "file.001.foo file.002.foo file.003.foo" "" "foo"
 
     output=$( source "$TEST/.core/hooks/pre-commit" )
-    echo $output | grep -q "Mock : git stash push -- file.001.foo file.003.foo"
+    echo $output | grep -q "Mock : git stash push --keep-index --quiet -- file.001.foo file.003.foo"
     assert "Should restore files"
 
     unmock
@@ -288,7 +300,7 @@ it_uses_correct_git_commands()
     assert "Should use correct diff command"
     [[ "$( head -n 4 "$commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
     assert "Should use correct hash-object command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "stash push -- file.002.foo file.004.foo" ]]
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "stash push --keep-index --quiet -- file.002.foo file.004.foo" ]]
     assert "Should use correct stash command"
     [[ "$( head -n 6 "$commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "Should use correct rev-list command"

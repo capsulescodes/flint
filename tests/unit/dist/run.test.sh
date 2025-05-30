@@ -70,10 +70,10 @@ mock()
             echo $PATCH
         fi
 
-        if [[ $1 == 'stash' && $2 == 'push' && $3 == '--' && -n $4 ]]
+        if [[ $1 == 'stash' && $2 == 'push' && $3 == '--keep-index' && $4 == '--quiet' && $5 == '--' && -n $6 ]]
 
         then
-            echo "Mock : git stash push -- ${@:4}"
+            echo "Mock : git stash push --keep-index --quiet -- ${@:6}"
         fi
 
         if [[ $1 == "diff" && $2 == "--diff-filter=d" && $3 == "--name-only" ]]
@@ -179,10 +179,22 @@ it_exits_if_config_file_does_not_exist()
 
 it_patches_files_when_matching_modified_and_staged_files()
 {
+    mock "file.001.foo" "file.001.foo" "" "foo"
+
+    output=$( source "$TEST/.core/run.sh" )
+    echo $output | grep -q "Mock : git stash push"
+    assert "Should restore files"
+
+    unmock
+}
+
+
+it_patches_files_when_matching_modified_and_staged_files_quietly()
+{
     mock "file.001.foo file.003.foo" "file.001.foo file.002.foo file.003.foo" "" "foo"
 
     output=$( source "$TEST/.core/run.sh" )
-    echo $output | grep -q "Mock : git stash push -- file.001.foo file.003.foo"
+    echo $output | grep -q "Mock : git stash push --keep-index --quiet -- file.001.foo file.003.foo"
     assert "Should restore files"
 
     unmock
@@ -384,7 +396,7 @@ it_uses_correct_git_commands()
     assert "Should use correct diff command"
     [[ "$( head -n 4 "$commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
     assert "Should use correct hash-object command"
-    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "stash push -- file.003.foo" ]]
+    [[ "$( head -n 5 "$commands" | tail -n 1 )" == "stash push --keep-index --quiet -- file.003.foo" ]]
     assert "Should use correct stash command"
     [[ "$( head -n 6 "$commands" | tail -n 1 )" ==  "restore --staged file.003.foo file.004.foo" ]]
     assert "Should use correct restore command"

@@ -61,7 +61,7 @@ function mock
 
     function git
     {
-        if [[ $1 == "add" ]] || [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && "$4" == "--quiet" ]]
+        if [[ $1 == "add" ]] || [[ "$1" == "reset" && "$2" == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" ]]
 
         then
             files=$( [[ $1 == "add" ]] && echo "${@:2}" || echo "$( ls "$LOCAL/.git/committed/$3" )" )
@@ -245,7 +245,7 @@ function mock
             echo "patched"
         fi
 
-        if [[ $1 == 'stash' ]]
+        if [[ $1 == 'stash' && $2 == 'push' && $3 == '--keep-index' ]]
 
         then
             if [[ -f "$LOCAL/.git/modified/$file" ]]
@@ -294,7 +294,7 @@ function mock
             fi
         fi
 
-        if [[ $1 == "reset" && $2 == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" && $4 == "--quiet" ]]
+        if [[ $1 == "reset" && $2 == "--soft" && $3 == "FLINT-TEMPORARY-COMMIT" ]]
 
         then
             sed -i.bak -e "\$s|FLINT-TEMPORARY-COMMIT|DELETED-TEMPORARY-COMMIT|" "$LOCAL/.git/commits"

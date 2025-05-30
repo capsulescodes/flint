@@ -458,7 +458,7 @@ it_creates_a_file_adds_it_modifies_it_and_runs_flint()
     assert "commands - Should use correct diff command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
     assert "commands - Should use correct hash-object command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push -- file.001.foo" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push --keep-index --quiet -- file.001.foo" ]]
     assert "commands - Should use correct stash command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "restore --staged file.001.foo" ]]
     assert "commands - Should use correct restore command"

@@ -685,7 +685,7 @@ it_creates_a_file_adds_it_modifies_it_commits_it_pushes_it()
     assert "commands - Should use correct diff command"
     [[ "$( head -n 6 "$LOCAL/.git/commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
     assert "commands - Should use correct hash-object command"
-    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push -- file.001.foo" ]]
+    [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push --keep-index --quiet -- file.001.foo" ]]
     assert "commands - Should use correct stash command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"

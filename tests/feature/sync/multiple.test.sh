@@ -560,7 +560,7 @@ it_creates_a_file_adds_it_creates_another_file_adds_it_modifies_a_file_commits_t
     assert "commands - Should use correct diff command"
     [[ "$( head -n 7 "$LOCAL/.git/commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
     assert "commands - Should use correct hash-object command"
-    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push -- file.001.foo" ]]
+    [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push --keep-index --quiet -- file.001.foo" ]]
     assert "commands - Should use correct stash command"
     [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"
@@ -820,7 +820,7 @@ it_creates_a_file_adds_it_creates_another_file_adds_it_modifies_two_files_commit
     assert "commands - Should use correct diff command"
     [[ "$( head -n 8 "$LOCAL/.git/commands" | tail -n 1 )" == "hash-object -w --stdin" ]]
     assert "commands - Should use correct hash-object command"
-    [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push -- file.001.foo file.002.foo" ]]
+    [[ "$( head -n 9 "$LOCAL/.git/commands" | tail -n 1 )" == "stash push --keep-index --quiet -- file.001.foo file.002.foo" ]]
     assert "commands - Should use correct stash command"
     [[ "$( head -n 10 "$LOCAL/.git/commands" | tail -n 1 )" == "rev-list HEAD --invert-grep --grep=FLINT-TEMPORARY-COMMIT --max-count=1" ]]
     assert "commands - Should use correct rev-list command"

@@ -53,7 +53,7 @@ if [[ -n ${patched[0]} ]]
 then
     patch=$( git diff "${patched[@]}" | git hash-object -w --stdin )
 
-    git stash push -- "${patched[@]}"
+    git stash push --keep-index --quiet -- "${patched[@]}"
 fi
 
 
