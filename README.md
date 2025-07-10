@@ -193,7 +193,11 @@ If you want to run a specific **command** from configuration file property ***co
 
 ```shell
 # npm
+node_modules/.bin/flint run
+
 node_modules/.bin/flint run remote
+
+node_modules/.bin/flint run local foo.js
 ```
 
 <br>

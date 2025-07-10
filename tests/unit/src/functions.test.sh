@@ -42,6 +42,16 @@ it_handles_missing_command()
 }
 
 
+it_silently_handles_incorrect_command()
+{
+    output=$( eval_for_command "foo/bar.baz" "config.005.json" 2>&1 )
+    ! echo $output | grep -Fq "sed: 1: \"s/.*\"foo/bar.baz\"[[:spa ...\": bad flag in substitute command: '\'"
+    assert "Should not  when local command is missing"
+    echo $output | grep -q "No 'foo/bar.baz' command associated with linter. Skipping."
+    assert "Should warn when local command is missing"
+}
+
+
 it_checks_if_binary_file_exists()
 {
     output=$( eval_for_command "local" "config.005.json" "file.foo" )

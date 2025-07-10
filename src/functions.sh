@@ -27,7 +27,7 @@ function eval_for_command
             continue
         fi
 
-        local command=$( echo "$linter" | tr -d '\n\r' | sed -n "s/.*\"$name\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" )
+        local command=$( echo "$linter" | tr -d '\n\r' | sed -n "s/.*\"$name\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" 2>/dev/null )
 
         if [[ -z $command ]]
 
