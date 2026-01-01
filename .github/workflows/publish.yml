@@ -2,25 +2,19 @@ name : Publish Package
 on :
   release :
     types : [ published ]
+permissions :
+  id-token : write
+  contents : read
 jobs :
   build :
     runs-on : ubuntu-latest
     steps :
-      - name : Checkout Repository
-        uses : actions/checkout@v4
+      - uses : actions/checkout@v4
+      - run : bash tests/runner.sh
 
-      - name : Run Bash Tests
-        run : bash tests/runner.sh
-
-      - name : Setup Node
-        uses : actions/setup-node@v4
+      - uses : actions/setup-node@v4
         with :
-          node-version : '22.x'
+          node-version : '24'
           registry-url : 'https://registry.npmjs.org'
-
-      - name : Publish on npm
-        run : |
-          npm run test
-          npm publish --access public
-        env :
-          NODE_AUTH_TOKEN : ${{ secrets.NPM }}
+      - run : npm run test
+      - run : npm publish
