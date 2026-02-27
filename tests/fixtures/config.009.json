@@ -1,0 +1,20 @@
+{
+    "linters" : [
+        {
+            "extensions" : [ "foo" ],
+            "binary" : ".core/echo",
+            "commands" : {
+                "local" : "local_foo",
+                "remote" : "remote_foo"
+            }
+        },
+        {
+            "extensions" : [ "bar" ],
+            "binary" : "missing/binary",
+            "commands" : {
+                "local" : "local_bar",
+                "remote" : "remote_bar"
+            }
+        }
+    ]
+}

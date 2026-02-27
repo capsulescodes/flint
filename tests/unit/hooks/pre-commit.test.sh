@@ -285,6 +285,26 @@ it_does_not_patch_when_no_matching_modified_and_staged_files()
 }
 
 
+it_patches_all_staged_files_when_all_are_also_unstaged()
+{
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo" "" "baz"
+
+    output=$( source "$TEST/.core/hooks/pre-commit" )
+    echo $output | grep -q "Mock : git stash push --keep-index --quiet -- file.001.foo file.002.foo"
+    assert "Should stash all files when all staged are also unstaged"
+
+    source "$TEST/.core/hooks/pre-commit" > /dev/null
+    [[ -n $FLINT_PATCH ]]
+    assert "FLINT_PATCH should be set"
+    echo $FLINT_PATCH | grep -q "baz"
+    assert "Should contain patch hash"
+
+    unset FLINT_PATCH
+
+    unmock
+}
+
+
 it_uses_correct_git_commands()
 {
     commands=$( mktemp )

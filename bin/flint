@@ -1,20 +1,20 @@
 #!/bin/bash
 
-target=$0
+target="$0"
 
 
-while [[ -h $target ]]
+while [[ -h "$target" ]]
 
 do
-    directory="$( cd -P "$( dirname $target )" && pwd )"
+    directory="$( cd -P "$( dirname "$target" )" && pwd )"
 
     target="$( readlink "$target" )"
 
-    [[ $target != /* ]] && target="$directory/$target"
+    [[ "$target" != /* ]] && target="$directory/$target"
 done
 
 
-path="$( cd -P "$( dirname $target )" && pwd )/../dist"
+path="$( cd -P "$( dirname "$target" )" && pwd )/../dist"
 
 
 
@@ -35,7 +35,21 @@ then
     for arg in "${@:2}"
 
     do
-        if [[ ! "${options[@]}" =~ "$arg" ]]
+        valid=false
+
+        for option in "${options[@]}"
+
+        do
+            if [[ "$arg" == "$option" ]]
+
+            then
+                valid=true
+
+                break
+            fi
+        done
+
+        if [[ "$valid" == false ]]
 
         then
             printf "\n\033[1;33mflint - '$arg' is not a valid option. Type 'flint help' to display help section.\n"

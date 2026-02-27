@@ -381,6 +381,38 @@ it_applies_patch_and_eval_if_patched_files()
 }
 
 
+it_applies_patch_and_eval_for_multiple_patched_files()
+{
+    mock "file.001.foo file.002.foo file.003.foo" "file.001.foo file.002.foo file.003.foo" "" "" "bar"
+
+    output=$( source "$TEST/.core/run.sh" )
+    echo $output | grep -q "Mock : git apply"
+    assert "Should apply patch"
+    echo $output | grep -q "local_foo file.001.foo file.002.foo file.003.foo"
+    assert "Should eval all patched files"
+
+    unmock
+}
+
+
+it_uses_custom_command_name()
+{
+    cp "$TEST/flint.config.json" "$TEST/flint.config.json.bak"
+
+    cp "$PWD/tests/fixtures/config.007.json" "$TEST/flint.config.json"
+
+    mock
+
+    output=$( source "$TEST/.core/run.sh" run bar )
+    echo $output | grep -qv "local_foo"
+    assert "Should not run local command"
+
+    mv "$TEST/flint.config.json.bak" "$TEST/flint.config.json"
+
+    unmock
+}
+
+
 it_uses_correct_git_commands()
 {
     commands=$( mktemp )

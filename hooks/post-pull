@@ -1,11 +1,11 @@
 pulled=$( git diff --diff-filter=d --name-only @{1} HEAD 2>/dev/null )
 
-mixed=$( printf "%s\n%s\n" $pulled $FLINT_RESET_FILES | sort | uniq )
+mixed=$( printf "%s\n" $pulled $FLINT_RESET_FILES | sort | uniq )
 
-if [[ -n $mixed ]]
+if [[ -n "$mixed" ]]
 
 then
-    eval_for_command "local" $FLINT_CONFIG "$mixed"
+    eval_for_command "local" "$FLINT_CONFIG" "$mixed"
 
     modified=$( git diff --diff-filter=d --name-only )
 
@@ -14,7 +14,7 @@ then
     while IFS= read -r file
 
     do
-        if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$FLINT_UNSTAGED_FILES" | grep -Fqx "$file" && ! echo "$FLINT_STAGED_FILES" | grep -Fqx "$file"
+        if [[ -n "$file" ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$FLINT_UNSTAGED_FILES" | grep -Fqx "$file" && ! echo "$FLINT_STAGED_FILES" | grep -Fqx "$file"
 
         then
             files+=( "$file" )
@@ -22,7 +22,7 @@ then
     done <<< "$mixed"
 
 
-    if [[ -n ${files[0]} ]]
+    if [[ -n "${files[0]}" ]]
 
     then
         git add "${files[@]}"
@@ -30,7 +30,7 @@ then
 
     reset=$( git diff --diff-filter=d --staged --name-only )
 
-    if [[ -n $reset ]]
+    if [[ -n "$reset" ]]
 
     then
         export FLINT_TEMPORARY_COMMIT=1
@@ -42,21 +42,21 @@ then
 fi
 
 
-if [[ -n $FLINT_RESET_FILES ]]
+if [[ -n "$FLINT_RESET_FILES" ]]
 
 then
     unset FLINT_RESET_FILES
 fi
 
-if [[ -n $FLINT_STAGED_FILES ]]
+if [[ -n "$FLINT_STAGED_FILES" ]]
 
 then
-    git add "$FLINT_STAGED_FILES"
+    git add $FLINT_STAGED_FILES
 
     unset FLINT_STAGED_FILES
 fi
 
-if [[ -n $FLINT_UNSTAGED_FILES ]]
+if [[ -n "$FLINT_UNSTAGED_FILES" ]]
 
 then
     unset FLINT_UNSTAGED_FILES

@@ -1,6 +1,6 @@
 reset=$( git diff --diff-filter=d --staged --name-only )
 
-if [[ -n $reset ]]
+if [[ -n "$reset" ]]
 
 then
     export FLINT_TEMPORARY_COMMIT=1
@@ -10,10 +10,10 @@ then
     unset FLINT_TEMPORARY_COMMIT
 fi
 
-if [[ -n $FLINT_STAGED_FILES ]]
+if [[ -n "$FLINT_STAGED_FILES" ]]
 
 then
-    git add "$FLINT_STAGED_FILES"
+    git add $FLINT_STAGED_FILES
 
     unset FLINT_STAGED_FILES
 fi

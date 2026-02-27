@@ -15,7 +15,7 @@ beforeEach()
 
     sed -i.bak -e "s|${PWD}|${LOCAL}/.core|" "$LOCAL/.flint/git.sh"
 
-    sed -i.bak -e "s|path=\"\$( cd -P \"\$( dirname \$target )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|path=\"\$( cd -P \"\$( dirname \"\$target\" )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
 
     sed -i.bak -e "s|bash \"|source \"|" "$LOCAL/.core/bin/flint"
 

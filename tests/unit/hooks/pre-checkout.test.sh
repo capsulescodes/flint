@@ -24,6 +24,7 @@ mock()
     STATE=$1
     RESET=($2)
     COMMANDS=$3
+    UNSTAGED=($4)
 
     git()
     {
@@ -37,6 +38,12 @@ mock()
 
         then
             printf "%s\n" "${RESET[@]}"
+        fi
+
+        if [[ $1 == "diff" && $2 == "--name-only" && -z $3 ]]
+
+        then
+            printf "%s\n" "${UNSTAGED[@]}"
         fi
 
 
@@ -120,4 +127,32 @@ it_uses_correct_git_commands()
     unmock
 
     [[ -f "$commands" ]] && rm $commands
+}
+
+
+it_exports_unstaged_files_if_unstaged_files_exist()
+{
+    mock "" "" "" "file.001.foo file.002.foo"
+
+    source "$TEST/.core/hooks/pre-checkout" > /dev/null
+    [[ -n $FLINT_UNSTAGED_FILES ]]
+    assert "Should export unstaged files"
+    echo $FLINT_UNSTAGED_FILES | grep -q "file.001.foo"
+    assert "Should list unstaged files"
+
+    unset FLINT_UNSTAGED_FILES
+
+    unmock
+}
+
+
+it_does_not_export_unstaged_files_if_none_exist()
+{
+    mock
+
+    source "$TEST/.core/hooks/pre-checkout" > /dev/null
+    [[ -z $FLINT_UNSTAGED_FILES ]]
+    assert "Should not export unstaged files when there are none"
+
+    unmock
 }

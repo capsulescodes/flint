@@ -281,6 +281,32 @@ it_unsets_unstaged_files_if_unstaged_files_exist()
 }
 
 
+it_excludes_file_in_both_pulled_and_unstaged()
+{
+    mock "file.001.foo file.002.foo" "file.001.foo file.002.foo"
+
+    output=$( FLINT_UNSTAGED_FILES="file.001.foo" source "$TEST/.core/hooks/post-pull" )
+    echo $output | grep -q "Mock : git add file.002.foo"
+    assert "Should only add files not in unstaged"
+    echo $output | grep -qv "Mock : git add file.001.foo file.002.foo"
+    assert "Should not add the unstaged file"
+
+    unmock
+}
+
+
+it_handles_no_pulled_files()
+{
+    mock
+
+    output=$( source "$TEST/.core/hooks/post-pull" )
+    [[ -z $output ]]
+    assert "Should produce no output when nothing was pulled"
+
+    unmock
+}
+
+
 it_uses_correct_git_commands()
 {
     commands=$( mktemp )

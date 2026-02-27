@@ -1,14 +1,14 @@
-if [[ -z $FLINT_TEMPORARY_COMMIT ]]
+if [[ -z "$FLINT_TEMPORARY_COMMIT" ]]
 
 then
     committed=$( git diff-tree --diff-filter=d --name-only --no-commit-id -r HEAD )
 
-    mixed=$( printf "%s\n%s\n" $committed $FLINT_RESET_FILES | sort | uniq )
+    mixed=$( printf "%s\n" $committed $FLINT_RESET_FILES | sort | uniq )
 
-    if [[ -n $mixed ]]
+    if [[ -n "$mixed" ]]
 
     then
-        eval_for_command "local" $FLINT_CONFIG "$mixed"
+        eval_for_command "local" "$FLINT_CONFIG" "$mixed"
 
         modified=$( git diff --diff-filter=d --name-only )
 
@@ -17,7 +17,7 @@ then
         while IFS= read -r file
 
         do
-            if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file"
+            if [[ -n "$file" ]] && echo "$modified" | grep -Fqx "$file"
 
             then
                 files+=( "$file" )
@@ -25,7 +25,7 @@ then
         done <<< "$mixed"
 
 
-        if [[ -n ${files[0]} ]]
+        if [[ -n "${files[0]}" ]]
 
         then
             git add "${files[@]}"
@@ -33,7 +33,7 @@ then
 
         reset=$( git diff --diff-filter=d --staged --name-only )
 
-        if [[ -n $reset ]]
+        if [[ -n "$reset" ]]
 
         then
             export FLINT_TEMPORARY_COMMIT=1
@@ -45,13 +45,13 @@ then
     fi
 
 
-    if [[ -n $FLINT_RESET_FILES ]]
+    if [[ -n "$FLINT_RESET_FILES" ]]
 
     then
         unset FLINT_RESET_FILES
     fi
 
-    if [[ -n $FLINT_PATCH ]]
+    if [[ -n "$FLINT_PATCH" ]]
 
     then
         git cat-file -p "$FLINT_PATCH" | git apply

@@ -1,0 +1,12 @@
+{
+    "linters" : [
+        {
+            "extensions" : [ "js", "jsx", "ts" ],
+            "binary" : ".core/echo",
+            "commands" : {
+                "local" : "local_foo",
+                "remote" : "remote_foo"
+            }
+        }
+    ]
+}

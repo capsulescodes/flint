@@ -15,7 +15,7 @@ beforeEach()
 
     cp -r "$PWD/stubs" "$LOCAL/.core/stubs"
 
-    sed -i.bak -e "s|\$( cd -P \"\$( dirname \$target )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|\$( cd -P \"\$( dirname \"\$target\" )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/bin/flint"
 
     sed -i.bak -e "s|\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/..|$LOCAL/.core|" "$LOCAL/.core/dist/init.sh"
 
@@ -37,20 +37,6 @@ afterEach()
 }
 
 
-
-
-it_warns_if_source_hooks_directory_is_missing()
-{
-    mv "$LOCAL/.core/hooks" "$LOCAL/.core/hooks-bak"
-
-    output=$( flint init )
-    [[ ! -d "$LOCAL/.core/hooks" ]]
-    assert "Should not have hooks directory"
-    echo $output | grep -q "Required files not found at '$LOCAL/.core'."
-    assert "Should output message"
-
-    mv "$LOCAL/.core/hooks-bak" "$LOCAL/.core/hooks"
-}
 
 
 it_warns_if_source_hooks_directory_is_missing()
@@ -280,4 +266,32 @@ it_warns_if_no_shell_is_found()
     output=$( SHELL="foo" flint init --wrap )
     echo $output | grep -q "Shell profile file not found. the Git wrapper function is required to use Flint correctly. Please add it manually."
     assert "Should output message"
+}
+
+
+it_creates_hooks_and_skips_config_simultaneously()
+{
+    output=$( HOME=$LOCAL flint init --hooks --no-config )
+    [[ -d "$LOCAL/.flint/hooks" ]]
+    assert "Should create hooks directory"
+    [[ ! -f "$LOCAL/flint.config.json" ]]
+    assert "Should not create configuration file"
+    echo $output | grep -q "Hooks directory 'hooks' added to '.flint' directory."
+    assert "Should output hooks message"
+}
+
+
+it_prefers_bashrc_over_bash_profile_when_both_exist()
+{
+    touch "$LOCAL/.bash_profile"
+
+    touch "$LOCAL/.bashrc"
+
+    output=$( SHELL="bash" HOME=$LOCAL flint init --wrap )
+    echo "$( cat "$LOCAL/.bashrc" )" | grep -q "git()"
+    assert "Should write wrapper to .bashrc"
+    [[ ! -s "$LOCAL/.bash_profile" ]]
+    assert ".bash_profile should remain empty"
+
+    rm "$LOCAL/.bash_profile" "$LOCAL/.bashrc"
 }

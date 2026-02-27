@@ -1,5 +1,5 @@
 
-if [[ -z $FLINT_TEMPORARY_COMMIT ]]
+if [[ -z "$FLINT_TEMPORARY_COMMIT" ]]
 
 then
     unstaged=$( git diff --name-only )
@@ -11,7 +11,7 @@ then
     while IFS= read -r file
 
     do
-        if [[ -n $file ]] && echo "$unstaged" | grep -Fqx "$file"
+        if [[ -n "$file" ]] && echo "$unstaged" | grep -Fqx "$file"
 
         then
             patched+=( "$file" )
@@ -20,7 +20,7 @@ then
     done <<< "$staged"
 
 
-    if [[ -n ${patched[0]} ]]
+    if [[ -n "${patched[0]}" ]]
 
     then
         FLINT_PATCH=$( git diff "${patched[@]}" | git hash-object -w --stdin )
@@ -35,10 +35,10 @@ then
 
     manual=$( git rev-list HEAD --invert-grep --grep='FLINT-TEMPORARY-COMMIT' --max-count=1 )
 
-    if [[ -n $manual ]]
+    if [[ -n "$manual" ]]
 
     then
-        git reset --soft $manual --quiet
+        git reset --soft "$manual" --quiet
     fi
 
 
@@ -46,10 +46,10 @@ then
 
     reset=$( git diff --diff-filter=d --staged --name-only )
 
-    if [[ -n $reset ]]
+    if [[ -n "$reset" ]]
 
     then
-        eval_for_command "remote" $FLINT_CONFIG "$reset"
+        eval_for_command "remote" "$FLINT_CONFIG" "$reset"
 
         modified=$( git diff --diff-filter=d --name-only )
 
@@ -58,7 +58,7 @@ then
         while IFS= read -r file
 
         do
-            if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file"
+            if [[ -n "$file" ]] && echo "$modified" | grep -Fqx "$file"
 
             then
                 files+=( "$file" )
@@ -66,12 +66,12 @@ then
         done <<< "$reset"
 
 
-        if [[ -n ${files[0]} ]]
+        if [[ -n "${files[0]}" ]]
 
         then
             git add "${files[@]}"
         fi
 
-        export FLINT_RESET_FILES=$reset
+        export FLINT_RESET_FILES="$reset"
     fi
 fi

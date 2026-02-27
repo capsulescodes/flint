@@ -7,16 +7,20 @@ while IFS=' ' read -r line
 do
     path=$( echo "$line" | tr -s '[:space:]' ' ' | cut -d ' ' -f 5- )
 
-    if [[ -n $path ]] && ! echo "$FLINT_STATE" | grep -Fqx "$line"
+    path="${path## }"
+
+    path="${path%% }"
+
+    if [[ -n "$path" ]] && ! echo "$FLINT_STATE" | grep -Fqx "$line"
 
     then
-        paths+=( $path )
+        paths+=( "$path" )
     fi
 done <<< "$state"
 
 mixed="$( printf "%s\n" "${paths[@]}" | sort | uniq )"
 
-if [[ -n $mixed ]]
+if [[ -n "$mixed" ]]
 
 then
     eval_for_command "local" "$FLINT_CONFIG" "$mixed"
@@ -28,7 +32,7 @@ then
     while IFS= read -r file
 
     do
-        if [[ -n $file ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$FLINT_UNSTAGED_FILES" | grep -Fqx "$file" && ! echo "$FLINT_STAGED_FILES" | grep -Fqx "$file"
+        if [[ -n "$file" ]] && echo "$modified" | grep -Fqx "$file" && ! echo "$FLINT_UNSTAGED_FILES" | grep -Fqx "$file" && ! echo "$FLINT_STAGED_FILES" | grep -Fqx "$file"
 
         then
             files+=( "$file" )
@@ -36,7 +40,7 @@ then
     done <<< "$mixed"
 
 
-    if [[ -n ${files[0]} ]]
+    if [[ -n "${files[0]}" ]]
 
     then
         git add "${files[@]}"
@@ -44,7 +48,7 @@ then
 
     reset=$( git diff --diff-filter=d --staged --name-only )
 
-    if [[ -n $reset ]]
+    if [[ -n "$reset" ]]
 
     then
         export FLINT_TEMPORARY_COMMIT=1
@@ -56,21 +60,21 @@ then
 fi
 
 
-if [[ -n $FLINT_STATE ]]
+if [[ -n "$FLINT_STATE" ]]
 
 then
     unset FLINT_STATE
 fi
 
-if [[ -n $FLINT_STAGED_FILES ]]
+if [[ -n "$FLINT_STAGED_FILES" ]]
 
 then
-    git add "$FLINT_STAGED_FILES"
+    git add $FLINT_STAGED_FILES
 
     unset FLINT_STAGED_FILES
 fi
 
-if [[ -n $FLINT_UNSTAGED_FILES ]]
+if [[ -n "$FLINT_UNSTAGED_FILES" ]]
 
 then
     unset FLINT_UNSTAGED_FILES

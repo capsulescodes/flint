@@ -4,14 +4,14 @@ function eval_for_command
 
     local config=$2
 
-    local files=${@:3}
+    local files="${*:3}"
 
     local linters=$( tr -d '\n' < "$config" | sed -n 's/.*"linters"[[:space:]]*:[[:space:]]*\(\[.*\]\).*/\1/p' | sed 's/},[[:space:]]*{/}{/g' | awk '{gsub(/}{/, "}\n{")}1' )
 
     while IFS= read -r linter
 
     do
-        if [[ -z $linter ]]
+        if [[ -z "$linter" ]]
 
         then
             continue
@@ -19,7 +19,7 @@ function eval_for_command
 
         local binary=$( echo "$linter" | tr -d '\n\r' | sed -n 's/.*"binary"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' )
 
-        if [[ -z $binary ]]
+        if [[ -z "$binary" ]]
 
         then
             printf "\033[1;33mflint - No binary associated with linter. Skipping.\033[0m\n"
@@ -29,7 +29,7 @@ function eval_for_command
 
         local command=$( echo "$linter" | tr -d '\n\r' | sed -n "s/.*\"$name\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" 2>/dev/null )
 
-        if [[ -z $command ]]
+        if [[ -z "$command" ]]
 
         then
             printf "\033[1;33mflint - No '$name' command associated with linter. Skipping.\033[0m\n"
@@ -39,15 +39,19 @@ function eval_for_command
 
         local extensions=$( echo "$linter" | sed -n 's/.*"extensions"[[:space:]]*:[[:space:]]*\[\([^]]*\)\].*/\1/p' | tr -d '" ' | tr ',' '|' )
 
-        local filtered=$( [[ -n $files ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
+        local filtered=$( [[ -n "$files" ]] && printf '%s\n' $files | grep -E "\.($extensions)$" | tr '\n' ' ' || echo "." )
 
-        if [[ -n $filtered ]]
+        if [[ -n "$filtered" ]]
 
         then
-            if [[ -x $binary ]]
+            if [[ -x "$binary" ]]
 
             then
-                eval $binary $command "$filtered"
+                local args=()
+
+                IFS=' ' read -ra args <<< "$command"
+
+                "$binary" "${args[@]}" $filtered
             else
                 printf "\033[1;33mflint - Binary '$binary' not found. Install it and run 'flint run'. Skipping.\033[0m\n"
             fi

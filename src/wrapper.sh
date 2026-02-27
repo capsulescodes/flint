@@ -1,7 +1,7 @@
-if [[ ! -f $config ]]
+if [[ ! -f "$config" ]]
 
 then
-    echo "\n\033[1;33mflint - '$config' file not found in root directory. Running default git.\033[0m\n"
+    printf "\n\033[1;33mflint - '$config' file not found in root directory. Running default git.\033[0m\n"
 else
     source "$( cd "$( dirname "${BASH_SOURCE:-$0}" )" && pwd )/functions.sh"
 fi
@@ -9,10 +9,10 @@ fi
 
 
 
-path=$( [[ $hooks == /* ]] && echo "$hooks" || echo "$PWD/$hooks" )
+path=$( [[ "$hooks" == /* ]] && echo "$hooks" || echo "$PWD/$hooks" )
 
 
-if [[ -f $config && -f "$path/pre-$1" ]]
+if [[ -f "$config" && -f "$path/pre-$1" ]]
 
 then
     export FLINT_CONFIG=$config
@@ -36,7 +36,7 @@ return=$?
 
 
 
-if [[ -f $config && -f "$path/post-$1" ]]
+if [[ -f "$config" && -f "$path/post-$1" ]]
 
 then
     export FLINT_CONFIG=$config

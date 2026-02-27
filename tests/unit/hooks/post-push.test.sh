@@ -122,8 +122,8 @@ it_unsets_staged_files_if_staged_files_exist()
     FLINT_STAGED_FILES="file.001.foo file.002.foo"
 
     source "$TEST/.core/hooks/post-push" > /dev/null
-    [[ -z $FLINT_RESET_FILES ]]
-    assert "Should unset reset files"
+    [[ -z $FLINT_STAGED_FILES ]]
+    assert "Should unset staged files"
 
     unmock
 }

@@ -15,7 +15,7 @@ beforeEach()
 
     sed -i.bak -e "s|${PWD}|${LOCAL}/.core|" "$LOCAL/.flint/git.sh"
 
-    sed -i.bak -e "s|path=\"\$( cd -P \"\$( dirname \$target )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
+    sed -i.bak -e "s|path=\"\$( cd -P \"\$( dirname \"\$target\" )\" && pwd )/../dist|path=\"$LOCAL/.core/dist|" "$LOCAL/.core/bin/flint"
 
     sed -i.bak -e "s|bash \"\$path/run|source \"\$path/run|" "$LOCAL/.core/bin/flint"
 
@@ -108,4 +108,28 @@ it_runs_flint_command()
     assert "Should output git error from binary"
 
     mv "$LOCAL/.flint-bak" "$LOCAL/.flint"
+}
+
+
+it_rejects_substring_option()
+{
+    output=$( flint init --hook 2>&1 )
+    echo $output | grep -q "'--hook' is not a valid option."
+    assert "Should reject --hook as substring of --hooks"
+}
+
+
+it_rejects_partial_option()
+{
+    output=$( flint init --no 2>&1 )
+    echo $output | grep -q "'--no' is not a valid option."
+    assert "Should reject --no as substring of --no-config"
+}
+
+
+it_rejects_mixed_valid_and_invalid_options()
+{
+    output=$( flint init --wrap --foo 2>&1 )
+    echo $output | grep -q "'--foo' is not a valid option."
+    assert "Should reject invalid option even when mixed with valid ones"
 }
