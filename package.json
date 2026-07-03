@@ -1,7 +1,7 @@
 {
 	"name" : "@capsulescodes/flint",
 	"description" : "Auto-format utility for local and remote ease of development",
-	"version" : "0.2.0",
+	"version" : "0.2.1",
 	"keywords" : [
 		"format",
 		"lint",

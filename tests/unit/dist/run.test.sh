@@ -1,17 +1,19 @@
 beforeAll()
 {
+    ROOT=$PWD
+
     TEST=$( mktemp -d )
 
 
     mkdir -p "$TEST/.core"
 
-    cp "$PWD/dist/run.sh" "$TEST/.core/run.sh"
+    cp "$ROOT/dist/run.sh" "$TEST/.core/run.sh"
 
-    cp "$PWD/src/functions.sh" "$TEST/.core/functions.sh"
+    cp "$ROOT/src/functions.sh" "$TEST/.core/functions.sh"
 
-    cp "$PWD/tests/fixtures/echo" "$TEST/.core/echo"
+    cp "$ROOT/tests/fixtures/echo" "$TEST/.core/echo"
 
-    cp "$PWD/tests/fixtures/config.003.json" "$TEST/flint.config.json"
+    cp "$ROOT/tests/fixtures/config.003.json" "$TEST/flint.config.json"
 
     sed -i.bak -e "s|source \"\$( cd \"\$( dirname \"\${BASH_SOURCE\[0\]}\" )\" && pwd )/../src/functions.sh\"||" "$TEST/.core/run.sh"
 
@@ -399,7 +401,7 @@ it_uses_custom_command_name()
 {
     cp "$TEST/flint.config.json" "$TEST/flint.config.json.bak"
 
-    cp "$PWD/tests/fixtures/config.007.json" "$TEST/flint.config.json"
+    cp "$ROOT/tests/fixtures/config.007.json" "$TEST/flint.config.json"
 
     mock
 
